@@ -1,0 +1,4 @@
+Sitemap: https://safehill.io/sitemap.xml
+
+User-agent: *
+Disallow: /api
