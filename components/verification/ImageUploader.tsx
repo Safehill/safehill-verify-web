@@ -9,7 +9,7 @@ const VerifyButton = () => {
   return (
     <Link 
     className="group flex max-w-fit items-center justify-center space-x-2 rounded-full border border-black bg-black px-5 py-2 text-lg text-white transition-colors hover:bg-white hover:text-black"
-    href="/">
+    href="/image-details">
       <p>Verify</p>
     </Link>
   )
@@ -17,7 +17,7 @@ const VerifyButton = () => {
 
 const ImageUploader = () => {
     const [file, setFileSelected] = useState(null);
-    const fileInputRef: MutableRefObject<any | null> = useRef(null);
+    const fileInputRef: MutableRefObject<any> = useRef(null);
 
     const handleCancelSelection = async () => {
       setFileSelected(null)
@@ -46,6 +46,12 @@ const ImageUploader = () => {
   
     return (
       <div style={{ height: "30px" }}>
+        <p
+          className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl"
+          style={{ animationDelay: "0.25s", animationFillMode: "forwards" }}
+        >
+          Choose a file from this device
+        </p>
         <div
         className="mx-auto mt-8 flex animate-fade-up items-center justify-center space-x-5 opacity-0"
         style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
@@ -57,6 +63,11 @@ const ImageUploader = () => {
         style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
       >
       { file != null ? <VerifyButton/> : <></>}
+      </div>
+      <div
+        className="mx-auto mt-8 flex animate-fade-up items-center justify-center space-x-5 opacity-0"
+        style={{ animationDelay: "0.3s", animationFillMode: "forwards" }}
+      >
       { file != null ? <button onClick={handleCancelSelection}>Clear selection</button> : <></>}  
       </div>
       </div>
