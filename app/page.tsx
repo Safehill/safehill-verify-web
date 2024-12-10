@@ -36,7 +36,7 @@ export default async function Home() {
           className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl"
           style={{ animationDelay: "0.25s", animationFillMode: "forwards" }}
         >
-          In the sea of deepfakes and AI-generated media it's hard to tell what's authentic these days.
+          In the sea of deepfakes and AI-generated media it’s hard to tell what is authentic these days.
         </p>
         <p
           className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl"
