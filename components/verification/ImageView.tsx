@@ -1,12 +1,32 @@
-export default function ImageView() {
+import { useState, useEffect } from "react";
+import { ImageMetadataProps } from "./FileDetailsProps";
+
+const ImageView: React.FC<ImageMetadataProps> = ({ file, author, people, createdAt }) => {
+  const [url, setURL] = useState<string | null>(null)
+
+  useEffect(() => {
+    setURL(URL.createObjectURL(file))
+  }, []);
+
+  if (!url) {
     return (
-      <div
-        className={`relative col-span-1 h-96 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md`}
-      >
+      <h1
+          className="animate-fade-up bg-gradient-to-br from-black to-stone-500 bg-clip-text text-center font-display text-4xl tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-2xl md:leading-[5rem]"
+          style={{ animationDelay: "0.15s", animationFillMode: "forwards" }}
+        >
+          Loading …
+      </h1>
+    );
+  } else {
+    return (
+      <div className="relative col-span-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md">
         <img 
-            src="https://cdn-media-2.freecodecamp.org/w1280/5f9ca063740569d1a4ca4858.jpg"
+          src={url}
+          className="w-full h-auto object-cover"
         />
       </div>
     );
   }
-  
+};
+
+export default ImageView;

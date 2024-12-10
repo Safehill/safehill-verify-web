@@ -1,4 +1,4 @@
-import { create } from "domain";
+import { ImageMetadataProps } from "./FileDetailsProps"
 
 function LabelValue({ label, value }: { label: string, value: string }) {
   return (
@@ -9,29 +9,18 @@ function LabelValue({ label, value }: { label: string, value: string }) {
   );
 }
 
-export default function ImageMetadata({
-  people,
-  author,
-  createdAt
-}: {
-  people: string;
-  author: string;
-  createdAt: string;
-}) {
+const ImageMetadata: React.FC<ImageMetadataProps> = ({ file, author, people, createdAt }) => {
   return (
-    <div
-      className={`relative col-span-1 h-96 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md`}
-    >
-      <div className="flex h-10 items-center justify-center"/>
-
-      <div className="mx-auto max-w-lg text-center">
-      <h2 className="bg-gradient-to-br from-black to-stone-500 bg-clip-text font-display text-xl font-bold text-transparent [text-wrap:balance] md:text-3xl md:font-normal">
-          Image History
-      </h2>
-      </div>
+    <div className="relative col-span-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md">
+      
       <LabelValue label="Author" value={author} />
       <LabelValue label="People with access" value={people} />
       <LabelValue label="Created on" value={createdAt} />
+
+      <div className="flex flex-col items-center px-5 py-10"/>
+
     </div>
   );
 }
+
+export default ImageMetadata;
