@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
-import { ImageMetadataProps } from "./FileDetailsProps";
 
-const ImageView: React.FC<ImageMetadataProps> = ({ file, author, people, createdAt }) => {
+const ImageView = ({ 
+  file 
+}: {
+  file: File
+}) => {
   const [url, setURL] = useState<string | null>(null)
 
   useEffect(() => {
-    setURL(URL.createObjectURL(file))
+    setURL(URL.createObjectURL(file!))
   }, []);
 
   if (!url) {

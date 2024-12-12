@@ -9,15 +9,23 @@ function LabelValue({ label, value }: { label: string, value: string }) {
   );
 }
 
-const ImageMetadata: React.FC<ImageMetadataProps> = ({ file, author, people, createdAt }) => {
+const ImageMetadata: React.FC<ImageMetadataProps> = ({ file, author, people, issuedAt, score }) => {
   return (
     <div className="relative col-span-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md">
+      <div className="flex flex-col items-center px-5 py-2"/>
       
+      <div className="mx-auto max-w-lg text-center mb-4">
+        <h2 className="bg-gradient-to-br from-black to-stone-500 bg-clip-text font-display text-xl font-bold text-transparent [text-wrap:balance] md:text-3xl md:font-normal">
+          Best Match
+        </h2>
+      </div>
+      <hr/>
       <LabelValue label="Author" value={author} />
-      <LabelValue label="People with access" value={people} />
-      <LabelValue label="Created on" value={createdAt} />
+      <LabelValue label="Status" value="Public" />
+      <LabelValue label="Released on" value={issuedAt} />
+      <LabelValue label="Similarity" value={score * 100 + "%"} />
 
-      <div className="flex flex-col items-center px-5 py-10"/>
+      <div className="flex flex-col items-center px-5 py-5"/>
 
     </div>
   );
