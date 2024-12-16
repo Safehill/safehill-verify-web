@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const ImageView = ({ 
@@ -24,7 +23,7 @@ const ImageView = ({
   } else {
     return (
       <div className="relative col-span-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md">
-        <Image
+        <img
           src={url}
           alt="Preview of the selected image"
           className="w-full h-auto object-cover"
