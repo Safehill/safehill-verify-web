@@ -21,13 +21,26 @@ AxiosInstance.interceptors.response.use(
   }
 );
 
+async function generatePerceptualHash(file: File): Promise<number> {
+  const url = URL.createObjectURL(file)
+  const image = new Image()
+  image.src = url
+  await image.decode()
+  // const hash = await phash.imageHash(image);
+  // return hash
+  return 213897219821;
+}
+
 const ImageDetailsLoader: React.FC<FileMetadataLoaderProps> = ({ currentFile, onApiResponse }) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setIsLoading(true);
-    AxiosInstance.post<FingerprintMatchDTO[]>('/fingerprint/retrieve-similar', { fingerprint: "gdfg1df2g2121dgfdg" })
+
+    const fingerprint = "" + generatePerceptualHash(currentFile);
+
+    AxiosInstance.post<FingerprintMatchDTO[]>('/fingerprint/retrieve-similar', { fingerprint: fingerprint })
         .then(response => {
           console.log("received response " + response.status)
           onApiResponse(response.data);

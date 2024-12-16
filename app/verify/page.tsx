@@ -74,7 +74,7 @@ export default function VerifyPage() {
   } else if (!imageMetadata) {
     return (
       <>
-        <NoMatches file={file}/>
+        { imageMetadata && <NoMatches file={file}/> }
 
         <StartOverButton onClick={() => {
           setFile(null);
