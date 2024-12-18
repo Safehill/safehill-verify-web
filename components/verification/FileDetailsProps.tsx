@@ -1,35 +1,37 @@
 export interface FingerprintMatchDTO {
-  globalIdentifier: string
-  createdBy: string
-  creationDate: string | null // ISO8601 formatted datetime
-  authenticationDate: string // ISO8601 formatted datetime
-  score: number
+  globalIdentifier: string;
+  createdBy: string; // User Identifier
+  creationDate: string | null; // ISO8601 formatted datetime
+  authenticationDate: string; // ISO8601 formatted datetime
+  distance: number;
 }
 
 export interface ImageMetadataProps {
-  file: File
-  author: string
-  people: string
-  issuedAt: string
-  score: number
+  file: File;
+  imageData: ImageData;
+  author: string;
+  people: string;
+  issuedAt: string;
+  distance: number;
 }
 
 export interface FileDetailsProps {
-  file: File | null
+  file: File | null;
 }
 
 export interface FileUploaderProps {
-  currentFile: File | null
-  onFileChange: (file: File | null) => void
+  currentFile: File | null;
+  onFileChange: (file: File | null) => void;
 }
 
 export interface FileMetadataLoaderProps {
-  currentFile: File
-  onApiResponse: (response: FingerprintMatchDTO[] | null) => void
+  currentFile: File;
+  fingerprint: string;
+  onApiResponse: (response: FingerprintMatchDTO[] | null) => void;
 }
 
-export interface ImageMetadataApiReponse {
-  author: string
-  issuedAt: string
-  score: number
+export interface ImageMatch {
+  author: string;
+  issuedAt: string;
+  distance: number;
 }
