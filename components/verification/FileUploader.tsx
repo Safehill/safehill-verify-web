@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRef } from 'react';
 import React, { ChangeEvent } from 'react';
 import { FileUploaderProps } from './FileDetailsProps';
+import PrimaryButton from '@/components/shared/PrimaryButton';
 
 const FileUploader: React.FC<FileUploaderProps> = ({
   currentFile,
@@ -58,14 +59,12 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         className="mx-auto mt-8 flex animate-fade-up items-center justify-center space-x-5 opacity-0"
         style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
       >
-        <button
-          className="group flex max-w-fit items-center justify-center space-x-2 rounded-full border border-black bg-black px-5 py-2 text-lg text-white transition-colors hover:bg-white hover:text-black"
+        <PrimaryButton
+          label="Start over"
           onClick={() => {
             handleFile(null);
           }}
-        >
-          <p>Start over</p>
-        </button>
+        />
       </div>
     );
   }
@@ -85,14 +84,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         Curious about the history of an image?
       </p>
       <p
-        className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl"
+        className="mt-2 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl"
         style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
       >
-        If it was ever authenticated with Safehill we will tell you all about
-        it!
+        Drop it here to match it against our authenticated images!
       </p>
       <div
-        className="flex items-center justify-center py-20 mt-4 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-l"
+        className="flex items-center justify-center py-20 mt-2 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-l"
         style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
       >
         <form
