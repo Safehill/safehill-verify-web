@@ -12,6 +12,10 @@ module.exports = {
         display: ["var(--font-sf)", "system-ui", "sans-serif"],
         default: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
+      colors: {
+        deepTeal: "rgb(20,37,38)", // Main background color
+        mutedTeal: "rgb(36,63,64)", // Slightly lighter for gradients
+      },
       animation: {
         // Fade up and down
         "fade-up": "fade-up 0.5s",

@@ -78,13 +78,13 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         The truth teller
       </h1>
       <p
-        className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl"
+        className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl font-light"
         style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
       >
         Curious about the history of an image?
       </p>
       <p
-        className="mt-2 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl"
+        className="mt-2 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl font-light"
         style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
       >
         Drop it here to match it against our authenticated images!
