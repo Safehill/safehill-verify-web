@@ -3,7 +3,7 @@ import { ItemizedListProps } from './ItemizedListProps';
 
 const ItemizedList: React.FC<ItemizedListProps> = ({ items }) => {
   return (
-    <div className="grid grid-cols-[1fr_10fr] gap-x-6 gap-y-10 py-20 px-20 max-w-4xl mx-auto">
+    <div className="grid grid-cols-[1fr_10fr] gap-x-6 gap-y-10 py-10 px-10 max-w-4xl mx-auto">
       {items.map((item, index) => (
         <React.Fragment key={index}>
           {/* Left column: Circle */}
@@ -19,10 +19,10 @@ const ItemizedList: React.FC<ItemizedListProps> = ({ items }) => {
           </div>
 
           {/* Right column: Text */}
-          <div>
+          <div className="mb-10">
             {/* Title */}
             <div
-              className="bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-left font-display text-lg md:text-4xl font-bold tracking-[-0.02em] text-transparent drop-shadow-sm font-light"
+              className="bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-left font-display text-2xl md:text-4xl font-bold tracking-[-0.02em] text-transparent drop-shadow-sm font-light"
               style={{
                 animationFillMode: 'forwards',
               }}

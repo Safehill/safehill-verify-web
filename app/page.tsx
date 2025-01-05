@@ -2,6 +2,10 @@ import { Suspense } from 'react';
 import Navbar from '@/components/layout/navbar';
 import ItemizedList from '@/components/home/ItemizedList';
 import CenteredItems from '@/components/home/CenteredItems';
+import BottomNav from '@/components/layout/bottomNav';
+import TopNav from '@/components/layout/topNav';
+import { HandRaised } from '@/components/shared/icons';
+import Footer from '@/components/layout/footer';
 
 export default async function Home() {
   const steps = [
@@ -10,26 +14,29 @@ export default async function Home() {
       title: 'Create your unique fingerprint',
       content: (
         <>
-          Use our app to create your user’s fingerprint.
-          <br />
-          Because your fingerprint belongs only to you, it is never sent to or
-          stored on any server.
-          <div className="flex items-left mt-10">
-            <a href="https://apps.apple.com/us/app/snoog/id1624088867">
+          <div className="flex flex-col sm:flex-row justify-start gap-4 my-10">
+            <a
+              href="https://apps.apple.com/us/app/snoog/id1624088867"
+              className="flex-shrink-0"
+            >
               <img
-                src="/images/app-stores.png"
+                src="/images/app-store.png"
                 alt="App Store download"
-                className="w-[240px] h-[90px] object-cover object-top mb-6"
+                className="w-[180px] sm:w-[240px]"
               />
             </a>
-            <a href="">
+            <a href="" className="flex-shrink-0">
               <img
-                src="/images/app-stores.png"
+                src="/images/play-store.png"
                 alt="Google Play Store download"
-                className="w-[240px] h-[90px] object-cover object-bottom mt-6"
+                className="w-[180px] sm:w-[240px]"
               />
             </a>
           </div>
+          Use our app to create your personal fingerprint.
+          <br />
+          Your fingerprint is your digital identity, and as such it is never
+          sent to or stored on any server.
         </>
       ),
     },
@@ -38,18 +45,9 @@ export default async function Home() {
       title: 'Protect your assets',
       content: (
         <>
-          Start adding your assets to your dedicated secure store.
+          Start adding your assets to your secure library.
           <br />
-          We make sure they are authentic and - if so - you become the official
-          owner.
-          <br />
-          <br />
-          Neither Safehill nor anyone other than you can decrypt your assets at
-          this point. Their fingerprints are embedded in the content, and added
-          it to our repository.
-          <br />
-          <br />
-          Content that looks similar to yours will have a similar fingerprint.
+          For anything you add, we verify authenticity and make you the owner.
         </>
       ),
     },
@@ -58,17 +56,22 @@ export default async function Home() {
       title: 'Let us worry about the rest',
       content: (
         <>
+          Out of the box, you get:
+          <br />
+          <br />
           <h1 className="text-left text-green-300 [text-wrap:balance] md:text-2xl font-bold">
-            Secure storage
+            💾 The most secure storage
           </h1>
-          Our best-in-class security standards guarantee that <b>NO-ONE</b>{' '}
-          other than people with explicit access can ever decrypt confidential
-          assets. Not even Safehill.
+          For your proprietary content. Our best-in-class security standards
+          guarantee that <b className="text-green-300">NO-ONE</b> other than
+          people with explicit access can ever decrypt confidential assets. Not
+          even Safehill.
           <h1 className="mt-8 text-left text-pink-300 [text-wrap:balance] md:text-2xl font-bold">
-            Control over distribution
+            💼 The best controls for distribution
           </h1>{' '}
-          You can prevent re-shares, screenshots, etc., leaving you in control.
-          <div className="flex flex-row items-center gap-4 my-10 ml-10">
+          If your content is confidential, you can decide to prevent re-shares,
+          screenshots, etc. when sharing it.
+          <div className="flex flex-col sm:flex-row gap-4 my-10">
             <img
               src="/images/share-choice-1.png"
               alt="Sharing options"
@@ -81,17 +84,12 @@ export default async function Home() {
             />
           </div>
           <h1 className="mt-8 text-left text-cyan-300 [text-wrap:balance] md:text-2xl font-bold">
-            Tracking
+            🔎 A way to trace your content
           </h1>
-          We use asset fingerprints to track content and update its history,
-          wherever it goes.
-          <h1 className="mt-8 text-left text-orange-300 [text-wrap:balance] md:text-2xl font-bold">
-            Monitoring
-          </h1>
-          We are alert on rights or privacy violations, and notify you when we
-          think those have been breached.
+          We fingerprint every piece of content so that you can find it your
+          wherever it goes, even if altered or after it’s widely distributed.
           <h1 className="mt-8 text-left text-yellow-300 [text-wrap:balance] md:text-2xl font-bold">
-            Transparency
+            🙋🏽 A way to discover who content belongs to
           </h1>
           Assets’ history and ownership can be checked by anyone using our{' '}
           <a
@@ -101,7 +99,12 @@ export default async function Home() {
             authentication tool
           </a>
           .
-          <br />
+          <h1 className="mt-8 text-left text-orange-300 [text-wrap:balance] md:text-2xl font-bold">
+            🤖 A way to let any AI system avoid IP infringments
+          </h1>
+          Our simple API lets any system determine what is off-limits for
+          training, and whether generated content looks too similar to something
+          that is proprietary.
         </>
       ),
     },
@@ -110,37 +113,45 @@ export default async function Home() {
   const whys = [
     {
       icon: '🧑‍🎨',
-      title: 'Focus on making great content, not on protecting it',
+      title: 'Just focus on making great content',
       content: (
         <div>
-          Spend less time worrying about transfering high quality assets, and
-          more on what you do best.
+          Spend less time worrying about protecting your valuable work, and more
+          on what you do best: creating and sharing great content!
+          {/* <br />
           <br />
-          Creating great content and collaborating more.
-          <br />
-          <br />
-          In the unlikely event someone uses content you own online, or AI
-          generates content too similar to yours, you will be thankful you
-          decided to be fully protected!
+          Safehill will come to the rescue if copyrights are infringed, by
+          either humans or AI. */}
         </div>
       ),
     },
     {
       icon: '🔗',
-      title: 'Collaborate more freely',
+      title: 'Collaborate confidentially',
       content: (
         <div>
-          Confidential shares let you fully control distribution of your
-          content.
+          Because you can control the distribution of your content and because
+          of our high security standards, you are protected from any data or
+          security breach, from either authorized or unauthorized access.
           <br />
           <br />
-          Because of Safehill’s top-notch security standard,
+          Sharing password-protected links is a thing of the past!
+        </div>
+      ),
+    },
+    {
+      icon: '🪄',
+      title: 'Stop worrying about AI-generated content',
+      content: (
+        <div>
+          We love AI generated images and videos!
           <br />
-          you are protected from any breach happening via authorized or
-          unauthorized access.
           <br />
+          We love them even more if AI system can avoid copyrights infrigements
+          and can be safely used.
+          {/* <br />
           <br />
-          It is time to forget those password protected links.
+          If AI regulations are the cure, we provide preventive care! */}
         </div>
       ),
     },
@@ -155,24 +166,44 @@ export default async function Home() {
     <>
       <div className="fixed h-screen w-full bg-gradient-to-br from-deepTeal to-mutedTeal" />
       <Suspense fallback="...">
-        <Navbar darkTheme={true} />
+        <Navbar darkTheme={true} withNavBar={true} />
       </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center justify-center pt-32">
         <div className="z-10 w-full xl:px-20">
           <h1
-            className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-9xl py-10"
+            className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-6xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] py-10"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
-            ✋🏿
+            <HandRaised
+              className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto bg-clip-text bg-gradient-to-br from-yellow-200 to-purple-300"
+              fill="url(#gradient)"
+              width="100%" // or a specific value like "200px"
+              height="100%" // or a specific value like "200px"
+            />
+            <svg width="0" height="0">
+              <defs>
+                <linearGradient
+                  id="gradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stopColor="#E9D8FD" /> {/* Purple-300 */}
+                  <stop offset="100%" stopColor="#FEF9C3" /> {/* Yellow-200 */}
+                </linearGradient>
+              </defs>
+            </svg>
           </h1>
+
           <h1
-            className="animate-fade-up bg-gradient-to-br from-white to-gray-500 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pb-4"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Do you know how your data is being used?
           </h1>
           <p
-            className="mt-8 animate-fade-up text-center text-orange-300 opacity-0 [text-wrap:balance] md:text-2xl font-bold"
+            className="mt-8 animate-fade-up text-center text-orange-300 opacity-0 [text-wrap:balance] text-2xl sm:text-2xl md:text-2xl font-bold px-2"
             style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
           >
             AI is everywhere, and it’s trained using your data, too!
@@ -180,31 +211,28 @@ export default async function Home() {
 
           <div>
             <p
-              className="mt-8 animate-fade-up text-center text-gray-200 opacity-0 [text-wrap:balance] md:text-xl font-light"
+              className="mt-8 animate-fade-up text-center text-gray-200 opacity-0 [text-wrap:balance] md:text-xl font-light px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Effortlessly protect your content from unintended use.
+              Effortlessly protect your IP from unintended use.
               <br />
-              Stop worrying about breaches or deepfakes.
+              Stop worrying about breaches and AI-generated deepfakes.
             </p>
           </div>
 
-          <div className="relative flex justify-center items-center mt-20 mb-40">
+          <div className="relative flex justify-center items-center mt-20 mb-10 px-4">
             <img
-              className="w-full h-auto"
+              className="w-full h-auto max-w-screen-md"
               style={{
                 height: '600px',
-                width: '100%',
-                marginTop: '-50px', // Adjust this to control the overlap }}
               }}
               alt="home-glow-background"
-              src="images/aura.png"
+              src="/images/aura.png"
             />
 
             <img
-              className="absolute max-w-full sm:w-3/4 md:w-1/2 lg:w-auto h-auto rounded-xl shadow-lg"
+              className="absolute w-full sm:w-3/4 md:w-1/2 lg:w-auto h-auto max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg"
               style={{
-                maxWidth: '420px',
                 opacity: 0.9,
               }}
               src="/images/rafa-example-2.png"
@@ -212,15 +240,25 @@ export default async function Home() {
             />
           </div>
 
-          <div
-            style={{
-              marginTop: '-100px', // Adjust this to control the overlap
-            }}
-          >
+          {/* <div>
+            <p
+              className="animate-fade-up font-display text-center text-gray-200 opacity-0 [text-wrap:balance] md:text-xl font-light px-2"
+              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+            >
+              With Safehill, you fully control content distribution
+              <br />
+              and let any AI system avoid IP infringements on public content.
+              <br />
+              <br />
+              Here’s how:
+            </p>
+          </div> */}
+
+          <div id="download">
             <ItemizedList items={steps} />
           </div>
 
-          <div className="z-10 w-full xl:px-20 py-40">
+          <div className="z-10 w-full xl:px-20 pt-40 pb-20">
             <h1
               className="animate-fade-up bg-gradient-to-br from-white to-gray-500 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
@@ -228,24 +266,26 @@ export default async function Home() {
               Why use Safehill
             </h1>
 
-            <div>
+            <div className="px-5 sm:px-8 md:px-20 lg:px-30 pt-10 pb-20">
               <p
-                className="mt-8 mb-20 animate-fade-up text-center text-gray-200 opacity-0 [text-wrap:balance] md:text-xl font-light"
+                className="animate-fade-up bg-gradient-to-br from-white to-gray-500 bg-clip-text text-center text-base font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm md:text-xl px-5 py-5"
                 style={{
-                  animationDelay: '0.25s',
+                  animationDelay: '0.15s',
                   animationFillMode: 'forwards',
                 }}
               >
-                Safehill manages your digital content rights and attribution.
+                Safehill protects and manages your digital content rights.
                 <br />
-                So you can focus on making great content.
+                So you can focus on what’s more important.
               </p>
             </div>
 
             <CenteredItems items={whys} />
           </div>
         </div>
+        <BottomNav />
       </main>
+      <Footer darkTheme={true} />
     </>
   );
 }
