@@ -373,7 +373,7 @@ const PrivacyPolicy: React.FC = () => {
             <>
               <p className="my-5">
                 California Civil Code Section 1798.83 permits users who are
-                California residents and who have provided with "personal
+                California residents and who have provided with &quot;personal
                 information&quot; (as that term is defined in Section 1798.83)
                 to request certain information about the disclosure of that
                 information to third parties for their direct marketing
