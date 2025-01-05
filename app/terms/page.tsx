@@ -106,7 +106,7 @@ const PrivacyPolicy: React.FC = () => {
                 <li>
                   Engaging in any activities that could harm, disable,
                   overburden, or impair our platform or interfere with other
-                  users' enjoyment or use of our platform.
+                  users’ enjoyment or use of our platform.
                 </li>
               </ul>
               <div className="font-display text-lg md:text-xl tracking-[-0.02em] my-5">
@@ -223,12 +223,12 @@ const PrivacyPolicy: React.FC = () => {
                 5.1 No Warranty:
               </div>
               <p className="my-5">
-                Our platform is provided on an "as is" and "as available" basis.
-                We do not warrant that our platform will be uninterrupted,
-                error-free, or free from viruses or other harmful components. We
-                make no representations or warranties of any kind, whether
-                express or implied, regarding the accuracy, reliability, or
-                completeness of any content on our platform.
+                Our platform is provided on an &quot;as is&quot; and &quot;as
+                available&quot; basis. We do not warrant that our platform will
+                be uninterrupted, error-free, or free from viruses or other
+                harmful components. We make no representations or warranties of
+                any kind, whether express or implied, regarding the accuracy,
+                reliability, or completeness of any content on our platform.
               </p>
               <div className="font-display text-lg md:text-xl tracking-[-0.02em] my-5">
                 5.2 Limitation of Liability:
@@ -256,7 +256,7 @@ const PrivacyPolicy: React.FC = () => {
                 You agree to indemnify and hold harmless Safehill and its
                 officers, directors, employees, agents, and affiliates from and
                 against any claims, liabilities, damages, losses, and expenses,
-                including without limitation reasonable attorney's fees and
+                including without limitation reasonable attorney’s fees and
                 costs, arising out of or in connection with your use of our
                 platform or any violation of this Agreement.
               </p>
@@ -374,9 +374,10 @@ export default function TermsPage() {
       <MessageView message="Terms of Use Agreement" sizeClass={6} />
       <div>
         <div className="text-center text-lg md:text-xl font-light my-20 px-5">
-          This Terms of Use Agreement ("Agreement") governs your access to and
-          use of our platform and services. By using our platform, you agree to
-          be bound by the terms and conditions set forth in this Agreement.
+          This Terms of Use Agreement (&quot;Agreement&quot;) governs your
+          access to and use of our platform and services. By using our platform,
+          you agree to be bound by the terms and conditions set forth in this
+          Agreement.
         </div>
         <PrivacyPolicy />
       </div>

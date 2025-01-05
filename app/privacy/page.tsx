@@ -37,10 +37,10 @@ const PrivacyPolicy: React.FC = () => {
               <p className="my-5">
                 When creating a user account (“User Account”), we collect Name
                 and Phone number which can be categorized as Personally
-                Identifiable Information ("PII"). Safehill uses the phone
-                numbers for verification and only stores a cryptographically
-                secure hashed representation of the phone number from that point
-                forward.
+                Identifiable Information (&quot;PII&quot;). Safehill uses the
+                phone numbers for verification and only stores a
+                cryptographically secure hashed representation of the phone
+                number from that point forward.
               </p>
               <p className="my-5">
                 You have the option to grant Safehill access to your contacts on
@@ -68,12 +68,12 @@ const PrivacyPolicy: React.FC = () => {
               <p className="my-5">
                 You may review, amend or delete any and all information
                 associated with your User Account by signing into your account
-                on the App and clicking on "Destroy my account". You may also
-                request the deactivation of your User Account and any uploaded
-                content by sending an e-mail to support@safehill.io. Please note
-                that permanently deleting your Safehill User Account erases all
-                of your information from our system. After completing this
-                process your User Account and all its data will be removed
+                on the App and clicking on &quot;Destroy my account&quot;. You
+                may also request the deactivation of your User Account and any
+                uploaded content by sending an e-mail to support@safehill.io.
+                Please note that permanently deleting your Safehill User Account
+                erases all of your information from our system. After completing
+                this process your User Account and all its data will be removed
                 permanently, and Safehill will not be able to restore your User
                 Account or retrieve your data in the future.
               </p>
@@ -374,8 +374,8 @@ const PrivacyPolicy: React.FC = () => {
               <p className="my-5">
                 California Civil Code Section 1798.83 permits users who are
                 California residents and who have provided with "personal
-                information" (as that term is defined in Section 1798.83) to
-                request certain information about the disclosure of that
+                information&quot; (as that term is defined in Section 1798.83)
+                to request certain information about the disclosure of that
                 information to third parties for their direct marketing
                 purposes. If you are a California resident with questions
                 regarding this, or how the Safehill reviews and processes any
