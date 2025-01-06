@@ -1,7 +1,6 @@
 import './globals.css';
 import cx from 'classnames';
 import { sfPro, inter } from './fonts';
-import Footer from '@/components/layout/footer';
 import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 // import { ClerkProvider } from "@clerk/nextjs";
 
@@ -16,7 +15,6 @@ export default async function RootLayout({
     <html lang="en">
       <body className={cx(sfPro.variable, inter.variable)}>
         {children}
-        <Footer />
         <VercelAnalytics />
       </body>
     </html>
