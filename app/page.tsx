@@ -3,15 +3,15 @@ import Navbar from '@/components/layout/navbar';
 import ItemizedList from '@/components/home/ItemizedList';
 import CenteredItems from '@/components/home/CenteredItems';
 import BottomNav from '@/components/layout/bottomNav';
-import TopNav from '@/components/layout/topNav';
 import { HandRaised } from '@/components/shared/icons';
 import Footer from '@/components/layout/footer';
+import Link from 'next/link';
 
 export default async function Home() {
   const steps = [
     {
       icon: null,
-      title: 'Create your unique fingerprint',
+      title: 'Create your fingerprint',
       content: (
         <>
           <div className="flex flex-col sm:flex-row justify-start gap-4 my-10">
@@ -25,7 +25,7 @@ export default async function Home() {
                 className="w-[180px] sm:w-[240px]"
               />
             </a>
-            <a href="" className="flex-shrink-0">
+            <a target="_blank" className="flex-shrink-0">
               <img
                 src="/images/play-store.png"
                 alt="Google Play Store download"
@@ -35,8 +35,8 @@ export default async function Home() {
           </div>
           Use our app to create your personal fingerprint.
           <br />
-          Your fingerprint is your digital identity, and as such it is never
-          sent to or stored on any server.
+          Your fingerprint is your digital identity, and as such it only exists
+          on your devices. It is never sent to or stored on our servers.
         </>
       ),
     },
@@ -59,52 +59,61 @@ export default async function Home() {
           Out of the box, you get:
           <br />
           <br />
-          <h1 className="text-left text-green-300 [text-wrap:balance] md:text-2xl font-bold">
-            💾 The most secure storage
-          </h1>
-          For your proprietary content. Our best-in-class security standards
-          guarantee that <b className="text-green-300">NO-ONE</b> other than
-          people with explicit access can ever decrypt confidential assets. Not
-          even Safehill.
-          <h1 className="mt-8 text-left text-pink-300 [text-wrap:balance] md:text-2xl font-bold">
-            💼 The best controls for distribution
-          </h1>{' '}
-          If your content is confidential, you can decide to prevent re-shares,
-          screenshots, etc. when sharing it.
-          <div className="flex flex-col sm:flex-row gap-4 my-10">
-            <img
-              src="/images/share-choice-1.png"
-              alt="Sharing options"
-              className="w-[245px] rounded-xl shadow-lg"
-            />
-            <img
-              src="/images/share-choice-2.png"
-              alt="Sharing options"
-              className="w-[245px] rounded-xl shadow-lg"
-            />
+          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
+            <h1 className="text-left text-green-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              💾 The most secure storage
+            </h1>
+            For your proprietary content. Our best-in-class security standards
+            guarantee that <b className="text-green-300">NO-ONE</b> other than
+            people with explicit access can ever decrypt it. Not even Safehill.
           </div>
-          <h1 className="mt-8 text-left text-cyan-300 [text-wrap:balance] md:text-2xl font-bold">
-            🔎 A way to trace your content
-          </h1>
-          We fingerprint every piece of content so that you can find it your
-          wherever it goes, even if altered or after it’s widely distributed.
-          <h1 className="mt-8 text-left text-yellow-300 [text-wrap:balance] md:text-2xl font-bold">
-            🙋🏽 A way to discover who content belongs to
-          </h1>
-          Assets’ history and ownership can be checked by anyone using our{' '}
-          <a
-            href="/authenticate"
-            className="font-bold underline text-orange-100 opacity-90"
-          >
-            authentication tool
-          </a>
-          .
-          <h1 className="mt-8 text-left text-orange-300 [text-wrap:balance] md:text-2xl font-bold">
-            🤖 A way to let any AI system avoid IP infringments
-          </h1>
-          Our simple API lets any system determine what is off-limits for
-          training, and whether generated content looks too similar to something
-          that is proprietary.
+          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
+            <h1 className="text-left text-pink-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              💼 The best controls for distribution
+            </h1>{' '}
+            If your content is confidential, you can decide to prevent
+            re-shares, screenshots, etc. when sharing it.
+            <div className="flex flex-col sm:flex-row gap-4 my-10">
+              <img
+                src="/images/share-choice-1.png"
+                alt="Sharing options"
+                className="w-[245px] rounded-xl shadow-lg"
+              />
+              <img
+                src="/images/share-choice-2.png"
+                alt="Sharing options"
+                className="w-[245px] rounded-xl shadow-lg"
+              />
+            </div>
+          </div>
+          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
+            <h1 className="text-left text-cyan-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              🔎 A way to trace your content
+            </h1>
+            We fingerprint every piece of content so that you can find it your
+            wherever it goes, even if altered or after it’s widely distributed.
+          </div>
+          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
+            <h1 className="text-left text-yellow-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              🙋🏽 A way to discover who content belongs to
+            </h1>
+            Assets’ history and ownership can be checked by anyone using our{' '}
+            <Link
+              href="/authenticate"
+              className="font-bold underline text-orange-100 opacity-90"
+            >
+              authenticator tool
+            </Link>
+            .
+          </div>
+          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
+            <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              🤖 A way to fully protect your IP
+            </h1>
+            Our simple yet powerful API lets any system determine what should
+            not be used for training ML models, and whether AI-generated images
+            infringe any copyrights or IP.
+          </div>
         </>
       ),
     },
@@ -147,19 +156,26 @@ export default async function Home() {
           We love AI generated images and videos!
           <br />
           <br />
-          We love them even more if AI system can avoid copyrights infrigements
-          and can be safely used.
+          We love them even more when they can be used safely, with no
+          copyrights infrigements.
           {/* <br />
           <br />
           If AI regulations are the cure, we provide preventive care! */}
         </div>
       ),
     },
-    // {
-    //   icon: '⏭',
-    //   title: 'Shorten your time to market',
-    //   content: <div>TBD</div>,
-    // },
+    {
+      icon: '⏭',
+      title: 'Increase your speed to market',
+      content: (
+        <div>
+          We handle the complexities of distributing copyrighted content on the
+          web,
+          <br />
+          letting you focus on your core value proposition.
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -220,7 +236,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="relative flex justify-center items-center mt-20 mb-10 px-4">
+          <div className="relative flex justify-center items-center sm:mt-10 md:mt-20 sm:mb-5 md:mb-20 px-4">
             <img
               className="w-full h-auto max-w-screen-md"
               style={{
@@ -240,20 +256,6 @@ export default async function Home() {
             />
           </div>
 
-          {/* <div>
-            <p
-              className="animate-fade-up font-display text-center text-gray-200 opacity-0 [text-wrap:balance] md:text-xl font-light px-2"
-              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
-            >
-              With Safehill, you fully control content distribution
-              <br />
-              and let any AI system avoid IP infringements on public content.
-              <br />
-              <br />
-              Here’s how:
-            </p>
-          </div> */}
-
           <div id="download">
             <ItemizedList items={steps} />
           </div>
@@ -268,7 +270,7 @@ export default async function Home() {
 
             <div className="px-5 sm:px-8 md:px-20 lg:px-30 pt-10 pb-20">
               <p
-                className="animate-fade-up bg-gradient-to-br from-white to-gray-500 bg-clip-text text-center text-base font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm md:text-xl px-5 py-5"
+                className="animate-fade-up bg-gradient-to-br from-white to-gray-500 bg-clip-text text-center text-base font-display tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm md:text-xl px-5 py-5"
                 style={{
                   animationDelay: '0.15s',
                   animationFillMode: 'forwards',
@@ -282,6 +284,17 @@ export default async function Home() {
 
             <CenteredItems items={whys} />
           </div>
+        </div>
+        <div className="flex flex-row z-10 w-full justify-center items-center my-40 px-2">
+          <span className="px-4 py-2 text-white text-lg">
+            Have any questions?
+          </span>
+          <Link
+            href="https://tally.so/r/3qoGxg"
+            className="px-6 py-2 bg-orange-100/80 font-display text-black text-base rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+          >
+            Talk to us
+          </Link>
         </div>
         <BottomNav />
       </main>
