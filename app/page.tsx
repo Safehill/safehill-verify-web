@@ -65,14 +65,15 @@ export default async function Home() {
             </h1>
             For your proprietary content. Our best-in-class security standards
             guarantee that <b className="text-green-300">NO-ONE</b> other than
-            people with explicit access can ever decrypt it. Not even Safehill.
+            people with explicit access can ever decrypt confidential content.
+            Not even Safehill.
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-pink-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
               💼 The best controls for distribution
             </h1>{' '}
             If your content is confidential, you can decide to prevent
-            re-shares, screenshots, etc. when sharing it.
+            re-shares, screenshots, etc. when sharing it privately.
             <div className="flex flex-col sm:flex-row gap-4 my-10">
               <img
                 src="/images/share-choice-1.png"
@@ -90,12 +91,20 @@ export default async function Home() {
             <h1 className="text-left text-cyan-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
               🔎 A way to trace your content
             </h1>
-            We fingerprint every piece of content so that you can find it your
+            We fingerprint every piece of content so that you can find it
             wherever it goes, even if altered or after it’s widely distributed.
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
+            <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              🤖 An IP-aware AI
+            </h1>
+            Our simple yet powerful API lets any system determine what should
+            not be used for training ML models, and whether AI-generated images
+            infringe any copyrights or IP.
+          </div>
+          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-yellow-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🙋🏽 A way to discover who content belongs to
+              🙋🏽 A way to discover content credentials
             </h1>
             Assets’ history and ownership can be checked by anyone using our{' '}
             <Link
@@ -105,14 +114,6 @@ export default async function Home() {
               authenticator tool
             </Link>
             .
-          </div>
-          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🤖 A way to fully protect your IP
-            </h1>
-            Our simple yet powerful API lets any system determine what should
-            not be used for training ML models, and whether AI-generated images
-            infringe any copyrights or IP.
           </div>
         </>
       ),
@@ -156,8 +157,8 @@ export default async function Home() {
           We love AI generated images and videos!
           <br />
           <br />
-          We love them even more when they can be used safely, with no
-          copyrights infrigements.
+          We love them even more when they can be used safely with no risk of
+          infringing copyrights.
           {/* <br />
           <br />
           If AI regulations are the cure, we provide preventive care! */}
