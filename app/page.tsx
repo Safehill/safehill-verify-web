@@ -96,11 +96,11 @@ export default async function Home() {
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🤖 An IP-aware AI
+              🤖 Protection against AI-generated content
             </h1>
-            Our simple yet powerful API lets any system determine what should
-            not be used for training ML models, and whether AI-generated images
-            infringe any copyrights or IP.
+            Our simple yet powerful API both protects proprietary data from
+            being used for training AI models, and helps LLMs steer away from
+            copyrights and IP infrigments.
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-yellow-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
@@ -252,7 +252,7 @@ export default async function Home() {
               style={{
                 opacity: 0.9,
               }}
-              src="/images/rafa-example-2.png"
+              src="/images/rafa-example-3.png"
               alt="Example asset tracking Nike & Rafa"
             />
           </div>
