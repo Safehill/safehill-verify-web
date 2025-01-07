@@ -33,10 +33,12 @@ export default async function Home() {
               />
             </a>
           </div>
-          Use our app to create your personal fingerprint.
+          Create an account on our app to generate your personal fingerprint.
           <br />
           Your fingerprint is your digital identity, and as such it only exists
-          on your devices. It is never sent to or stored on our servers.
+          on your devices.
+          <br />
+          It is never sent to or stored on our servers.
         </>
       ),
     },
@@ -278,7 +280,8 @@ export default async function Home() {
                   animationFillMode: 'forwards',
                 }}
               >
-                Safehill protects and manages your digital content rights.
+                Safehill protects and manages your digital content and its
+                rights.
                 <br />
                 So you can focus on what’s more important.
               </p>
