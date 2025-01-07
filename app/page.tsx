@@ -98,8 +98,8 @@ export default async function Home() {
             <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
               🤖 Protection against AI-generated content
             </h1>
-            Our simple yet powerful API both protects proprietary data from
-            being used for training AI models, and helps LLMs steer away from
+            Our simple yet powerful API protects proprietary data from being
+            used for training AI models, and helps LLMs steer away from
             copyrights and IP infrigments.
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
