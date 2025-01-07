@@ -70,7 +70,7 @@ export default async function Home() {
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-pink-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              💼 The best controls for distribution
+              💼 Accurate controls for distribution
             </h1>{' '}
             If your content is confidential, you can decide to prevent
             re-shares, screenshots, etc. when sharing it privately.
@@ -89,10 +89,11 @@ export default async function Home() {
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-cyan-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🔎 A way to trace your content
+              🔎 A way make your content traceable
             </h1>
-            We fingerprint every piece of content so that you can find it
-            wherever it goes, even if altered or after it’s widely distributed.
+            We fingerprint every piece of content so that we can determine if
+            anything available online matches your content, even when it’s
+            altered.
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
