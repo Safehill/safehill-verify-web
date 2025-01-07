@@ -33,10 +33,12 @@ export default async function Home() {
               />
             </a>
           </div>
-          Use our app to create your personal fingerprint.
+          Create an account on our app to generate your personal fingerprint.
           <br />
           Your fingerprint is your digital identity, and as such it only exists
-          on your devices. It is never sent to or stored on our servers.
+          on your devices.
+          <br />
+          It is never sent to or stored on our servers.
         </>
       ),
     },
@@ -70,7 +72,7 @@ export default async function Home() {
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-pink-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              💼 The best controls for distribution
+              💼 Accurate controls for distribution
             </h1>{' '}
             If your content is confidential, you can decide to prevent
             re-shares, screenshots, etc. when sharing it privately.
@@ -89,10 +91,11 @@ export default async function Home() {
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-cyan-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🔎 A way to trace your content
+              🔎 A way make your content traceable
             </h1>
-            We fingerprint every piece of content so that you can find it
-            wherever it goes, even if altered or after it’s widely distributed.
+            We fingerprint every piece of content so that we can determine if
+            anything available online matches your content, even when it’s
+            altered.
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
@@ -277,7 +280,8 @@ export default async function Home() {
                   animationFillMode: 'forwards',
                 }}
               >
-                Safehill protects and manages your digital content rights.
+                Safehill protects and manages your digital content and its
+                rights.
                 <br />
                 So you can focus on what’s more important.
               </p>
