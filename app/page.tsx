@@ -250,7 +250,7 @@ export default function Home() {
             Yours. Truly.
           </h1>
 
-          <div className="mt-32">
+          <div className="md:mt-32">
             <p
               className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] md:text-3xl font-display px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
@@ -289,7 +289,7 @@ export default function Home() {
 
           <div id="download" className="z-10 w-full xl:px-20 pt-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               How does it work?

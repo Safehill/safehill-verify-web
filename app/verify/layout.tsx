@@ -1,6 +1,7 @@
 import '../globals.css';
 import { Suspense } from 'react';
 import Navbar from '@/components/layout/navbar';
+import {Toaster} from "sonner";
 
 export default async function RootLayout({
   children,
@@ -9,6 +10,7 @@ export default async function RootLayout({
 }) {
   return (
     <>
+      <Toaster />
       <div className="fixed h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-cyan-100" />
       <Suspense fallback="...">
         <Navbar darkTheme={false} withNavBar={false} />

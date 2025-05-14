@@ -13,7 +13,7 @@ function PrimaryButton({
       style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
     >
       <button
-        className="group flex max-w-fit items-center justify-center space-x-2 rounded-full border border-black bg-black px-5 py-2 text-lg text-white transition-colors hover:bg-white hover:text-black"
+        className="group flex max-w-fit items-center justify-center space-x-2 rounded-full border border-black bg-black px-5 py-2 text-md text-white transition-colors hover:bg-white hover:text-black"
         onClick={onClick}
       >
         <p>{label}</p>

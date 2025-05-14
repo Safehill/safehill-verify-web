@@ -8,13 +8,14 @@ const ProvidedImage = ({
   imageData: ImageData;
 }) => {
   return (
-    <div className="grid w-full max-w-screen-xl animate-fade-up grid-cols-2 gap-5 px-5 xl:px-0 py-2">
-      <div className="md:col-span-1 flex justify-end">
+    <div className="grid w-full max-w-screen-xl grid-cols-2 gap-5 px-5 xl:px-0 py-2">
+      <div className="col-span-2 md:col-span-1 flex justify-end">
         <div className="w-fit">
-          <ImageView file={file} height={100} />
+          <ImageView file={file} height={300} />
         </div>
       </div>
-      <div className="md:col-span-1">
+      <div className="opacity-0 animate-fade-up"
+           style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
         <p>
           <b>File: </b>
           {file.name}

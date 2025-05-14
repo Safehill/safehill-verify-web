@@ -15,6 +15,15 @@ module.exports = {
       colors: {
         deepTeal: "rgb(20,37,38)", // Main background color
         mutedTeal: "rgb(36,63,64)", // Slightly lighter for gradients
+
+        primary: "#6b6bff", // Indigo
+        "primary-foreground": "#ffffff",
+
+        secondary: "#e5e7eb", // Gray-200
+        "secondary-foreground": "#111827",
+
+        destructive: "#ef4444", // Red-500
+        "destructive-foreground": "#ffffff",
       },
       animation: {
         // Fade up and down

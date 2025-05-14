@@ -15,19 +15,20 @@ export interface ImageMetadataProps {
   distance: number;
 }
 
-export interface FileDetailsProps {
-  file: File | null;
+export interface FileDetails {
+  file: File;
+  imageData: ImageData;
 }
 
 export interface FileUploaderProps {
-  currentFile: File | null;
-  onFileChange: (file: File | null) => void;
+  isLoading: boolean;
+  setIsLoading: (isLoading: boolean) => void;
+  onSubmit: (files: File[]) => void;
 }
 
 export interface FileMetadataLoaderProps {
-  currentFile: File;
   fingerprint: string;
-  onApiResponse: (response: FingerprintMatchDTO[] | null) => void;
+  onApiResponse: (response: FingerprintMatchDTO[] | Error | null) => void;
 }
 
 export interface ImageMatch {
