@@ -70,7 +70,7 @@ const features = [
   {
     title: 'Public images',
     description:
-      'Authenticated by famous brands and companies partnering with Safehill',
+      'Authenticated by companies partnering with Safehill',
     demo: <WebVitals />,
   },
   {

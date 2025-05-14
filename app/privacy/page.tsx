@@ -11,7 +11,7 @@ const Section = ({ item }: { item: Item }) => {
         {item.title}
       </div>
 
-      <div className="mt-4 text-sm md:text-base font-light">{item.content}</div>
+      <div className="mt-4 text-sm md:text-base font-light">{item.mainContent}</div>
     </div>
   );
 };
@@ -23,7 +23,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '1. Information Collection',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 Safehill collects information about you only if we have a reason
@@ -118,7 +118,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '2. Information Use',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 Safehill is an industry leader in protecting and safeguarding
@@ -226,7 +226,7 @@ const PrivacyPolicy: React.FC = () => {
           icon: null,
           title:
             '3. Legal Basis Under EU General Data Protection Regulation for Processing Information of EU Residents.',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 Where you have consented to data processing, by using this App,
@@ -262,7 +262,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '4. Cookies and Third-Party Providers',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">Safehill does not use cookies.</p>
               <p className="my-5">
@@ -302,7 +302,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '5. Children and Privacy',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 This App is NOT intended to be used by children under the age of
@@ -346,7 +346,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '6. Notification of Changes',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 Safehill may at any time and in its sole discretion, add,
@@ -369,7 +369,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '7. Notice to California Users',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 California Civil Code Section 1798.83 permits users who are
@@ -391,7 +391,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '8. Contacting us',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 If there are any questions regarding this Privacy Policy you may
@@ -405,7 +405,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '9. Notice to EU users',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 The GDPR of the European Union permits users who are residents

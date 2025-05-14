@@ -15,18 +15,6 @@ export default function BottomNav() {
       >
         Terms of Use
       </Link>
-      <Link
-        href="/authenticate"
-        className="px-6 py-2 bg-purple-100/80 font-display text-black text-base rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-purple/80 hover:text-gray-800"
-      >
-        Authenticator Tool
-      </Link>
-      <Link
-        href="https://tally.so/r/3qoGxg"
-        className="px-6 py-2 bg-orange-100/80 font-display text-black text-base rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
-      >
-        Book a demo
-      </Link>
     </div>
   );
 }

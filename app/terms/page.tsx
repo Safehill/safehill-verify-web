@@ -11,7 +11,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 You must be at least Seventeen (17) years old to use the App. If
@@ -33,7 +33,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: 'Definition of Terms',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 Definition of Terms “App” means this site and associated sites
@@ -67,7 +67,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '1. User Conduct',
-          content: (
+          mainContent: (
             <>
               <div className="font-display text-lg md:text-xl tracking-[-0.02em] my-5">
                 1.1. Compliance with Laws and Regulations:
@@ -134,7 +134,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '2. Intellectual Property',
-          content: (
+          mainContent: (
             <>
               <div className="font-display text-lg md:text-xl tracking-[-0.02em] my-5">
                 2.1. Ownership of Content
@@ -184,7 +184,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '3. Privacy',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 Your privacy is important to us. Please refer to our{' '}
@@ -199,7 +199,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '4. Third-Party Links and Content',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 Our platform may contain links to third-party websites or
@@ -217,7 +217,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '5. Disclaimer of Warranties and Limitation of Liability',
-          content: (
+          mainContent: (
             <>
               <div className="font-display text-lg md:text-xl tracking-[-0.02em] my-5">
                 5.1 No Warranty:
@@ -250,7 +250,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '6. Indemnification',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 You agree to indemnify and hold harmless Safehill and its
@@ -268,7 +268,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '7. Amendments',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 We reserve the right to amend or modify this Agreement at any
@@ -285,7 +285,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '8. Termination',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 We may terminate or suspend your access to our platform, with or
@@ -301,7 +301,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '9. Governing Law and Dispute Resolution',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 This Agreement shall be governed by and construed in accordance
@@ -320,7 +320,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '10. Severability',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 If any provision of this Agreement is found to be invalid,
@@ -335,7 +335,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '11. Entire Agreement',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 This Agreement constitutes the entire agreement between you and
@@ -350,7 +350,7 @@ const PrivacyPolicy: React.FC = () => {
         item={{
           icon: null,
           title: '12. Contact Us',
-          content: (
+          mainContent: (
             <>
               <p className="my-5">
                 If you have any questions or concerns regarding this Agreement,

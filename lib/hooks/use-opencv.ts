@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+// import cv from '../../deps/opencv_version';
 import cv from '@techstark/opencv-js';
 
 export function useOpenCV() {
