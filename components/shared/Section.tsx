@@ -7,7 +7,7 @@ const Section = ({ item }: { item: Item }) => {
         {item.title}
       </div>
 
-      <div className="mt-4 text-sm md:text-base font-light">{item.content}</div>
+      <div className="mt-4 text-sm md:text-base font-light">{item.mainContent}</div>
     </div>
   );
 };

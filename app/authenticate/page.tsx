@@ -1,55 +1,49 @@
-import Card from '@/components/home/card';
-import { VERIFICATION_URL } from '@/lib/constants';
-import WebVitals from '@/components/home/web-vitals';
-import { nFormatter } from '@/lib/utils';
-import Link from 'next/link';
+"use client";
 
-export default async function AuthenticatePage() {
+import Card from '@/components/home/card';
+import WebVitals from '@/components/home/web-vitals';
+import {Button} from "@/components/shared/button";
+import {useRouter} from "next/navigation";
+import {useOpenCV} from "@/lib/hooks/use-opencv";
+
+export default function AuthenticatePage() {
+  // Load OpenCV asap
+  const { } = useOpenCV();
+
+  const router = useRouter();
+
   return (
     <>
       <div className="z-10 w-full max-w-xl px-5 xl:px-0">
         <h1
-          className="animate-fade-up bg-gradient-to-br from-black to-stone-500 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem]"
+          className="animate-fade-up bg-gradient-to-br from-black to-stone-500 bg-clip-text text-center font-display font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] text-3xl md:text-6xl leading-[3rem] md:leading-[5rem]"
           style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
         >
-          Is it authentic?
+          Is it authentic? Copyrighted?
         </h1>
         <p
-          className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl font-light"
+          className="mt-8 animate-fade-up text-center text-gray-600 opacity-0 [text-wrap:balance] md:text-lg font-light"
           style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
         >
           In the sea of deepfakes and AI-generated media it’s hard to tell what
           is authentic and who owns what these days.
         </p>
         <p
-          className="mt-8 animate-fade-up text-center text-gray-500 opacity-0 [text-wrap:balance] md:text-xl font-light"
+          className="mt-8 animate-fade-up text-center text-gray-600 opacity-0 [text-wrap:balance] md:text-lg font-light"
           style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
         >
           With Safehill, you can match any image against our repository of
-          fingerprinted assets to verify its provenance!
+          fingerprinted assets to verify its history!
         </p>
         <div
           className="mx-auto mt-8 flex animate-fade-up items-center justify-center space-x-5 py-10 opacity-0"
           style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
         >
-          <Link
-            className="group flex max-w-fit items-center justify-center space-x-2 rounded-full border border-black bg-black px-5 py-2 text-lg text-white transition-colors hover:bg-white hover:text-black"
-            href="/verify"
-          >
-            <p>Give it a try</p>
-          </Link>
-          {/* <a
-            className="flex max-w-fit items-center justify-center space-x-2 rounded-full border border-gray-300 bg-white px-5 py-2 text-sm text-gray-600 shadow-md transition-colors hover:border-gray-800"
-            href="https://github.com/steven-tey/precedent"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Github />
-            <p>
-              <span className="hidden sm:inline-block">Star on</span> GitHub{" "}
-              <span className="font-semibold">{nFormatter(stars)}</span>
-            </p>
-          </a> */}
+          <Button
+            onClick={e => { e.preventDefault(); router.push('/verify'); }}
+            >
+            Give it a try
+          </Button>
         </div>
       </div>
       <div className="my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-5 px-5 md:grid-cols-3 xl:px-0">
@@ -70,7 +64,7 @@ const features = [
   {
     title: 'Public images',
     description:
-      'Authenticated by famous brands and companies partnering with Safehill',
+      'Authenticated by companies partnering with Safehill',
     demo: <WebVitals />,
   },
   {

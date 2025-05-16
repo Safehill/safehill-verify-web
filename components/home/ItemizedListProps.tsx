@@ -5,5 +5,6 @@ export interface ItemizedListProps {
 export interface Item {
   icon: string | null;
   title: string;
-  content: React.ReactNode;
+  mainContent: React.ReactNode;
+  sideContent?: React.ReactNode;
 }

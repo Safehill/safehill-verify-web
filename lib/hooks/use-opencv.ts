@@ -1,17 +1,58 @@
-import { useState, useEffect } from 'react';
+// import cv from '../../deps/opencv_version';
 import cv from '@techstark/opencv-js';
+import { useSyncExternalStore } from 'react';
+import {toast} from "sonner";
+
+export const OpenCVSingleton = {
+  isLoaded: false,
+  hasInitStarted: false,
+  listeners: new Set<() => void>(),
+};
+
+
+function notifyAll() {
+  OpenCVSingleton.listeners.forEach((cb) => cb());
+}
 
 export function useOpenCV() {
-  const [isLoaded, setIsLoaded] = useState(false);
-  
-  useEffect(() => {
-    cv.onRuntimeInitialized = () => {
-      setIsLoaded(true);
-    };
-  }, []);
-  
+  // Subscribe to global isLoaded state
+  const isLoadedState = useSyncExternalStore(
+    (callback) => {
+      OpenCVSingleton.listeners.add(callback);
+      return () => OpenCVSingleton.listeners.delete(callback);
+    },
+    () => OpenCVSingleton.isLoaded,
+    () => false
+  );
+
+  // Perform init once
+  if (
+    typeof window !== 'undefined' &&
+    !OpenCVSingleton.isLoaded &&
+    !OpenCVSingleton.hasInitStarted
+  ) {
+    console.log('useOpenCV initializing');
+    OpenCVSingleton.hasInitStarted = true;
+
+    try {
+      cv.onRuntimeInitialized = () => {
+        console.log('useOpenCV initialization COMPLETE!');
+        OpenCVSingleton.isLoaded = true;
+        notifyAll();
+      };
+
+      cv.exceptionFromPtr = () => {
+        toast.error('Initialization failed');
+        OpenCVSingleton.isLoaded = false;
+        notifyAll();
+      };
+    } catch (e) {
+      toast.error('OpenCV setup failed: ' + e);
+    }
+  }
+
   const calculatePHash = (imageData: ImageData): string => {
-    if (!isLoaded) {
+    if (!OpenCVSingleton.isLoaded) {
       throw new Error('OpenCV is not loaded yet');
     }
 
@@ -163,6 +204,10 @@ export function useOpenCV() {
     
     return matOutput;
   }
-  
-  return { isLoaded, calculatePHash };
+
+  // Return singleton-safe state
+  return {
+    isLoaded: isLoadedState,
+    calculatePHash: calculatePHash,
+  };
 }

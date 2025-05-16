@@ -1,63 +1,45 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, {useRef, useState} from 'react';
 import FileUploader from '@/components/verification/FileUploader';
-import ImageDetails from '@/components/verification/ImageDetails';
-import ImageMatchesLoader from '@/components/verification/ImageMatchesLoader';
-import {
-  ImageMatch,
-  FingerprintMatchDTO,
-} from '@/components/verification/FileDetailsProps';
-import { useOpenCV } from '../../lib/hooks/use-opencv';
+import {FileDetails, FingerprintMatchDTO, ImageMatch,} from '@/components/verification/FileDetailsProps';
+import {useOpenCV} from '@/lib/hooks/use-opencv';
 import MessageView from '@/components/shared/MessageView';
-import PrimaryButton from '@/components/shared/PrimaryButton';
-import ProvidedImage from '@/components/verification/ProvidedImage';
-
-const formattedDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
+import {toast} from "sonner";
+import {v4 as uuidv4} from 'uuid';
+import AxiosInstance from "@/lib/api/api";
+import VerifyResultsPage from "@/components/verification/VerifyResultsPage";
+import {Button} from "@/components/shared/button";
+import {ArrowLeft} from "lucide-react";
+import {useRouter} from "next/navigation";
+import LoadingSpinner from "../../components/shared/icons/loading-spinner";
+import {formattedDate} from "@/lib/utils";
+import ProvidedImage from "@/components/verification/ProvidedImage";
 
 export default function VerifyPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { isLoaded: isCVLoaded, calculatePHash } = useOpenCV();
-  const [file, setFile] = useState<File | null>(null);
-  const [imageData, setImageData] = useState<ImageData | null>(null);
-  const [pHash, setPHash] = useState<string | null>(null);
-  const [apiResponse, setApiResponse] = useState<
-    FingerprintMatchDTO[] | Error | null
-  >(null);
-  const [matches, setMatches] = useState<ImageMatch[] | null>(null);
+  const [fileDetails, setFileDetails] = useState<FileDetails | null>(null);
+  const [imageMatches, setImageMatches] = useState<ImageMatch[] | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const calculateHash = (imageData: ImageData) => {
+  const calculateHash = (imageData: ImageData): string | null => {
     try {
       const hash = calculatePHash(imageData);
       console.log('Hash has been calculated ' + hash);
-      setPHash(hash);
+      return hash;
     } catch {
-      console.error('ERROR calculating hash');
-      setPHash(null);
-      return;
+      toast.error('ERROR calculating hash');
+      return null;
     }
   };
 
-  useEffect(() => {
-    if (pHash) {
-      return;
-    }
-    if (!imageData) {
-      return;
-    }
-    if (!isCVLoaded) {
-      return;
-    }
-    calculateHash(imageData);
-  }, [imageData, pHash, isCVLoaded]);
+  const handleFileProvided = (files: File[]) => {
+    const file = files.length > 0 ? files[0] : null;
 
-  const handleFileProvided = (file: File | null) => {
+    console.log('File has been received ' + file);
+
     if (file && canvasRef.current) {
       const canvas = canvasRef.current!;
       const reader = new FileReader();
@@ -69,114 +51,126 @@ export default function VerifyPage() {
           const ctx = canvas.getContext('2d')!;
           ctx.drawImage(img, 0, 0);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          setImageData(imageData);
 
           if (!isCVLoaded) {
-            console.error('CV library still warming up');
+            toast.error('CV library still warming up');
             return;
           }
           console.log('Image data has been pulled ' + imageData);
-          calculateHash(imageData);
+          const hash = calculateHash(imageData);
+          if (hash) {
+            const fileDetails: FileDetails = {file: file, imageData: imageData};
+            setFileDetails(fileDetails);
+            performAuthentication(hash);
+          }
         };
         img.src = e.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
-
-    setFile(file);
-    console.log('File has been received ' + file);
   };
 
-  const handleApiResponse = (apiResponse: FingerprintMatchDTO[] | null) => {
+  const performAuthentication = (fingerprint: string) => {
+    console.log('Calling API');
+    AxiosInstance.post<FingerprintMatchDTO[]>('/fingerprint/retrieve-similar', {
+      fingerprint: fingerprint,
+    })
+      .then((response) => {
+        console.log('received response ' + response.status);
+        handleApiResponse(response.data);
+      })
+      .catch((error) => {
+        console.log('received error ' + error.message);
+        handleApiResponse(error);
+      });
+  }
+
+  const handleApiResponse = (apiResponse: FingerprintMatchDTO[] | Error | null) => {
     if (!apiResponse) {
-      setApiResponse(new Error('No response from server. Please try again'));
-      setMatches(null);
+      toast.error('Error connecting to the server. Please try again');
+      setIsLoading(false);
       return;
-    } else {
-      setApiResponse(apiResponse);
     }
 
-    const imageMatches: ImageMatch[] = apiResponse.map((match) => {
+    if (apiResponse instanceof Error) {
+      toast.error('Error from server ' + apiResponse.message + '. Please try again');
+      setIsLoading(false);
+      return;
+    }
+
+    var imageMatches: ImageMatch[] = apiResponse.map((match) => {
       const imageMatch: ImageMatch = {
+        globalIdentifier: match.globalIdentifier,
         author: match.createdBy,
-        issuedAt: formattedDate(new Date(match.authenticationDate)),
+        issuedAt: new Date(match.authenticationDate),
         distance: match.distance,
       };
       return imageMatch;
     });
 
-    setMatches(imageMatches);
+    // if (imageMatches.length == 0) {
+    //   imageMatches.push({
+    //     globalIdentifier: uuidv4().toString(),
+    //     author: "John Scavenger",
+    //     issuedAt: new Date(),
+    //     distance: 10,
+    //   })
+    //   imageMatches.push({
+    //     globalIdentifier: uuidv4().toString(),
+    //     author: "Deliah Jones",
+    //     issuedAt: new Date(),
+    //     distance: 8,
+    //   })
+    // }
+
+    setIsLoading(false);
+    setImageMatches(imageMatches);
   };
 
-  if (file == null) {
+  if (fileDetails && imageMatches) {
+    return (<VerifyResultsPage fileDetails={fileDetails} matches={imageMatches} onBack={() => {
+      setFileDetails(null);
+      setImageMatches(null);
+      setIsLoading(false);
+    }}/>);
+  } else if (!isCVLoaded) {
     return (
       <>
-        <FileUploader currentFile={file} onFileChange={handleFileProvided} />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <LoadingSpinner/>
+        <MessageView message="Preparing for authentication" sizeClass={4}/>
       </>
     );
-  } else if (pHash == null) {
-    <MessageView message="Preparing …" sizeClass={4} />;
-  } else if (apiResponse == null) {
-    return (
-      <ImageMatchesLoader
-        currentFile={file}
-        fingerprint={pHash}
-        onApiResponse={handleApiResponse}
-      />
-    );
-  } else if (!matches) {
-    return (
-      <MessageView message={(apiResponse as Error).message} sizeClass={4} />
-    );
-  } else if (imageData) {
-    const bestMatch = matches[0];
+  } else if (isLoading) {
     return (
       <>
-        {matches.length == 0 ? (
-          <div className="z-10 w-full max-w-6xl px-5 xl:px-0">
-            <div className="my-5">
-              <MessageView
-                message="We couldn't find any matches"
-                sizeClass={4}
-              />
-            </div>
-            <ProvidedImage file={file} imageData={imageData} />
-          </div>
-        ) : (
-          <ImageDetails
-            file={file}
-            imageData={imageData}
-            author={bestMatch.author}
-            people="people"
-            issuedAt={bestMatch.issuedAt}
-            distance={bestMatch.distance}
-          />
+        <LoadingSpinner />
+        <MessageView message="Authenticating" sizeClass={4} />
+        {fileDetails && (
+          <ProvidedImage file={fileDetails.file} properties={[{
+            key: "File name",
+            icon: null,
+            value: (<span>{fileDetails.file.name}</span>)
+          },{
+            key: "Image size",
+            icon: null,
+            value: (<span>{fileDetails.imageData.width + ' X ' + fileDetails.imageData.height}</span>)
+          }]} />
         )}
-        <PrimaryButton
-          label="Start a new search"
-          onClick={() => {
-            setFile(null);
-            setImageData(null);
-            setApiResponse(null);
-            setMatches(null);
-          }}
-        />
       </>
     );
   } else {
     return (
       <>
-        <MessageView message="Something unexpected occurred" sizeClass={4} />
-        <PrimaryButton
-          label="Start over"
-          onClick={() => {
-            setFile(null);
-            setImageData(null);
-            setApiResponse(null);
-            setMatches(null);
-          }}
-        />
+        <FileUploader isLoading={isLoading} setIsLoading={setIsLoading} onSubmit={handleFileProvided} />
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <Button
+          variant="outline"
+          onClick={e => { e.preventDefault(); router.push('/authenticate'); }}
+          className="opacity-95"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <p className="text-sm md:text-md">Back</p>
+        </Button>
       </>
     );
   }

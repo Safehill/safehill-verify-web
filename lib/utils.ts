@@ -59,6 +59,7 @@ export function nFormatter(num: number, digits?: number) {
 }
 
 export function capitalize(str: string) {
+  "string".toUpperCase()
   if (!str || typeof str !== "string") return str;
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -66,4 +67,14 @@ export function capitalize(str: string) {
 export const truncate = (str: string, length: number) => {
   if (!str || str.length <= length) return str;
   return `${str.slice(0, length)}...`;
+};
+
+export const formattedDate = (date: Date, includeHour: boolean = false) => {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: includeHour ? 'numeric' : undefined,
+    minute: includeHour ? 'numeric' : undefined,
+  });
 };

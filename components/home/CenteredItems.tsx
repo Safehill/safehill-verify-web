@@ -1,5 +1,6 @@
 import React from 'react';
 import { ItemizedListProps } from './ItemizedListProps';
+import LineSeparator from "@/components/home/LineSeparator";
 
 const CenteredItems: React.FC<ItemizedListProps> = ({ items }) => {
   return (
@@ -15,20 +16,17 @@ const CenteredItems: React.FC<ItemizedListProps> = ({ items }) => {
             </div>
 
             <div className="mt-4 text-gray-300 text-sm md:text-base font-light px-4 sm:px-20 md:px-30 lg:px-40">
-              {item.content}
+              {item.mainContent}
             </div>
           </div>
 
           {/* Separator Line */}
           {index < items.length - 1 ? (
-            <div className="mx-4 sm:mx-8 md:mx-16 lg:mx-32 my-10">
-              <div
-                className="h-0.5 w-full bg-gradient-to-r from-transparent via-gray-400 to-transparent"
-                style={{ opacity: 0.7 }}
-              ></div>
+            <div className="my-10">
+              <LineSeparator />
             </div>
           ) : (
-            <div />
+            <></>
           )}
         </React.Fragment>
       ))}

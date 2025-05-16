@@ -1,136 +1,138 @@
-import { Suspense } from 'react';
+import React, {Suspense} from 'react';
 import Navbar from '@/components/layout/navbar';
 import ItemizedList from '@/components/home/ItemizedList';
 import CenteredItems from '@/components/home/CenteredItems';
-import BottomNav from '@/components/layout/bottomNav';
-import { HandRaised } from '@/components/shared/icons';
+import {HandRaised} from '@/components/shared/icons';
 import Footer from '@/components/layout/footer';
 import Link from 'next/link';
+import {Item} from "@/components/home/ItemizedListProps";
+import LineSeparator from "@/components/home/LineSeparator";
+import {ArrowRightCircleIcon, CalendarDaysIcon} from "lucide-react";
+import {DownloadAppButtons} from "@/components/home/DownloadAppButtons";
 
-export default async function Home() {
-  const steps = [
+export default function Home() {
+  const steps: Item[] = [
     {
       icon: null,
       title: 'Create your fingerprint',
-      content: (
+      mainContent: (
         <>
-          <div className="flex flex-col sm:flex-row justify-start gap-4 my-10">
-            <a
-              href="https://apps.apple.com/us/app/snoog/id1624088867"
-              className="flex-shrink-0"
-            >
-              <img
-                src="/images/app-store.png"
-                alt="App Store download"
-                className="w-[180px] sm:w-[240px]"
-              />
-            </a>
-            <a target="_blank" className="flex-shrink-0">
-              <img
-                src="/images/play-store.png"
-                alt="Google Play Store download"
-                className="w-[180px] sm:w-[240px]"
-              />
-            </a>
+          Use your personal mobile device to create your fingerprint on the Safehill app
+          <div className="flex flex-col sm:flex-row justify-start gap-4 mt-10 mb-3">
+            <DownloadAppButtons className="w-[160px] sm:w-[200px]"/>
           </div>
-          Create an account on our app to generate your personal fingerprint.
-          <br />
-          Your fingerprint is your digital identity, and as such it only exists
-          on your devices.
-          <br />
-          It is never sent to or stored on our servers.
         </>
       ),
+      sideContent: (
+        <div className="pl-20 pb-20">
+          <div className="rounded-xl overflow-hidden shadow-lg">
+            <img
+              src="/images/safehill-app-logo-2.png"
+              alt={`Image at /images/safehill-app-logo.png`}
+              className="w-80 object-cover"
+            />
+          </div>
+        </div>
+      )
     },
     {
       icon: null,
-      title: 'Protect your assets',
-      content: (
+      title: 'Add your fingerprint to your content',
+      mainContent: (
         <>
-          Start adding your assets to your secure library.
+          Simply upload your content to the Safehill cloud.
           <br />
-          For anything you add, we verify authenticity and make you the owner.
+          We will authenticate it and attach a permanent fingerprint to your content.
         </>
       ),
+      sideContent: (
+        <div className="pl-20 pb-32">
+          <img
+            src="/images/fingerprint.png"
+            alt={`Image at /images/fingerprint.png`}
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      )
     },
     {
       icon: null,
       title: 'Let us worry about the rest',
-      content: (
+      mainContent: (
         <>
-          Out of the box, you get:
+          Once fingerprinted assets are in Safehill, you get:
           <br />
           <br />
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-green-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              💾 The most secure storage
+            <h1 className="text-left text-cyan-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              🏦 &nbsp; The most secure vault
             </h1>
-            For your proprietary content. Our best-in-class security standards
-            guarantee that <b className="text-green-300">NO-ONE</b> other than
-            people with explicit access can ever decrypt confidential content.
+            Our best-in-class security standards
+            guarantee that <b className="text-cyan-300">NO-ONE</b> other than
+            people with explicit access can ever decrypt your content or use it for AI training.
             Not even Safehill.
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-pink-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              💼 Accurate controls for distribution
+            <h1 className="text-left text-yellow-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              💼 &nbsp; The best controls for distribution
             </h1>{' '}
-            If your content is confidential, you can decide to prevent
-            re-shares, screenshots, etc. when sharing it privately.
+            If you share content confidentially, you can prevent
+            re-shares, screenshots, or any form or redistribution
             <div className="flex flex-col sm:flex-row gap-4 my-10">
               <img
-                src="/images/share-choice-1.png"
+                src="/images/share-choice-3.png"
                 alt="Sharing options"
                 className="w-[245px] rounded-xl shadow-lg"
               />
               <img
-                src="/images/share-choice-2.png"
+                src="/images/share-choice-4.png"
                 alt="Sharing options"
                 className="w-[245px] rounded-xl shadow-lg"
               />
             </div>
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-cyan-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🔎 A way make your content traceable
+            <h1 className="text-left text-red-400 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              ❌️ &nbsp; The ability to remove all copies
+            </h1>{' '}
+            You can revoke access and remove all copies of the content you previously shared
+          </div>
+          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
+            <h1 className="text-left text-purple-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
+              🧬 &nbsp; Traceability
             </h1>
-            We fingerprint every piece of content so that we can determine if
-            anything available online matches your content, even when it’s
-            altered.
+            Fingerprints, not content, can be use to detect misuse, even if the content is altered
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🤖 Protection against AI-generated content
+              🙋🏽 &nbsp; Attribution from Gen AI
             </h1>
-            Our simple yet powerful API protects proprietary data from being
-            used for training AI models, and helps LLMs steer away from
-            copyrights and IP infrigments.
-          </div>
-          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-yellow-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🙋🏽 A way to discover content credentials
-            </h1>
-            Assets’ history and ownership can be checked by anyone using our{' '}
-            <Link
-              href="/authenticate"
-              className="font-bold underline text-orange-100 opacity-90"
-            >
-              authenticator tool
-            </Link>
-            .
+            Generative AI system integrate with Safehill to avoid copyrights and IP infringements
           </div>
         </>
       ),
+      sideContent: (
+        <div className="pl-20 pb-20">
+          <img
+            src="/images/umbrella.png"
+            alt={`Image at /images/umbrella.png`}
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      )
     },
   ];
 
-  const whys = [
+  const whys: Item[] = [
     {
       icon: '🧑‍🎨',
-      title: 'Just focus on making great content',
-      content: (
+      title: 'Focus on making great content',
+      mainContent: (
         <div>
           Spend less time worrying about protecting your valuable work, and more
-          on what you do best: creating and sharing great content!
+          on what you do best:
+          <br />
+          creating and sharing your beautiful work!
           {/* <br />
           <br />
           Safehill will come to the rescue if copyrights are infringed, by
@@ -141,27 +143,29 @@ export default async function Home() {
     {
       icon: '🔗',
       title: 'Collaborate confidentially',
-      content: (
+      mainContent: (
         <div>
-          Because you can control the distribution of your content and because
-          of our high security standards, you are protected from any data or
-          security breach, from either authorized or unauthorized access.
+          Because of our superior security standards
+          <br />
+          and the control over the distribution you get with Safehill,
+          <br />
+          you are protected from any data or security or copyright breach.
           <br />
           <br />
-          Sharing password-protected links is a thing of the past!
+          Sharing password-protected links with your colleagues is a thing of the past!
         </div>
       ),
     },
     {
       icon: '🪄',
       title: 'Stop worrying about AI-generated content',
-      content: (
+      mainContent: (
         <div>
           We love AI generated images and videos!
           <br />
           <br />
-          We love them even more when they can be used safely with no risk of
-          infringing copyrights.
+          We love them even more when we know they can be used safely
+          <br />without infringing copyrights.
           {/* <br />
           <br />
           If AI regulations are the cure, we provide preventive care! */}
@@ -171,7 +175,7 @@ export default async function Home() {
     {
       icon: '⏭',
       title: 'Increase your speed to market',
-      content: (
+      mainContent: (
         <div>
           We handle the complexities of distributing copyrighted content on the
           web,
@@ -217,26 +221,26 @@ export default async function Home() {
           </h1>
 
           <h1
-            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pb-4"
+            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-7xl sm:text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-8"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
-            Do you know how your data is being used?
+            Yours. Truly.
           </h1>
-          <p
-            className="mt-8 animate-fade-up text-center text-orange-300 opacity-0 [text-wrap:balance] text-2xl sm:text-2xl md:text-2xl font-bold px-2"
-            style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
-          >
-            AI is everywhere, and it’s trained using your data, too!
-          </p>
 
-          <div>
+          <div className="md:mt-32">
             <p
-              className="mt-8 animate-fade-up text-center text-gray-200 opacity-0 [text-wrap:balance] md:text-xl font-light px-2"
+              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] md:text-3xl font-display px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Effortlessly protect your IP from unintended use.
+              Effortlessly protect your digital property from unintended use
+            </p>
+            <p
+              className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] md:text-2xl font-extralight px-2"
+              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+            >
+              Stop worrying about <span className="font-bold">security and copyright breaches</span>
               <br />
-              Stop worrying about breaches and AI-generated deepfakes.
+              made by humans and AI
             </p>
           </div>
 
@@ -244,7 +248,7 @@ export default async function Home() {
             <img
               className="w-full h-auto max-w-screen-md"
               style={{
-                height: '600px',
+                height: '900px',
               }}
               alt="home-glow-background"
               src="/images/aura.png"
@@ -255,30 +259,43 @@ export default async function Home() {
               style={{
                 opacity: 0.9,
               }}
-              src="/images/rafa-example-3.png"
-              alt="Example asset tracking Nike & Rafa"
+              src="/images/fingerprint-example.png"
+              alt="Example of an asset fingerprint"
             />
           </div>
 
-          <div id="download">
+          <div id="download" className="z-10 w-full xl:px-20 pt-10">
+            <h1
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+              style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
+            >
+              How does it work?
+            </h1>
+            <p
+              className="animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] md:text-2xl font-extralight px-2 pt-5 pb-20"
+              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+            >
+              3 simple steps
+            </p>
             <ItemizedList items={steps} />
           </div>
 
-          <div className="z-10 w-full xl:px-20 pt-40 pb-20">
+          <div className="my-10">
+            <LineSeparator />
+          </div>
+
+          <div className="z-10 w-full xl:px-20 pt-20 pb-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-white to-gray-500 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               Why use Safehill
             </h1>
 
-            <div className="px-5 sm:px-8 md:px-20 lg:px-30 pt-10 pb-20">
+            <div className="px-5 sm:px-8 md:px-20 lg:px-30 pt-10 pb-5">
               <p
-                className="animate-fade-up bg-gradient-to-br from-white to-gray-500 bg-clip-text text-center text-base font-display tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm md:text-xl px-5 py-5"
-                style={{
-                  animationDelay: '0.15s',
-                  animationFillMode: 'forwards',
-                }}
+                className="mt-8 mb-20 animate-fade-up text-center text-purple-50 opacity-0 [text-wrap:balance] md:text-2xl font-light px-2"
+                style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
               >
                 Safehill protects and manages your digital content and its
                 rights.
@@ -289,19 +306,58 @@ export default async function Home() {
 
             <CenteredItems items={whys} />
           </div>
+          <div className="my-10">
+            <LineSeparator />
+          </div>
         </div>
-        <div className="flex flex-row z-10 w-full justify-center items-center my-40 px-2">
-          <span className="px-4 py-2 text-white text-lg">
-            Have any questions?
+
+        <div className="z-10 w-full xl:px-20 pt-40">
+          <h1
+            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-3xl sm:text-2xl md:text-5xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
+            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
+          >
+            Want to know if an image is copyrighted?
+          </h1>
+          <div className="pb-20">
+            <p
+              className="mt-8 mb-5 animate-fade-up text-center text-purple-50 opacity-0 [text-wrap:balance] md:text-2xl font-light px-2"
+              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+            >
+              Use our{" "}
+              <Link
+                href="/authenticate"
+                className="font-bold text-purple-100 opacity-90"
+              >
+                authenticator tool
+              </Link>
+            </p>
+            <div className="flex flex-row z-10 w-full justify-center items-center mb-20 px-2">
+              <Link
+                href="/authenticate"
+                className="flex gap-2 px-6 py-2 bg-purple-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+              >
+                Try it out now
+                <ArrowRightCircleIcon className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+          <div className="my-10">
+            <LineSeparator />
+          </div>
+        </div>
+
+        <div className="flex flex-row z-10 w-full justify-center items-center mb-40 px-2">
+          <span className="px-4 py-2 text-purple-100 text-lg font-default">
+            Still have questions?
           </span>
           <Link
             href="https://tally.so/r/3qoGxg"
-            className="px-6 py-2 bg-orange-100/80 font-display text-black text-base rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+            className="flex gap-2 px-6 py-2 bg-yellow-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
           >
-            Talk to us
+            Get in touch
+            <CalendarDaysIcon className="w-5 h-5" />
           </Link>
         </div>
-        <BottomNav />
       </main>
       <Footer darkTheme={true} />
     </>
