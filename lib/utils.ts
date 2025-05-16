@@ -68,3 +68,13 @@ export const truncate = (str: string, length: number) => {
   if (!str || str.length <= length) return str;
   return `${str.slice(0, length)}...`;
 };
+
+export const formattedDate = (date: Date, includeHour: boolean = false) => {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: includeHour ? 'numeric' : undefined,
+    minute: includeHour ? 'numeric' : undefined,
+  });
+};

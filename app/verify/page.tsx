@@ -1,6 +1,6 @@
 'use client';
 
-import {useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import FileUploader from '@/components/verification/FileUploader';
 import {FileDetails, FingerprintMatchDTO, ImageMatch,} from '@/components/verification/FileDetailsProps';
 import {useOpenCV} from '@/lib/hooks/use-opencv';
@@ -9,16 +9,15 @@ import {toast} from "sonner";
 import {v4 as uuidv4} from 'uuid';
 import AxiosInstance from "@/lib/api/api";
 import VerifyResultsPage from "@/components/verification/VerifyResultsPage";
-
-const formattedDate = (date: Date) => {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
+import {Button} from "@/components/shared/button";
+import {ArrowLeft} from "lucide-react";
+import {useRouter} from "next/navigation";
+import LoadingSpinner from "../../components/shared/icons/loading-spinner";
+import {formattedDate} from "@/lib/utils";
+import ProvidedImage from "@/components/verification/ProvidedImage";
 
 export default function VerifyPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { isLoaded: isCVLoaded, calculatePHash } = useOpenCV();
   const [fileDetails, setFileDetails] = useState<FileDetails | null>(null);
@@ -87,8 +86,6 @@ export default function VerifyPage() {
   }
 
   const handleApiResponse = (apiResponse: FingerprintMatchDTO[] | Error | null) => {
-    const id = uuidv4();
-
     if (!apiResponse) {
       toast.error('Error connecting to the server. Please try again');
       setIsLoading(false);
@@ -101,34 +98,80 @@ export default function VerifyPage() {
       return;
     }
 
-    const imageMatches: ImageMatch[] = apiResponse.map((match) => {
+    var imageMatches: ImageMatch[] = apiResponse.map((match) => {
       const imageMatch: ImageMatch = {
+        globalIdentifier: match.globalIdentifier,
         author: match.createdBy,
-        issuedAt: formattedDate(new Date(match.authenticationDate)),
+        issuedAt: new Date(match.authenticationDate),
         distance: match.distance,
       };
       return imageMatch;
     });
 
+    // if (imageMatches.length == 0) {
+    //   imageMatches.push({
+    //     globalIdentifier: uuidv4().toString(),
+    //     author: "John Scavenger",
+    //     issuedAt: new Date(),
+    //     distance: 10,
+    //   })
+    //   imageMatches.push({
+    //     globalIdentifier: uuidv4().toString(),
+    //     author: "Deliah Jones",
+    //     issuedAt: new Date(),
+    //     distance: 8,
+    //   })
+    // }
+
+    setIsLoading(false);
     setImageMatches(imageMatches);
   };
-
-  if (!isCVLoaded) {
-    return (<MessageView message="Preparing Image Authenticator …" sizeClass={4} />);
-  }
 
   if (fileDetails && imageMatches) {
     return (<VerifyResultsPage fileDetails={fileDetails} matches={imageMatches} onBack={() => {
       setFileDetails(null);
       setImageMatches(null);
       setIsLoading(false);
-    }} />);
+    }}/>);
+  } else if (!isCVLoaded) {
+    return (
+      <>
+        <LoadingSpinner/>
+        <MessageView message="Preparing for authentication" sizeClass={4}/>
+      </>
+    );
+  } else if (isLoading) {
+    return (
+      <>
+        <LoadingSpinner />
+        <MessageView message="Authenticating" sizeClass={4} />
+        {fileDetails && (
+          <ProvidedImage file={fileDetails.file} properties={[{
+            key: "File name",
+            icon: null,
+            value: (<span>{fileDetails.file.name}</span>)
+          },{
+            key: "Image size",
+            icon: null,
+            value: (<span>{fileDetails.imageData.width + ' X ' + fileDetails.imageData.height}</span>)
+          }]} />
+        )}
+      </>
+    );
+  } else {
+    return (
+      <>
+        <FileUploader isLoading={isLoading} setIsLoading={setIsLoading} onSubmit={handleFileProvided} />
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        <Button
+          variant="outline"
+          onClick={e => { e.preventDefault(); router.push('/authenticate'); }}
+          className="opacity-95"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <p className="text-sm md:text-md">Back</p>
+        </Button>
+      </>
+    );
   }
-
-  return (
-    <>
-      <FileUploader isLoading={isLoading} setIsLoading={setIsLoading} onSubmit={handleFileProvided} />
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-    </>
-  );
 }

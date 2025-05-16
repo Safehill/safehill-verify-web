@@ -9,10 +9,7 @@ export interface FingerprintMatchDTO {
 export interface ImageMetadataProps {
   file: File;
   imageData: ImageData;
-  author: string;
-  people: string;
-  issuedAt: string;
-  distance: number;
+  matches: ImageMatch[];
 }
 
 export interface FileDetails {
@@ -32,7 +29,8 @@ export interface FileMetadataLoaderProps {
 }
 
 export interface ImageMatch {
+  globalIdentifier: string;
   author: string;
-  issuedAt: string;
+  issuedAt: Date;
   distance: number;
 }

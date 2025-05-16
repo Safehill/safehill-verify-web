@@ -22,7 +22,9 @@ const CenteredItems: React.FC<ItemizedListProps> = ({ items }) => {
 
           {/* Separator Line */}
           {index < items.length - 1 ? (
-            <LineSeparator />
+            <div className="my-10">
+              <LineSeparator />
+            </div>
           ) : (
             <></>
           )}

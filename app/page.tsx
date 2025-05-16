@@ -8,30 +8,7 @@ import Link from 'next/link';
 import {Item} from "@/components/home/ItemizedListProps";
 import LineSeparator from "@/components/home/LineSeparator";
 import {ArrowRightCircleIcon, CalendarDaysIcon} from "lucide-react";
-
-function DownloadAppButtons(props: {className: string;}) {
-  return (
-    <>
-      <a
-        href="https://apps.apple.com/us/app/snoog/id1624088867"
-        className="flex-shrink-0"
-      >
-        <img
-          src="/images/app-store.png"
-          alt="App Store download"
-          className={props.className}
-        />
-      </a>
-      <a target="_blank" className="flex-shrink-0">
-        <img
-          src="/images/play-store.png"
-          alt="Google Play Store download"
-          className={props.className}
-        />
-      </a>
-    </>
-  )
-}
+import {DownloadAppButtons} from "@/components/home/DownloadAppButtons";
 
 export default function Home() {
   const steps: Item[] = [
@@ -303,9 +280,11 @@ export default function Home() {
             <ItemizedList items={steps} />
           </div>
 
-          <LineSeparator />
+          <div className="my-10">
+            <LineSeparator />
+          </div>
 
-          <div className="z-10 w-full xl:px-20 pt-40 pb-20">
+          <div className="z-10 w-full xl:px-20 pt-20 pb-10">
             <h1
               className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
@@ -327,7 +306,9 @@ export default function Home() {
 
             <CenteredItems items={whys} />
           </div>
-          <LineSeparator />
+          <div className="my-10">
+            <LineSeparator />
+          </div>
         </div>
 
         <div className="z-10 w-full xl:px-20 pt-40">
@@ -360,12 +341,14 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <LineSeparator />
+          <div className="my-10">
+            <LineSeparator />
+          </div>
         </div>
 
         <div className="flex flex-row z-10 w-full justify-center items-center mb-40 px-2">
           <span className="px-4 py-2 text-purple-100 text-lg font-default">
-            Just want to know more?
+            Still have questions?
           </span>
           <Link
             href="https://tally.so/r/3qoGxg"

@@ -1,9 +1,9 @@
 'use client';
 
 import React, {useState} from 'react';
-import {Bars3Icon as MenuIcon, XMarkIcon as XIcon,} from '@heroicons/react/24/outline';
+import {Bars3Icon as MenuIcon, MagnifyingGlassIcon, XMarkIcon as XIcon,} from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import {ArrowRightCircleIcon, CalendarDaysIcon} from "lucide-react";
+import {CalendarDaysIcon} from "lucide-react";
 
 export default function TopNav({ darkTheme }: { darkTheme: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,6 +12,15 @@ export default function TopNav({ darkTheme }: { darkTheme: boolean }) {
     <div>
       {/* Desktop Navigation */}
       <div className="hidden sm:flex justify-end items-center gap-4">
+        {darkTheme && (
+          <Link
+            href="/authenticate"
+            className="flex gap-2 px-6 py-2 bg-purple-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+          >
+            Authenticator
+            <MagnifyingGlassIcon className="w-5 h-5" />
+          </Link>
+        )}
         <Link
           href="https://tally.so/r/3qoGxg"
           className="flex gap-2 px-6 py-2 bg-yellow-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"

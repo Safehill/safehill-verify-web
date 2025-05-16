@@ -1,29 +1,37 @@
 import ImageView from './ImageView';
+import {JSX} from "react";
 
-const ProvidedImage = ({
-  file,
-  imageData,
-}: {
-  file: File;
-  imageData: ImageData;
+const ProvidedImage = ({ file, properties }: {
+  file: File,
+  properties: {
+    key: string,
+    icon: JSX.Element | null,
+    value: JSX.Element | null,
+  }[],
 }) => {
   return (
-    <div className="grid w-full max-w-screen-xl grid-cols-2 gap-5 px-5 xl:px-0 py-2">
-      <div className="col-span-2 md:col-span-1 flex justify-end">
-        <div className="w-fit">
-          <ImageView file={file} height={300} />
+    <div className="grid w-full grid-cols-2 gap-5 px-5 xl:px-0 py-2">
+      <div className="col-span-1 flex justify-end">
+        <div className="h-[200px]">
+          <ImageView file={file} height={200} />
         </div>
       </div>
-      <div className="opacity-0 animate-fade-up"
-           style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
-        <p>
-          <b>File: </b>
-          {file.name}
-        </p>
-        <p>
-          <b>Size: </b>
-          {imageData.width} x {imageData.height}
-        </p>
+      <div className="w-[360px] h-[200px] col-span-1 opacity-95">
+        <div className="rounded-xl bg-gray-200 p-4 shadow-md pb-4">
+          <div className="flex flex-col gap-5">
+            {properties.map((property) => (
+              <div key={property.key} className="space-y-1">
+                <div className="text-xs text-black/60 uppercase pl-2 flex flex-cols gap-2">
+                  {property.icon ?? (<></>)}
+                  {property.key}
+                </div>
+                <div className="bg-neutral-100 rounded-lg px-4 py-3 text-sm text-black flex-cols gap-2 justify-between items-center truncate block">
+                  {property.value}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

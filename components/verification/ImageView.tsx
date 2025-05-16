@@ -18,9 +18,9 @@ const ImageView = ({ file, height }: { file: File; height: number }) => {
     );
   } else {
     return (
-      <div className="w-full ">
+      <div className="w-full flex justify-center items-center">
         <img
-          className="relative col-span-1 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md h-auto object-cover"
+          className="relative col-span-1 overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm h-auto object-cover"
           src={url}
           alt="Preview of the selected image"
           // className=""

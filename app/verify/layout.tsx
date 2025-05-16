@@ -1,9 +1,9 @@
 import '../globals.css';
-import { Suspense } from 'react';
+import React, {Suspense} from 'react';
 import Navbar from '@/components/layout/navbar';
 import {Toaster} from "sonner";
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -15,7 +15,7 @@ export default async function RootLayout({
       <Suspense fallback="...">
         <Navbar darkTheme={false} withNavBar={false} />
       </Suspense>
-      <main className="flex min-h-screen w-full flex-col items-center justify-center py-32">
+      <main className="flex min-h-screen w-full flex-col items-center justify-center">
         {children}
       </main>
     </>
