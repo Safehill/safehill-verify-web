@@ -46,7 +46,7 @@ export default function Home() {
         </>
       ),
       sideContent: (
-        <div className="pl-20 pb-32">
+        <div className="pl-20 pb-28">
           <img
             src="/images/fingerprint.png"
             alt={`Image at /images/fingerprint.png`}
@@ -194,31 +194,31 @@ export default function Home() {
       </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center justify-center pt-32">
         <div className="z-10 w-full xl:px-20">
-          <h1
-            className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-6xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] py-10"
-            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
-          >
-            <HandRaised
-              className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto bg-clip-text bg-gradient-to-br from-yellow-200 to-purple-300"
-              fill="url(#gradient)"
-              width="100%" // or a specific value like "200px"
-              height="100%" // or a specific value like "200px"
-            />
-            <svg width="0" height="0">
-              <defs>
-                <linearGradient
-                  id="gradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
-                  <stop offset="0%" stopColor="#E9D8FD" /> {/* Purple-300 */}
-                  <stop offset="100%" stopColor="#FEF9C3" /> {/* Yellow-200 */}
-                </linearGradient>
-              </defs>
-            </svg>
-          </h1>
+          {/*<h1*/}
+          {/*  className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-6xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] py-10"*/}
+          {/*  style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}*/}
+          {/*>*/}
+          {/*  <HandRaised*/}
+          {/*    className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto bg-clip-text bg-gradient-to-br from-yellow-200 to-purple-300"*/}
+          {/*    fill="url(#gradient)"*/}
+          {/*    width="100%" // or a specific value like "200px"*/}
+          {/*    height="100%" // or a specific value like "200px"*/}
+          {/*  />*/}
+          {/*  <svg width="0" height="0">*/}
+          {/*    <defs>*/}
+          {/*      <linearGradient*/}
+          {/*        id="gradient"*/}
+          {/*        x1="0%"*/}
+          {/*        y1="0%"*/}
+          {/*        x2="100%"*/}
+          {/*        y2="100%"*/}
+          {/*      >*/}
+          {/*        <stop offset="0%" stopColor="#E9D8FD" /> /!* Purple-300 *!/*/}
+          {/*        <stop offset="100%" stopColor="#FEF9C3" /> /!* Yellow-200 *!/*/}
+          {/*      </linearGradient>*/}
+          {/*    </defs>*/}
+          {/*  </svg>*/}
+          {/*</h1>*/}
 
           <h1
             className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-7xl sm:text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-8"
@@ -227,9 +227,9 @@ export default function Home() {
             Yours. Truly.
           </h1>
 
-          <div className="md:mt-32">
+          <div className="md:mt-20">
             <p
-              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] md:text-3xl font-display px-2"
+              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] text-2xl md:text-3xl font-display px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
               Effortlessly protect your digital property from unintended use
@@ -266,7 +266,7 @@ export default function Home() {
 
           <div id="download" className="z-10 w-full xl:px-20 pt-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               How does it work?
@@ -286,7 +286,7 @@ export default function Home() {
 
           <div className="z-10 w-full xl:px-20 pt-20 pb-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl  font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               Why use Safehill
@@ -313,7 +313,7 @@ export default function Home() {
 
         <div className="z-10 w-full xl:px-20 pt-40">
           <h1
-            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-3xl sm:text-2xl md:text-5xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
+            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Want to know if an image is copyrighted?
@@ -330,6 +330,7 @@ export default function Home() {
               >
                 authenticator tool
               </Link>
+              !
             </p>
             <div className="flex flex-row z-10 w-full justify-center items-center mb-20 px-2">
               <Link
