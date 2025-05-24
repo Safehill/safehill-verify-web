@@ -7,9 +7,11 @@ import TopNav from './topNav';
 export default function NavBar({
   darkTheme,
   withNavBar,
+  currentPage,
 }: {
   darkTheme: boolean;
   withNavBar: boolean;
+  currentPage: string;
 }) {
   const scrolled = useScroll(50);
 
@@ -17,7 +19,7 @@ export default function NavBar({
     <div
       className={`fixed top-0 flex w-full justify-center ${
         scrolled
-          ? 'border-white border-gray-800 bg-white/10 backdrop-blur-xl'
+          ? 'border-gray-800 bg-white/10 backdrop-blur-xl'
           : 'bg-white/0'
       } z-30 transition-all`}
     >
@@ -34,7 +36,7 @@ export default function NavBar({
           <p className={darkTheme ? 'text-white' : 'text-black'}>Safehill</p>
         </Link>
 
-        {withNavBar ? <TopNav darkTheme={darkTheme} /> : <></>}
+        {withNavBar ? <TopNav darkTheme={darkTheme} currentPage={currentPage}/> : <></>}
       </div>
     </div>
   );

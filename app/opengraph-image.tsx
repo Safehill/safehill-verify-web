@@ -1,9 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { ImageResponse } from "next/og";
+import {ImageResponse} from "next/og";
 
 export const runtime = "edge";
-export const alt = "Safehill - Authenticity in the age of AI";
-export const contentType = "image/png";
 
 export default async function OG() {
   const sfPro = await fetch(

@@ -6,17 +6,17 @@ import { Drawer } from "vaul";
 import * as Dialog from "@radix-ui/react-dialog";
 import useMediaQuery from "@/lib/hooks/use-media-query";
 
-export default function Modal({
-  children,
-  className,
-  showModal,
-  setShowModal,
-}: {
+export default ({
+                  children,
+                  className,
+                  showModal,
+                  setShowModal,
+                }: {
   children: React.ReactNode;
   className?: string;
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
-}) {
+}) => {
   const { isMobile } = useMediaQuery();
 
   if (isMobile) {
