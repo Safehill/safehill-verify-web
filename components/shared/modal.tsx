@@ -6,17 +6,14 @@ import { Drawer } from "vaul";
 import * as Dialog from "@radix-ui/react-dialog";
 import useMediaQuery from "@/lib/hooks/use-media-query";
 
-export default function Modal({
-  children,
-  className,
-  showModal,
-  setShowModal,
-}: {
+interface ModalProps {
   children: React.ReactNode;
   className?: string;
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
-}) {
+}
+
+const Modal = ({ children, className, showModal, setShowModal }: ModalProps) => {
   const { isMobile } = useMediaQuery();
 
   if (isMobile) {
@@ -40,6 +37,7 @@ export default function Modal({
       </Drawer.Root>
     );
   }
+
   return (
     <Dialog.Root open={showModal} onOpenChange={setShowModal}>
       <Dialog.Portal>
@@ -61,4 +59,6 @@ export default function Modal({
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};
+
+export default Modal;

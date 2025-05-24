@@ -7,6 +7,13 @@ module.exports = {
     hoverOnlyWhenSupported: true,
   },
   theme: {
+    screens: {
+      sm: '700px',   // small screens and up
+      md: '800px',   // medium screens and up
+      lg: '1024px',  // large screens and up
+      xl: '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       fontFamily: {
         display: ["var(--font-sf)", "system-ui", "sans-serif"],

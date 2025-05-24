@@ -70,7 +70,7 @@ const VerifyResultsPage = ({
               We will verify its authenticity and make you the owner
             </div>
             <div className="flex flex-col sm:flex-row justify-start gap-4">
-              <DownloadAppButtons className="w-[160px] sm:w-[200px]"/>
+              <DownloadAppButtons className="w-[160px] sm:w-[200px] transition-all duration-50 hover:scale-105"/>
             </div>
           </div>
         </>

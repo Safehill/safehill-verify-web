@@ -14,7 +14,7 @@ export default async function RootLayout({
       <Toaster />
       <div className="fixed h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-cyan-100" />
       <Suspense fallback="...">
-        <Navbar darkTheme={false} withNavBar={true} />
+        <Navbar darkTheme={false} withNavBar={true} currentPage="authenticate"/>
       </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center justify-center py-32">
         {children}

@@ -1,17 +1,17 @@
 import Link from 'next/link';
 
-export default function BottomNav() {
+export default function BottomNav({darkTheme}: {darkTheme: boolean}) {
   return (
-    <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-4 my-10 py-5 px-5">
+    <div className={`w-full flex justify-center items-center gap-2 py-5 px-5 text-sm ${darkTheme ? "text-gray-200" : "text-black"}`}>
       <Link
         href="/privacy"
-        className="px-6 py-2 bg-white/5 font-display text-gray-200 text-base rounded-lg shadow-md transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-white/100 hover:text-teal-800"
+        className={`px-6 py-2 font-normal rounded-lg hover:shadow-sm transition-all duration-50 hover:scale-105 ${darkTheme ? "hover:bg-white/30" : "hover:bg-primary hover:text-white"}`}
       >
         Privacy Policy
       </Link>
       <Link
         href="/terms"
-        className="px-6 py-2 bg-white/5 font-display text-gray-200 text-base rounded-lg shadow-md transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-white/100 hover:text-teal-800"
+        className={`px-6 py-2 font-normal rounded-lg hover:shadow-sm transition-all duration-50 hover:scale-105 ${darkTheme ? "hover:bg-white/30" : "hover:bg-primary hover:text-white"}`}
       >
         Terms of Use
       </Link>

@@ -7,8 +7,10 @@ import Footer from '@/components/layout/footer';
 import Link from 'next/link';
 import {Item} from "@/components/home/ItemizedListProps";
 import LineSeparator from "@/components/home/LineSeparator";
-import {ArrowRightCircleIcon, CalendarDaysIcon} from "lucide-react";
+import {ActivityIcon, ArrowRightCircleIcon, CalendarDaysIcon, PartyPopper} from "lucide-react";
 import {DownloadAppButtons} from "@/components/home/DownloadAppButtons";
+import SafehillAppLogo from "@/components/shared/SafehillAppLogo";
+import {Button} from "@/components/shared/button";
 
 export default function Home() {
   const steps: Item[] = [
@@ -19,19 +21,13 @@ export default function Home() {
         <>
           Use your personal mobile device to create your fingerprint on the Safehill app
           <div className="flex flex-col sm:flex-row justify-start gap-4 mt-10 mb-3">
-            <DownloadAppButtons className="w-[160px] sm:w-[200px]"/>
+            <DownloadAppButtons className="w-[160px] sm:w-[200px] transition-all duration-50 hover:scale-105"/>
           </div>
         </>
       ),
       sideContent: (
         <div className="pl-20 pb-20">
-          <div className="rounded-xl overflow-hidden shadow-lg">
-            <img
-              src="/images/safehill-app-logo-2.png"
-              alt={`Image at /images/safehill-app-logo.png`}
-              className="w-80 object-cover"
-            />
-          </div>
+          <SafehillAppLogo variant="large"/>
         </div>
       )
     },
@@ -42,11 +38,11 @@ export default function Home() {
         <>
           Simply upload your content to the Safehill cloud.
           <br />
-          We will authenticate it and attach a permanent fingerprint to your content.
+          We will authenticate it and attach a permanent fingerprint to it.
         </>
       ),
       sideContent: (
-        <div className="pl-20 pb-32">
+        <div className="pl-20 pb-28">
           <img
             src="/images/fingerprint.png"
             alt={`Image at /images/fingerprint.png`}
@@ -101,7 +97,7 @@ export default function Home() {
             <h1 className="text-left text-purple-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
               🧬 &nbsp; Traceability
             </h1>
-            Fingerprints, not content, can be use to detect misuse, even if the content is altered
+            Fingerprints, not content, can be use to detect misuse, even when the content is altered
           </div>
           <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
             <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
@@ -190,57 +186,57 @@ export default function Home() {
     <>
       <div className="fixed h-screen w-full bg-gradient-to-br from-deepTeal to-mutedTeal" />
       <Suspense fallback="...">
-        <Navbar darkTheme={true} withNavBar={true} />
+        <Navbar darkTheme={true} withNavBar={true} currentPage="home"/>
       </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center justify-center pt-32">
         <div className="z-10 w-full xl:px-20">
-          <h1
-            className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-6xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] py-10"
-            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
-          >
-            <HandRaised
-              className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto bg-clip-text bg-gradient-to-br from-yellow-200 to-purple-300"
-              fill="url(#gradient)"
-              width="100%" // or a specific value like "200px"
-              height="100%" // or a specific value like "200px"
-            />
-            <svg width="0" height="0">
-              <defs>
-                <linearGradient
-                  id="gradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
-                  <stop offset="0%" stopColor="#E9D8FD" /> {/* Purple-300 */}
-                  <stop offset="100%" stopColor="#FEF9C3" /> {/* Yellow-200 */}
-                </linearGradient>
-              </defs>
-            </svg>
-          </h1>
+          {/*<h1*/}
+          {/*  className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-6xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] py-10"*/}
+          {/*  style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}*/}
+          {/*>*/}
+          {/*  <HandRaised*/}
+          {/*    className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto bg-clip-text bg-gradient-to-br from-yellow-200 to-purple-300"*/}
+          {/*    fill="url(#gradient)"*/}
+          {/*    width="100%" // or a specific value like "200px"*/}
+          {/*    height="100%" // or a specific value like "200px"*/}
+          {/*  />*/}
+          {/*  <svg width="0" height="0">*/}
+          {/*    <defs>*/}
+          {/*      <linearGradient*/}
+          {/*        id="gradient"*/}
+          {/*        x1="0%"*/}
+          {/*        y1="0%"*/}
+          {/*        x2="100%"*/}
+          {/*        y2="100%"*/}
+          {/*      >*/}
+          {/*        <stop offset="0%" stopColor="#E9D8FD" /> /!* Purple-300 *!/*/}
+          {/*        <stop offset="100%" stopColor="#FEF9C3" /> /!* Yellow-200 *!/*/}
+          {/*      </linearGradient>*/}
+          {/*    </defs>*/}
+          {/*  </svg>*/}
+          {/*</h1>*/}
 
           <h1
-            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-7xl sm:text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-8"
+            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-8"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Yours. Truly.
           </h1>
 
-          <div className="md:mt-32">
+          <div className="md:mt-20">
             <p
-              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] md:text-3xl font-display px-2"
+              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] text-2xl md:text-3xl font-display px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Effortlessly protect your digital property from unintended use
+              Want to prevent unintended use of your digital property?
             </p>
             <p
               className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] md:text-2xl font-extralight px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Stop worrying about <span className="font-bold">security and copyright breaches</span>
+              Safehill protects you from <span className="font-bold">security and copyright breaches</span>
               <br />
-              made by humans and AI
+              made by both humans and AI
             </p>
           </div>
 
@@ -248,7 +244,7 @@ export default function Home() {
             <img
               className="w-full h-auto max-w-screen-md"
               style={{
-                height: '900px',
+                height: '800px',
               }}
               alt="home-glow-background"
               src="/images/aura.png"
@@ -264,9 +260,9 @@ export default function Home() {
             />
           </div>
 
-          <div id="download" className="z-10 w-full xl:px-20 pt-10">
+          <div className="z-10 w-full xl:px-20 pt-20">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               How does it work?
@@ -286,7 +282,7 @@ export default function Home() {
 
           <div className="z-10 w-full xl:px-20 pt-20 pb-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-4xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:text-7xl md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl  font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               Why use Safehill
@@ -313,7 +309,7 @@ export default function Home() {
 
         <div className="z-10 w-full xl:px-20 pt-40">
           <h1
-            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-3xl sm:text-2xl md:text-5xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
+            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Want to know if an image is copyrighted?
@@ -330,6 +326,7 @@ export default function Home() {
               >
                 authenticator tool
               </Link>
+              !
             </p>
             <div className="flex flex-row z-10 w-full justify-center items-center mb-20 px-2">
               <Link
@@ -347,7 +344,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-row z-10 w-full justify-center items-center mb-40 px-2">
-          <span className="px-4 py-2 text-purple-100 text-lg font-default">
+          <span className="px-4 py-2 text-purple-100 text-sm md:text-lg font-default">
             Still have questions?
           </span>
           <Link
