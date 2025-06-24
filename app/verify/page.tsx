@@ -117,6 +117,9 @@ export default function VerifyPage() {
       <>
         <LoadingSpinner/>
         <MessageView message="Preparing for authentication" sizeClass={4}/>
+        <div className="opacity-95 text-gray-500">
+          This may take a while the first time, as your browser needs to download our AI models
+        </div>
       </>
     );
   } else if (isLoading) {

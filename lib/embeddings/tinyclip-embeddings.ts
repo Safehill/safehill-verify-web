@@ -1,6 +1,10 @@
 import * as ort from 'onnxruntime-web';
 
-const MODEL_URL = '/models/TinyCLIP.onnx';
+import { get, set } from 'idb-keyval';
+import { unzipSync } from 'fflate';
+
+const MODEL_KEY = 'tinyclip_model';
+const MODEL_ZIP_URL = 'https://s3.us-east-2.wasabisys.com/safehill-ml-prod/latest/TinyCLIP.onnx.zip';
 
 let session: ort.InferenceSession | null = null;
 
@@ -8,10 +12,27 @@ let session: ort.InferenceSession | null = null;
  * Load TinyCLIP ONNX model using ONNX Runtime Web
  */
 export async function loadTinyCLIPModel(): Promise<void> {
-  if (!session) {
-    console.log(`Initializing ${MODEL_URL}`);
-    session = await ort.InferenceSession.create(MODEL_URL);
+  if (session) return;
+
+  let modelBuffer = await get(MODEL_KEY);
+
+  if (!modelBuffer) {
+    console.log('Model not cached, downloading...');
+    const res = await fetch(MODEL_ZIP_URL);
+    const zipBuffer = await res.arrayBuffer();
+
+    const unzipped = unzipSync(new Uint8Array(zipBuffer));
+    const modelBytes = unzipped['TinyCLIP.onnx'];
+    if (!modelBytes) throw new Error("Model file not found in zip");
+
+    modelBuffer = modelBytes.buffer;
+    await set(MODEL_KEY, modelBuffer);
+    console.log('Model cached in IndexedDB');
+  } else {
+    console.log('Loaded model from IndexedDB');
   }
+
+  session = await ort.InferenceSession.create(modelBuffer);
 }
 
 /**
