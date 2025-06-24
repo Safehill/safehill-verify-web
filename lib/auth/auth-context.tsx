@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import {UserDTO} from "@/lib/api/models/dto/user";
+import {UserDTO} from "@/lib/api/models/dto/User";
 
 // Define types for our authentication data
 export type AuthedSession = {

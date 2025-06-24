@@ -21,9 +21,9 @@ const InstructionsView = (
       </div>
 
       <div className="flex flex-col items-center justify-center text-muted-foreground gap-5">
-        Simply generate a QR code on this page
+        To log in, tap on the button below
         <br />
-        and point your device to it
+        then point your device&apos;s camera to the QR code
         <ArrowDown />
       </div>
       <div className="">
@@ -41,9 +41,9 @@ const InstructionsView = (
       </div>
 
       <p className="text-center text-sm text-muted-foreground pt-5">
-        This will open the Safehill app on your device
+        The Safehill app will launch on your device
         <br />
-        and authenticate this web session
+        which will securely log you in
       </p>
       <p className="text-center text-sm text-muted-foreground pt-5">
         If you don&#39;t have the app on your device yet, download it now

@@ -3,37 +3,25 @@
 import React, {useRef, useState} from 'react';
 import FileUploader from '@/components/verification/FileUploader';
 import {FileDetails, FingerprintMatchDTO, ImageMatch,} from '@/components/verification/FileDetailsProps';
-import {useOpenCV} from '@/lib/hooks/use-opencv';
 import MessageView from '@/components/shared/MessageView';
 import {toast} from "sonner";
-import {v4 as uuidv4} from 'uuid';
 import AxiosInstance from "@/lib/api/api";
 import VerifyResultsPage from "@/components/verification/VerifyResultsPage";
 import {Button} from "@/components/shared/button";
 import {ArrowLeft} from "lucide-react";
 import {useRouter} from "next/navigation";
 import LoadingSpinner from "../../components/shared/icons/loading-spinner";
-import {formattedDate} from "@/lib/utils";
 import ProvidedImage from "@/components/verification/ProvidedImage";
+import {useImageEmbedding} from "@/lib/hooks/use-image-embedding";
+import {AssetSimilarMatchRequestDTO} from "@/lib/api/models/dto/AssetFingerprint";
 
 export default function VerifyPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { isLoaded: isCVLoaded, calculatePHash } = useOpenCV();
+  const { isLoaded: isEmbeddingModelLoaded, calculate: calculateImageEmbedding } = useImageEmbedding();
   const [fileDetails, setFileDetails] = useState<FileDetails | null>(null);
   const [imageMatches, setImageMatches] = useState<ImageMatch[] | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const calculateHash = (imageData: ImageData): string | null => {
-    try {
-      const hash = calculatePHash(imageData);
-      console.log('Hash has been calculated ' + hash);
-      return hash;
-    } catch {
-      toast.error('ERROR calculating hash');
-      return null;
-    }
-  };
 
   const handleFileProvided = (files: File[]) => {
     const file = files.length > 0 ? files[0] : null;
@@ -52,17 +40,25 @@ export default function VerifyPage() {
           ctx.drawImage(img, 0, 0);
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-          if (!isCVLoaded) {
-            toast.error('CV library still warming up');
+          if (!isEmbeddingModelLoaded) {
+            toast.error('Embedding model still warming up');
             return;
           }
           console.log('Image data has been pulled ' + imageData);
-          const hash = calculateHash(imageData);
-          if (hash) {
-            const fileDetails: FileDetails = {file: file, imageData: imageData};
-            setFileDetails(fileDetails);
-            performAuthentication(hash);
-          }
+          calculateImageEmbedding(imageData)
+            .then(embeddingBase64 => {
+              const fileDetails: FileDetails = {file: file, imageData: imageData};
+              setFileDetails(fileDetails);
+              const fingerprint = {
+                embeddings: embeddingBase64,
+                maxDistance: 0.9,
+              } as AssetSimilarMatchRequestDTO;
+              performAuthentication(fingerprint);
+            })
+            .catch(err => {
+              toast.error('Failed to calculate embedding');
+              setIsLoading(false);
+            });
         };
         img.src = e.target?.result as string;
       };
@@ -70,11 +66,9 @@ export default function VerifyPage() {
     }
   };
 
-  const performAuthentication = (fingerprint: string) => {
+  const performAuthentication = (matching: AssetSimilarMatchRequestDTO) => {
     console.log('Calling API');
-    AxiosInstance.post<FingerprintMatchDTO[]>('/fingerprint/retrieve-similar', {
-      fingerprint: fingerprint,
-    })
+    AxiosInstance.post<FingerprintMatchDTO[]>('/fingerprint/retrieve-similar', matching)
       .then((response) => {
         console.log('received response ' + response.status);
         handleApiResponse(response.data);
@@ -108,21 +102,6 @@ export default function VerifyPage() {
       return imageMatch;
     });
 
-    // if (imageMatches.length == 0) {
-    //   imageMatches.push({
-    //     globalIdentifier: uuidv4().toString(),
-    //     author: "John Scavenger",
-    //     issuedAt: new Date(),
-    //     distance: 10,
-    //   })
-    //   imageMatches.push({
-    //     globalIdentifier: uuidv4().toString(),
-    //     author: "Deliah Jones",
-    //     issuedAt: new Date(),
-    //     distance: 8,
-    //   })
-    // }
-
     setIsLoading(false);
     setImageMatches(imageMatches);
   };
@@ -133,11 +112,14 @@ export default function VerifyPage() {
       setImageMatches(null);
       setIsLoading(false);
     }}/>);
-  } else if (!isCVLoaded) {
+  } else if (!isEmbeddingModelLoaded) {
     return (
       <>
         <LoadingSpinner/>
         <MessageView message="Preparing for authentication" sizeClass={4}/>
+        <div className="opacity-95 text-gray-500">
+          This may take a while the first time, as your browser needs to download our AI models
+        </div>
       </>
     );
   } else if (isLoading) {

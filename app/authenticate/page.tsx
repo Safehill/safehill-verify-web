@@ -4,14 +4,9 @@ import Card from '@/components/home/card';
 import WebVitals from '@/components/home/web-vitals';
 import {Button} from "@/components/shared/button";
 import {useRouter} from "next/navigation";
-import {useOpenCV} from "@/lib/hooks/use-opencv";
+import Link from "next/link";
 
 export default function AuthenticatePage() {
-  // Load OpenCV asap
-  const { } = useOpenCV();
-
-  const router = useRouter();
-
   return (
     <>
       <div className="z-10 w-full max-w-xl px-5 xl:px-0">
@@ -39,11 +34,11 @@ export default function AuthenticatePage() {
           className="mx-auto mt-8 flex animate-fade-up items-center justify-center space-x-5 py-10 opacity-0"
           style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
         >
-          <Button
-            onClick={e => { e.preventDefault(); router.push('/verify'); }}
-            >
-            Give it a try
-          </Button>
+          <Link href="/verify">
+            <Button>
+              Give it a try
+            </Button>
+          </Link>
         </div>
       </div>
       <div className="my-10 grid w-full max-w-screen-xl animate-fade-up grid-cols-1 gap-5 px-5 md:grid-cols-3 xl:px-0">

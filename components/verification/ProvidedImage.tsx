@@ -13,7 +13,7 @@ const ProvidedImage = ({ file, properties }: {
     <div className="grid w-full grid-cols-2 gap-5 px-5 xl:px-0 py-2">
       <div className="col-span-1 flex justify-end">
         <div className="h-[200px]">
-          <ImageView file={file} height={200} />
+          <ImageView file={file} height={200} isConfidential={false}/>
         </div>
       </div>
       <div className="w-[360px] h-[200px] col-span-1 opacity-95">
@@ -25,7 +25,7 @@ const ProvidedImage = ({ file, properties }: {
                   {property.icon ?? (<></>)}
                   {property.key}
                 </div>
-                <div className="bg-neutral-100 rounded-lg px-4 py-3 text-sm text-black flex-cols gap-2 justify-between items-center truncate block">
+                <div className="bg-neutral-100/60 rounded-lg px-4 py-3 text-sm text-black flex-cols gap-2 justify-between items-center truncate block h-12">
                   {property.value}
                 </div>
               </div>
