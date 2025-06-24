@@ -1,6 +1,6 @@
 // import cv from '../../deps/opencv_version';
 import cv from '@techstark/opencv-js';
-import { useSyncExternalStore } from 'react';
+import {useSyncExternalStore} from 'react';
 import {toast} from "sonner";
 
 export const OpenCVSingleton = {
@@ -208,6 +208,6 @@ export function useOpenCV() {
   // Return singleton-safe state
   return {
     isLoaded: isLoadedState,
-    calculatePHash: calculatePHash,
+    calculate: calculatePHash,
   };
 }

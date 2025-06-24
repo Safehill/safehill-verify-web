@@ -17,7 +17,7 @@ export const API_KEY = process.env.API_KEY || '';
 // Create singleton Axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // Optional: send cookies if needed
+  // withCredentials: true, // Optional: send cookies if needed
   headers: {
     'Content-Type': 'application/json',
   },

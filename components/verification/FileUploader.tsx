@@ -135,7 +135,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
                     >
                       <div className="col-span-5 flex items-center gap-3">
                         <div className="w-10 h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                          <ImageView file={file} height={35} />
+                          <ImageView file={file} height={35} isConfidential={false}/>
                         </div>
                         <div>
                           <p className="font-medium">{file.name}</p>

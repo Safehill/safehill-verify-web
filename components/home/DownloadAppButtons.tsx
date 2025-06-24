@@ -4,7 +4,7 @@ export function DownloadAppButtons(props: { className: string; }) {
   return (
     <>
       <a
-        href="https://apps.apple.com/us/app/snoog/id1624088867"
+        href="https://apps.apple.com/us/app/safehill/id6740229387"
         className="flex-shrink-0"
       >
         <img

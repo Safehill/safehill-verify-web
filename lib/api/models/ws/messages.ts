@@ -1,4 +1,4 @@
-import {UserDTO} from "@/lib/api/models/dto/user";
+import {UserDTO} from "@/lib/api/models/dto/User";
 
 export type AuthSessionInitializationMessage = {
   sessionId: string;
