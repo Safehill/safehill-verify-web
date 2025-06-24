@@ -227,7 +227,7 @@ export default function Home() {
 
           <div className="mt-20">
             <p
-              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] text-2xl md:text-3xl font-display px-2"
+              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] text-4xl md:text-5xl font-display px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
               How do you prevent misuse of your digital property?
@@ -236,7 +236,7 @@ export default function Home() {
               className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-xl md:text-2xl font-extralight px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Safehill protects your valuables from <span className="font-bold">security and copyright breaches</span>
+              Safehill protects your valuables from security and copyright breaches
               <br />
               made by both humans and AI
             </p>
@@ -272,14 +272,22 @@ export default function Home() {
           </div>
 
           <div className="md:mt-20 mb-20">
-            <p
-              className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-2xl md:text-3xl font-extralight px-2"
+            <div
+              className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-2xl md:text-3xl font-extralight px-2 pb-10"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Your digital content is your property.
-              <br /><br />
-              <span className="font-bold">Put your fingers on it, and get credit for your work!</span>
-            </p>
+              Your property is yours.
+            </div>
+            <h1
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
+              style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
+            >
+              Fingerprint it
+              <br />
+              and start getting credit
+              <br />
+              for your work!
+            </h1>
           </div>
 
           <div className="md:mt-20 mb-20"></div>
@@ -350,7 +358,7 @@ export default function Home() {
               Use our{" "}
               <Link
                 href="/authenticate"
-                className="font-bold text-purple-100 opacity-90"
+                className="text-purple-100 opacity-90"
               >
                 authenticator tool
               </Link>
