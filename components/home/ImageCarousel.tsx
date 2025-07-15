@@ -51,7 +51,7 @@ export const ImageCarousel = () => {
           {[...images, ...images].map((img, idx) => (
             <div
               key={idx}
-              className="relative aspect-[3/2] h-[200px] lg:h-[300px] bg-gray-200 rounded-xl overflow-hidden -ml-[2px] shadow-lg"
+              className="relative aspect-[3/2] h-[300px] lg:h-[400px] bg-gray-200 rounded-xl overflow-hidden -ml-[2px] shadow-lg"
             >
               <img
                 src={img.url}

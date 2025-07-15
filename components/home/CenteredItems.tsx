@@ -15,7 +15,7 @@ const CenteredItems: React.FC<ItemizedListProps> = ({ items }) => {
               {item.title}
             </div>
 
-            <div className="mt-4 text-gray-300 text-sm md:text-base font-light px-4 sm:px-20 md:px-30 lg:px-40">
+            <div className="mt-4 text-gray-300 text-base md:text-lg font-thin px-4 sm:px-20 md:px-30 lg:px-40">
               {item.mainContent}
             </div>
           </div>

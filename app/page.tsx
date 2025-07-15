@@ -10,6 +10,8 @@ import {ArrowDownCircleIcon, ArrowRightCircleIcon, CalendarDaysIcon} from "lucid
 import {DownloadAppButtons} from "@/components/home/DownloadAppButtons";
 import SafehillAppLogo from "@/components/shared/SafehillAppLogo";
 import {ImageCarousel} from "@/components/home/ImageCarousel";
+import FeaturesList from '@/components/home/FeaturesList';
+import TypewriterHeadline from '@/components/home/TypewriterHeadline';
 
 export default function Home() {
   const steps: Item[] = [
@@ -18,15 +20,19 @@ export default function Home() {
       title: 'Create your fingerprint',
       mainContent: (
         <>
-          Use a personal device to create your fingerprint on the Safehill app
-          <div className="flex flex-col sm:flex-row justify-start gap-4 mt-10 mb-3">
-            <DownloadAppButtons className="w-[160px] sm:w-[200px] transition-all duration-50 hover:scale-105"/>
-          </div>
+          Use our app on a mobile or desktop device to securely create
+          <br />
+          your or your company's fingerprint.
         </>
       ),
       sideContent: (
         <div className="pl-20 pb-20">
           <SafehillAppLogo variant="large"/>
+        </div>
+      ),
+      cta: (
+        <div className="flex flex-col sm:flex-row justify-start gap-4 mt-10 mb-3">
+          <DownloadAppButtons className="w-[160px] sm:w-[200px] transition-all duration-50 hover:scale-105"/>
         </div>
       )
     },
@@ -35,9 +41,9 @@ export default function Home() {
       title: 'Add it to your content',
       mainContent: (
         <>
-          Upload your content to the Safehill cloud.
+          Start uploading content to our cloud.
           <br />
-          We authenticate it, secure it, and attach your fingerprint to it. Permanently.
+          We authenticate it, secure it, and attach your fingerprint. Permanently.
         </>
       ),
       sideContent: (
@@ -55,56 +61,10 @@ export default function Home() {
       title: 'Let us worry about the rest',
       mainContent: (
         <>
-          Once fingerprinted assets are in Safehill, you get:
+          Once fingerprinted assets are in Safehill, you get peace of mind!
           <br />
+          You get things like:
           <br />
-          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-cyan-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🏦 &nbsp; The most secure vault
-            </h1>
-            Our best-in-class security standards
-            guarantee that <b className="text-cyan-300">NO-ONE</b> other than
-            people with explicit access can ever decrypt your content or use it for AI training.
-            Not even Safehill.
-          </div>
-          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-yellow-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              💼 &nbsp; The best controls for distribution
-            </h1>{' '}
-            If you share content confidentially, you can prevent
-            re-shares, screenshots, or any form or unauthorized distribution
-            <div className="flex flex-col sm:flex-row gap-4 my-10">
-              <img
-                src="/images/share-choice-3.png"
-                alt="Sharing options"
-                className="w-[245px] rounded-xl shadow-lg"
-              />
-              <img
-                src="/images/share-choice-4.png"
-                alt="Sharing options"
-                className="w-[245px] rounded-xl shadow-lg"
-              />
-            </div>
-          </div>
-          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-red-400 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              ❌️ &nbsp; The ability to remove all copies
-            </h1>{' '}
-            You can revoke access and remove all copies of the content you previously shared
-          </div>
-          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-purple-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🧬 &nbsp; Traceability
-            </h1>
-            Rather than accessing your content, we use fingerprints to detect misuse.
-            We can detect if the image was altered or tampered with.
-          </div>
-          <div className="bg-teal-300/5 px-5 py-3 rounded-xl mb-7 py-5">
-            <h1 className="text-left text-orange-300 [text-wrap:balance] text-xl md:text-2xl font-display mb-5">
-              🙋🏽 &nbsp; Attribution from Gen AI
-            </h1>
-            Generative AI system integrate with Safehill to avoid copyrights, IP infringements and attribution
-          </div>
         </>
       ),
       sideContent: (
@@ -173,10 +133,9 @@ export default function Home() {
       title: 'Increase your speed to market',
       mainContent: (
         <div>
-          We handle the complexities of distributing copyrighted content on the
-          web,
+          We handle the complexities of distributing copyrighted content,
           <br />
-          letting you focus on your core value proposition
+          letting you focus on your core value proposition.
         </div>
       ),
     },
@@ -189,7 +148,7 @@ export default function Home() {
         <Navbar darkTheme={true} withNavBar={true} currentPage="home"/>
       </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center justify-center pt-32">
-        <div className="z-10 w-full xl:px-20">
+        <div className="z-10 w-full">
           {/*<h1*/}
           {/*  className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-6xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] py-10"*/}
           {/*  style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}*/}
@@ -227,18 +186,16 @@ export default function Home() {
 
           <div className="mt-20">
             <p
-              className="mt-8 animate-fade-up text-center text-orange-200 opacity-0 [text-wrap:balance] text-4xl md:text-5xl font-display px-2"
-              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+              className="mt-8 text-center bg-gradient-to-br from-purple-100 to-orange-300 text-transparent bg-clip-text [text-wrap:balance] text-4xl md:text-5xl font-semibold px-2"
             >
-              How do you prevent misuse of your digital property?
+              Safehill protects you and your assets
             </p>
             <p
-              className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-xl md:text-2xl font-extralight px-2"
-              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+              className="mt-4 text-center text-orange-200 [text-wrap:balance] text-2xl md:text-3xl font-extralight px-2"
             >
-              Safehill protects your valuables from security and copyright breaches
+              from Security, IP and Copyright breaches
               <br />
-              made by both humans and AI
+              made by humans and AI
             </p>
             <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-20">
               <Link
@@ -273,21 +230,23 @@ export default function Home() {
 
           <div className="md:mt-20 mb-20">
             <div
-              className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-2xl md:text-3xl font-extralight px-2 pb-10"
+              className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-xl md:text-2xl font-extralight px-2 pb-10"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Your property is yours.
+              With true ownership over your work, you can …
             </div>
-            <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
-              style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
-            >
-              Fingerprint it
-              <br />
-              and start getting credit
-              <br />
-              for your work!
-            </h1>
+            {/* Typewriter effect for animated headline */}
+            <TypewriterHeadline
+              className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold text-transparent drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
+              style={{ height: '300px' }}
+              strings={[
+                "Get credit<br />and monetize<br />from it.",
+                "Prevent unauthorized<br />distribution<br />or leaks.",
+                "Share it while<br />retaining control.",
+                "Prevent legal<br />battles over<br />copyrights and IP.",
+                "Avoid AI-generated<br />copyright infringements."
+              ]}
+            />
           </div>
 
           <div className="md:mt-20 mb-20"></div>
@@ -296,45 +255,33 @@ export default function Home() {
 
           <div id="howitworks" className="z-10 w-full xl:px-20 pt-40">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-teal-100 to-yellow-300 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               How it works
             </h1>
             <p
-              className="animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] md:text-2xl font-extralight px-2 pt-5 pb-20"
+              className="animate-fade-up text-center text-yellow-100 opacity-0 [text-wrap:balance] md:text-2xl font-extralight px-2 pt-5 pb-20"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              3 simple steps
+              As simple as downloading an app
             </p>
+
             <ItemizedList items={steps} />
+            <FeaturesList />
           </div>
 
-          <div className="my-10">
+          <div className="my-20">
             <LineSeparator />
           </div>
 
           <div className="z-10 w-full xl:px-20 pt-20 pb-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl  font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 pb-10"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               Why use Safehill
             </h1>
-
-            <div className="px-5 sm:px-8 md:px-20 lg:px-30 pt-10 pb-5">
-              <p
-                className="mt-8 mb-20 animate-fade-up text-center text-purple-50 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light px-2"
-                style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
-              >
-                Safehill protects and manages your digital content and its
-                rights.
-                <br />
-                So you can focus on what’s more important,
-                <br />
-                while getting recognized for your work.
-              </p>
-            </div>
 
             <CenteredItems items={whys} />
           </div>
@@ -348,14 +295,14 @@ export default function Home() {
             className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
-            Want to look up the rights and history of an image?
+            Curious about the rights and history of an image?
           </h1>
           <div className="pb-20">
             <p
               className="mt-8 mb-5 animate-fade-up text-center text-purple-50 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              Use our{" "}
+              Check out our{" "}
               <Link
                 href="/authenticate"
                 className="text-purple-100 opacity-90"
@@ -379,7 +326,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex flex-row z-10 w-full justify-center items-center mb-40 px-2">
+        <div className="flex flex-row z-10 w-full justify-center items-center my-20 px-2">
           <span className="px-4 py-2 text-purple-100 text-sm md:text-lg font-default">
             Still have questions?
           </span>

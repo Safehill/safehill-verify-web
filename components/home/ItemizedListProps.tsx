@@ -7,4 +7,5 @@ export interface Item {
   title: string;
   mainContent: React.ReactNode;
   sideContent?: React.ReactNode;
+  cta?: React.ReactNode;
 }
