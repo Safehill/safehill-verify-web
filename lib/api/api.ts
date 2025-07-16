@@ -2,12 +2,12 @@ import axios from 'axios';
 
 // Use server-side or client-side environment variable
 export const API_BASE_URL = (
-  process.env.API_BASE_URL
+  process.env.NEXT_PUBLIC_API_BASE_URL
   || 'http://localhost:8080'
   || 'https://safehill-stage-1-ec0cd53b3592.herokuapp.com'
 );
 export const WS_BASE_URL = (
-  process.env.WS_BASE_URL
+  process.env.NEXT_PUBLIC_WS_BASE_URL
   || 'ws://localhost:8080'
   || 'wss://safehill-stage-1-ec0cd53b3592.herokuapp.com'
 );
