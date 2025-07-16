@@ -38,7 +38,7 @@ export default function Home() {
     },
     {
       icon: null,
-      title: 'Add it to your content',
+      title: 'Fingerprint your content',
       mainContent: (
         <>
           Start uploading content to our cloud via the app or our site. 
@@ -129,7 +129,7 @@ export default function Home() {
       ),
     },
     {
-      icon: '⏭',
+      icon: '🚀',
       title: 'Increase your speed to market',
       mainContent: (
         <div>
@@ -176,7 +176,7 @@ export default function Home() {
           {/*</h1>*/}
 
           <h1
-            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-20"
+            className="animate-fade-up bg-gradient-to-br from-purple-200 to-orange-300 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-20"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Yours. Truly.
@@ -188,13 +188,13 @@ export default function Home() {
 
           <div className="mt-20 px-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-purple-100 to-cyan-100 bg-clip-text text-center font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5"
+              className="animate-fade-up bg-gradient-to-br from-orange-100 to-purple-100/80 bg-clip-text text-center font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               Fingerprint and protect your assets
             </h1>
             <p
-              className="text-transparent bg-gradient-to-br from-teal-300/80 to-cyan-500/80 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5"
+              className="text-transparent bg-gradient-to-br from-gray-100/90 to-cyan-200/60 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5"
             >
               from Security, IP and Copyright breaches
               <br />
@@ -213,7 +213,7 @@ export default function Home() {
 
           <div className="flex flex-row justify-center items-center mt-20 ">
             <div
-              className="bg-white rounded-full p-2 shadow-md text-orange-500/80"
+              className="bg-white rounded-full p-2 shadow-md text-cyan-800/80"
             >
               <FingerprintIcon size={86} />
             </div>
@@ -256,7 +256,7 @@ export default function Home() {
 
           <div className="md:mt-20 mb-20 px-5">
             <div
-              className="mt-4 animate-fade-up text-center text-teal-100/70 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light tracking-[-0.01em] py-10"
+              className="mt-4 animate-fade-up text-center text-purple-100/80 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light tracking-[-0.01em] py-10"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards', top: 0 }}
             >
               With true ownership over your content, you can …
@@ -279,13 +279,13 @@ export default function Home() {
 
           <div id="howitworks" className="z-10 w-full pt-40">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-purple-400 to-yellow-100 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-purple-300 to-cyan-100 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               How it works
             </h1>
             <p
-              className="animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] md:text-2xl font-base tracking-[-0.01em] px-5 pt-5 pb-20"
+              className="animate-fade-up text-center text-teal-100 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light tracking-[-0.01em] px-5 pt-5 pb-20"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
               As simple as downloading an app
@@ -301,7 +301,7 @@ export default function Home() {
 
           <div className="z-10 w-full xl:px-20 pt-20 pb-10 px-5">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 pb-10"
+              className="animate-fade-up bg-gradient-to-br from-purple-400 to-yellow-100 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 mb-20"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               Why use Safehill
@@ -316,20 +316,19 @@ export default function Home() {
 
         <div className="z-10 w-full xl:px-20 pt-40">
           <h1
-            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
+            className="animate-fade-up bg-gradient-to-br from-cyan-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Curious about the rights and history of an image?
           </h1>
           <div className="pb-20">
             <p
-              className="mt-8 mb-5 animate-fade-up text-center text-purple-50 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light px-2"
+              className="mt-8 mb-5 animate-fade-up text-center text-purple-200 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light px-2"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
               Check out our{" "}
               <Link
                 href="/authenticate"
-                className="text-purple-100 opacity-90"
               >
                 authenticator tool
               </Link>
@@ -351,7 +350,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-row z-10 w-full justify-center items-center my-20 px-2">
-          <span className="px-4 py-2 text-purple-100 text-sm md:text-lg font-default">
+          <span className="px-4 py-2 text-orange-50 text-lg md:text-xl font-semibold tracking-[-0.01em]">
             Still have questions?
           </span>
           <Link

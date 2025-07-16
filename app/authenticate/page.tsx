@@ -17,14 +17,14 @@ export default function AuthenticatePage() {
           Is it authentic? Copyrighted?
         </h1>
         <p
-          className="mt-8 animate-fade-up text-center text-gray-600 opacity-0 [text-wrap:balance] md:text-lg font-light"
+          className="mt-8 animate-fade-up text-center text-gray-600 opacity-0 [text-wrap:balance] tracking-[-0.01em] md:text-lg font-light"
           style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
         >
           In the sea of deepfakes and AI-generated media it’s hard to tell what
           is authentic and who owns what these days.
         </p>
         <p
-          className="mt-8 animate-fade-up text-center text-gray-600 opacity-0 [text-wrap:balance] md:text-lg font-light"
+          className="mt-8 animate-fade-up text-center text-gray-600 opacity-0 [text-wrap:balance] tracking-[-0.01em] md:text-lg font-light"
           style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
         >
           With Safehill, you can match any image against our repository of

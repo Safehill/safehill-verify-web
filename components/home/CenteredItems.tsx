@@ -8,7 +8,7 @@ const CenteredItems: React.FC<ItemizedListProps> = ({ items }) => {
       {items.map((item, index) => (
         <React.Fragment key={index}>
           <div className="w-full text-center">
-            <h1 className="bg-gradient-to-br from-yellow-100 to-purple-200 bg-clip-text text-center font-display text-6xl font-bold tracking-[-0.02em] text-transparent drop-shadow-sm [text-wrap:balance] md:text-6xl py-5">
+            <h1 className="bg-gradient-to-br from-purple-300 to-orange-200 bg-clip-text text-center font-display text-7xl font-bold tracking-[-0.02em] text-transparent drop-shadow-sm [text-wrap:balance] md:text-6xl py-5">
               {item.icon}
             </h1>
             <div className="bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text font-display text-xl md:text-3xl font-bold tracking-[-0.02em] text-transparent drop-shadow-sm font-light py-5">
