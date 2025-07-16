@@ -24,7 +24,8 @@ const FeaturesList = () => {
       content: (
         <>
           If you share content confidentially, you can prevent
-          re-shares, screenshots, or any form or unauthorized distribution
+          saves, re-shares, screenshots, or any other form 
+          of unauthorized distribution.
           <div className="flex flex-row gap-4 my-5 justify-center">
             <img
               src="/images/share-choice-3.png"
@@ -52,12 +53,12 @@ const FeaturesList = () => {
     },
     {
       icon: "🧬",
-      title: "Traceability",
+      title: "Private Traceability",
       titleClass: "text-purple-300",
       content: (
         <>
           Rather than accessing your content, we use fingerprints to detect misuse.
-          We can detect if the image was altered or tampered with.
+          Fingerprints still work if the image is altered or tampered with.
         </>
       ),
     },
@@ -176,7 +177,7 @@ const FeaturesList = () => {
         {carouselItems.map((_, idx) => (
           <button
             key={idx}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${selectedIndex === idx ? "bg-purple-300" : "bg-teal-200/40"}`}
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${selectedIndex === idx ? "bg-purple-100" : "bg-teal-200/40"}`}
             onClick={() => emblaApi && emblaApi.scrollTo(idx)}
             aria-label={`Go to slide ${idx + 1}`}
             tabIndex={0}

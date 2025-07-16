@@ -82,7 +82,7 @@ const TypewriterHeadline = ({
       className={className}
       style={{
         ...style,
-        minHeight: undefined, // Don't set minHeight, use fixed lines instead
+        minHeight: undefined,
         position: "relative",
         display: "block",
       }}

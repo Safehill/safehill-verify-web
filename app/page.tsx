@@ -143,7 +143,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="fixed h-screen w-full bg-gradient-to-br from-deepTeal to-mutedTeal" />
+      <div className="fixed h-screen w-full bg-gradient-to-br from-deepTeal to-mutedTeal min-w-800px" />
       <Suspense fallback="...">
         <Navbar darkTheme={true} withNavBar={true} currentPage="home"/>
       </Suspense>
@@ -176,22 +176,25 @@ export default function Home() {
           {/*</h1>*/}
 
           <h1
-            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-32"
+            className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-20"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Yours. Truly.
           </h1>
 
-          <ImageCarousel />
+          <div className="my-20">
+            <ImageCarousel />
+          </div>
 
-          <div className="mt-20">
-            <p
-              className="mt-8 text-center bg-gradient-to-br from-purple-100 to-orange-300 text-transparent bg-clip-text [text-wrap:balance] text-4xl md:text-5xl font-semibold px-2"
+          <div className="mt-20 px-10">
+            <h1
+              className="animate-fade-up bg-gradient-to-br from-purple-100 to-cyan-100 bg-clip-text text-center font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5"
+              style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
-              Safehill protects you and your assets
-            </p>
+              Fingerprint and protect your assets
+            </h1>
             <p
-              className="mt-4 text-center text-orange-200 [text-wrap:balance] text-2xl md:text-3xl font-extralight px-2"
+              className="text-transparent bg-gradient-to-br from-teal-300/80 to-cyan-500/80 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5"
             >
               from Security, IP and Copyright breaches
               <br />
@@ -200,7 +203,7 @@ export default function Home() {
             <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-20">
               <Link
                 href="#howitworks"
-                className="flex gap-2 px-6 py-2 bg-purple-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+                className="flex gap-2 px-6 py-2 bg-cyan-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
               >
                 See how it works
                 <ArrowDownCircleIcon className="w-5 h-5" />
@@ -210,73 +213,79 @@ export default function Home() {
 
           <div className="flex flex-row justify-center items-center mt-20 ">
             <div
-              className="bg-white rounded-full p-2 shadow-md text-cyan-500"
+              className="bg-white rounded-full p-2 shadow-md text-orange-500/80"
             >
               <FingerprintIcon size={86} />
             </div>
           </div>
 
-          <div className="relative flex justify-center items-center">
+          <div className="flex justify-center items-center mt-4">
             <svg width="48" height="28" viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <polygon points="24,4 44,28 4,28" fill="#17191c" />
             </svg>
           </div>
 
-          <div className="relative flex justify-center items-start sm:mb-5 md:mb-20 px-4">
-            <img
-              className="w-full h-auto max-w-screen-md"
-              style={{
-                height: '700px',
-              }}
-              alt="home-glow-background"
-              src="/images/aura.png"
-            />
-
-            <img
-              className="absolute w-full sm:w-3/4 md:w-1/2 lg:w-auto h-auto max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg"
-              style={{
-                opacity: 0.9,
-                top: 0,
-              }}
-              src="/images/fingerprint-example.png"
-              alt="Example of an asset fingerprint"
-            />
+          {/* Overlapping images: fingerprint anchored to top, aura below in z-axis */}
+          <div className="flex flex-col items-center justify-center w-full sm:mb-5 md:mb-20 px-5">
+            <div className="relative flex flex-col items-center justify-start w-fit">
+              {/* The aura is below the fingerprint in z-axis, but visually behind */}
+              <img
+                className="absolute inset-0 w-full h-full max-w-xs sm:max-w-sm md:max-w-md pointer-events-none select-none"
+                style={{
+                  zIndex: 0,
+                  objectFit: "contain",
+                  // The aura is centered and fills the container, but is behind
+                }}
+                src="/images/aura.png"
+                alt="home-glow-background"
+                aria-hidden="true"
+              />
+              {/* The fingerprint is anchored to the top and above the aura */}
+              <img
+                className="relative block h-auto max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg z-10"
+                style={{
+                  zIndex: 1,
+                  display: "block",
+                  marginBottom: 0,
+                }}
+                src="/images/fingerprint-example.png"
+                alt="Example of an asset fingerprint"
+              />
+            </div>
           </div>
 
-          <div className="md:mt-20 mb-20">
+          <div className="md:mt-20 mb-20 px-5">
             <div
-              className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-xl md:text-2xl font-extralight px-2 pb-10"
+              className="mt-4 animate-fade-up text-center text-teal-100/70 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light tracking-[-0.01em] py-10"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards', top: 0 }}
             >
               With true ownership over your content, you can …
             </div>
             {/* Typewriter effect for animated headline */}
             <TypewriterHeadline
-              className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold text-transparent drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
-              style={{ height: '300px' }}
+              className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold text-transparent drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-10"
+              style={{}}
               strings={[
-                "Get credit<br />and royalties<br />from it.",
-                "Prevent unauthorized<br />distribution<br />or leaks.",
-                "Share it while<br />retaining control.",
-                "Prevent legal<br />battles over<br />copyrights and IP.",
-                "Avoid AI-generated<br />copyright <br />infringements."
+                "get credit<br />and royalties<br />from it.",
+                "prevent<br />unauthorized<br />distribution<br />or leaks.",
+                "share it while<br />retaining<br />control.",
+                "prevent legal<br />battles over<br />copyrights<br />and IP.",
+                "avoid<br />AI-generated<br />copyright <br />infringements."
               ]}
             />
           </div>
-
-          <div className="md:mt-20 mb-20"></div>
 
           <LineSeparator/>
 
           <div id="howitworks" className="z-10 w-full pt-40">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-teal-100 to-yellow-300 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
+              className="animate-fade-up bg-gradient-to-br from-purple-400 to-yellow-100 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               How it works
             </h1>
             <p
-              className="animate-fade-up text-center text-yellow-100 opacity-0 [text-wrap:balance] md:text-2xl font-extralight px-2 pt-5 pb-20"
+              className="animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] md:text-2xl font-base tracking-[-0.01em] px-5 pt-5 pb-20"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
               As simple as downloading an app
@@ -286,11 +295,11 @@ export default function Home() {
             <FeaturesList />
           </div>
 
-          <div className="my-20">
+          <div className="my-20 px-5">
             <LineSeparator />
           </div>
 
-          <div className="z-10 w-full xl:px-20 pt-20 pb-10">
+          <div className="z-10 w-full xl:px-20 pt-20 pb-10 px-5">
             <h1
               className="animate-fade-up bg-gradient-to-br from-yellow-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 pb-10"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}

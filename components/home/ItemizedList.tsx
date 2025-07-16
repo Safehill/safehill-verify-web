@@ -20,7 +20,7 @@ const stepVariants = {
 
 const ItemizedList: React.FC<ItemizedListProps> = ({ items }) => {
   return (
-    <div className="max-w-6xl mx-auto pt-10 px-4 md:px-10">
+    <div className="max-w-6xl mx-auto pt-10 px-5 md:px-10">
       {items.map((item, index) => (
         <motion.div
           key={index}
