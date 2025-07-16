@@ -6,7 +6,7 @@ import Footer from '@/components/layout/footer';
 import Link from 'next/link';
 import {Item} from "@/components/home/ItemizedListProps";
 import LineSeparator from "@/components/home/LineSeparator";
-import {ArrowDownCircleIcon, ArrowRightCircleIcon, CalendarDaysIcon} from "lucide-react";
+import {ArrowDownCircleIcon, ArrowRightCircleIcon, CalendarDaysIcon, FingerprintIcon} from "lucide-react";
 import {DownloadAppButtons} from "@/components/home/DownloadAppButtons";
 import SafehillAppLogo from "@/components/shared/SafehillAppLogo";
 import {ImageCarousel} from "@/components/home/ImageCarousel";
@@ -22,7 +22,7 @@ export default function Home() {
         <>
           Use our app on a mobile or desktop device to securely create
           <br />
-          your or your company's fingerprint.
+          your or your company&apos;s fingerprint.
         </>
       ),
       sideContent: (
@@ -41,7 +41,7 @@ export default function Home() {
       title: 'Add it to your content',
       mainContent: (
         <>
-          Start uploading content to our cloud.
+          Start uploading content to our cloud via the app or our site. 
           <br />
           We authenticate it, secure it, and attach your fingerprint. Permanently.
         </>
@@ -208,11 +208,25 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative flex justify-center items-center sm:mt-10 md:mt-20 sm:mb-5 md:mb-20 px-4">
+          <div className="flex flex-row justify-center items-center mt-20 ">
+            <div
+              className="bg-white rounded-full p-2 shadow-md text-cyan-500"
+            >
+              <FingerprintIcon size={86} />
+            </div>
+          </div>
+
+          <div className="relative flex justify-center items-center">
+            <svg width="48" height="28" viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <polygon points="24,4 44,28 4,28" fill="#17191c" />
+            </svg>
+          </div>
+
+          <div className="relative flex justify-center items-start sm:mb-5 md:mb-20 px-4">
             <img
               className="w-full h-auto max-w-screen-md"
               style={{
-                height: '800px',
+                height: '700px',
               }}
               alt="home-glow-background"
               src="/images/aura.png"
@@ -222,6 +236,7 @@ export default function Home() {
               className="absolute w-full sm:w-3/4 md:w-1/2 lg:w-auto h-auto max-w-xs sm:max-w-sm md:max-w-md rounded-xl shadow-lg"
               style={{
                 opacity: 0.9,
+                top: 0,
               }}
               src="/images/fingerprint-example.png"
               alt="Example of an asset fingerprint"
@@ -231,20 +246,20 @@ export default function Home() {
           <div className="md:mt-20 mb-20">
             <div
               className="mt-4 animate-fade-up text-center text-purple-100 opacity-0 [text-wrap:balance] text-xl md:text-2xl font-extralight px-2 pb-10"
-              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+              style={{ animationDelay: '0.25s', animationFillMode: 'forwards', top: 0 }}
             >
-              With true ownership over your work, you can …
+              With true ownership over your content, you can …
             </div>
             {/* Typewriter effect for animated headline */}
             <TypewriterHeadline
               className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold text-transparent drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
               style={{ height: '300px' }}
               strings={[
-                "Get credit<br />and monetize<br />from it.",
+                "Get credit<br />and royalties<br />from it.",
                 "Prevent unauthorized<br />distribution<br />or leaks.",
                 "Share it while<br />retaining control.",
                 "Prevent legal<br />battles over<br />copyrights and IP.",
-                "Avoid AI-generated<br />copyright infringements."
+                "Avoid AI-generated<br />copyright <br />infringements."
               ]}
             />
           </div>
@@ -253,7 +268,7 @@ export default function Home() {
 
           <LineSeparator/>
 
-          <div id="howitworks" className="z-10 w-full xl:px-20 pt-40">
+          <div id="howitworks" className="z-10 w-full pt-40">
             <h1
               className="animate-fade-up bg-gradient-to-br from-teal-100 to-yellow-300 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}

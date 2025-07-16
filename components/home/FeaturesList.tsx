@@ -18,7 +18,7 @@ const FeaturesList = () => {
       ),
     },
     {
-      icon: "🔒",
+      icon: "🙈",
       title: "The best controls for distribution",
       titleClass: "text-yellow-300",
       content: (
@@ -41,12 +41,12 @@ const FeaturesList = () => {
       ),
     },
     {
-      icon: "❌️",
+      icon: "🔥",
       title: "The ability to remove all copies",
       titleClass: "text-red-400",
       content: (
         <>
-          You can revoke access and remove all copies of the unpublished content you previouslyshared.
+          You can revoke access and remove all copies of the unpublished content you previously shared.
         </>
       ),
     },
@@ -67,7 +67,7 @@ const FeaturesList = () => {
       titleClass: "text-orange-300",
       content: (
         <>
-          Generative AI systems will integrate with Safehill to avoid copyrights, IP infringements and attribution
+          AI systems can integrate with our MCP server to prevent copyrights, IP infringements and attribution of generated media.
         </>
       ),
     },
