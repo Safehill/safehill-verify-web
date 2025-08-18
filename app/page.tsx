@@ -17,12 +17,12 @@ export default function Home() {
   const steps: Item[] = [
     {
       icon: null,
-      title: 'Create your fingerprint',
+      title: 'Create an account',
       mainContent: (
         <>
           Use our app on a mobile or desktop device to securely create
           <br />
-          your or your company&apos;s fingerprint.
+          your or your company&apos;s account and your personal fingerprint.
         </>
       ),
       sideContent: (
@@ -38,12 +38,12 @@ export default function Home() {
     },
     {
       icon: null,
-      title: 'Fingerprint your content',
+      title: 'Start fingerprinting your content',
       mainContent: (
         <>
           Start uploading content to our cloud via the app or our site. 
           <br />
-          We authenticate it, secure it, and attach your fingerprint. Permanently.
+          We authenticate it, secure it, and attach your fingerprint to it. Permanently.
         </>
       ),
       sideContent: (
@@ -81,22 +81,6 @@ export default function Home() {
 
   const whys: Item[] = [
     {
-      icon: '🧑‍🎨',
-      title: 'Focus on making great content',
-      mainContent: (
-        <div>
-          Spend less time worrying about protecting your valuable work, and more
-          on what you do best:
-          <br />
-          creating and sharing your beautiful work!
-          {/* <br />
-          <br />
-          Safehill will come to the rescue if copyrights are infringed, by
-          either humans or AI. */}
-        </div>
-      ),
-    },
-    {
       icon: '🔗',
       title: 'Collaborate confidentially',
       mainContent: (
@@ -113,8 +97,25 @@ export default function Home() {
       ),
     },
     {
-      icon: '🖋️',
-      title: 'Get credit for your work',
+      icon: '🧑‍🎨',
+      title: 'Focus on making great content',
+      mainContent: (
+        <div>
+          Spend less time and money worrying about protecting your valuable work, 
+          <br />
+          and more on what you do best:
+          <br />
+          creating and sharing your beautiful work!
+          {/* <br />
+          <br />
+          Safehill will come to the rescue if copyrights are infringed, by
+          either humans or AI. */}
+        </div>
+      ),
+    },
+    {
+      icon: '＄🫆',
+      title: 'Get credit and royalties for your work',
       mainContent: (
         <div>
           We love AI generated images and videos!
@@ -129,8 +130,8 @@ export default function Home() {
       ),
     },
     {
-      icon: '🚀',
-      title: 'Increase your speed to market',
+      icon: '💼',
+      title: 'Help your legal team with proof of ownership and distribution',
       mainContent: (
         <div>
           We handle the complexities of distributing copyrighted content,
@@ -269,7 +270,7 @@ export default function Home() {
                 "get credit<br />and royalties<br />from it.",
                 "prevent<br />unauthorized<br />distribution<br />or leaks.",
                 "share it while<br />retaining<br />control.",
-                "prevent legal<br />battles over<br />copyrights<br />and IP.",
+                "prevent or aid legal<br />battles over<br />copyrights<br />and IP.",
                 "avoid<br />AI-generated<br />copyright <br />infringements."
               ]}
             />

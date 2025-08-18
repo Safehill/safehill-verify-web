@@ -7,7 +7,7 @@ const FeaturesList = () => {
   const carouselItems = [
     {
       icon: "🏦",
-      title: "The most secure vault",
+      title: "Banking-like Security",
       titleClass: "text-cyan-300",
       content: (
         <>
@@ -18,8 +18,29 @@ const FeaturesList = () => {
       ),
     },
     {
+      icon: "🧬",
+      title: "Advanced Traceability",
+      titleClass: "text-purple-300",
+      content: (
+        <>
+          We use fingerprints to track how your content is used, without ever accessing it.
+          Fingerprints can be used to detect misuse, even if the image is altered or tampered with.
+        </>
+      ),
+    },
+    {
+      icon: "🔥",
+      title: "Remove or Revoke",
+      titleClass: "text-red-400",
+      content: (
+        <>
+          You can revoke access and remove all copies of any content you upload until you publish it.
+        </>
+      ),
+    },
+    {
       icon: "🙈",
-      title: "The best controls for distribution",
+      title: "Controlled Distribution",
       titleClass: "text-yellow-300",
       content: (
         <>
@@ -41,37 +62,16 @@ const FeaturesList = () => {
         </>
       ),
     },
-    {
-      icon: "🔥",
-      title: "The ability to remove all copies",
-      titleClass: "text-red-400",
-      content: (
-        <>
-          You can revoke access and remove all copies of the unpublished content you previously shared.
-        </>
-      ),
-    },
-    {
-      icon: "🧬",
-      title: "Private Traceability",
-      titleClass: "text-purple-300",
-      content: (
-        <>
-          Rather than accessing your content, we use fingerprints to detect misuse.
-          Fingerprints still work if the image is altered or tampered with.
-        </>
-      ),
-    },
-    {
-      icon: "🙋🏽",
-      title: "Attribution from Gen AI",
-      titleClass: "text-orange-300",
-      content: (
-        <>
-          AI systems can integrate with our MCP server to prevent copyrights, IP infringements and attribution of generated media.
-        </>
-      ),
-    },
+    // {
+    //   icon: "🙋🏽",
+    //   title: "Attribution from Gen AI",
+    //   titleClass: "text-orange-300",
+    //   content: (
+    //     <>
+    //       AI systems can integrate with our MCP server to prevent copyrights, IP infringements and attribution of generated media.
+    //     </>
+    //   ),
+    // },
   ];
 
   // Embla setup
