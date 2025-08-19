@@ -1,9 +1,9 @@
 'use client';
 
-import type React from 'react';
-import { useState } from 'react';
 import LineSeparator from '@/components/home/LineSeparator';
 import { cn } from '@/lib/utils';
+import type React from 'react';
+import { useState } from 'react';
 
 interface Tab {
   id: string;
