@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-export function DownloadAppButtons(props: { className: string; }) {
+export function DownloadAppButtons(props: { className: string }) {
   return (
     <>
       <a
@@ -21,5 +21,5 @@ export function DownloadAppButtons(props: { className: string; }) {
         />
       </a>
     </>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { Item } from '../home/ItemizedListProps';
+import type { Item } from '../home/ItemizedListProps';
 
 const Section = ({ item }: { item: Item }) => {
   return (
@@ -7,7 +7,9 @@ const Section = ({ item }: { item: Item }) => {
         {item.title}
       </div>
 
-      <div className="mt-4 text-sm md:text-base font-light">{item.mainContent}</div>
+      <div className="mt-4 text-sm md:text-base font-light">
+        {item.mainContent}
+      </div>
     </div>
   );
 };

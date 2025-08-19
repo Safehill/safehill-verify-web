@@ -1,4 +1,4 @@
-import {arrayBufferToBase64, base64ToArrayBuffer} from "@/lib/crypto/base64";
+import { arrayBufferToBase64, base64ToArrayBuffer } from '@/lib/crypto/base64';
 
 export async function generateAndExportECKeyPair(
   algorithm: 'ECDH' | 'ECDSA'
@@ -19,11 +19,17 @@ export async function generateAndExportECKeyPair(
   );
 
   // Export private key (PKCS#8 format, DER-encoded)
-  const privateKeyBuffer = await window.crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
+  const privateKeyBuffer = await window.crypto.subtle.exportKey(
+    'pkcs8',
+    keyPair.privateKey
+  );
   const privateKeyBase64 = arrayBufferToBase64(privateKeyBuffer);
 
   // Export public key (SPKI format, DER-encoded)
-  const publicKeyBuffer = await window.crypto.subtle.exportKey('spki', keyPair.publicKey);
+  const publicKeyBuffer = await window.crypto.subtle.exportKey(
+    'spki',
+    keyPair.publicKey
+  );
   const publicKeyBase64 = arrayBufferToBase64(publicKeyBuffer);
 
   return {
@@ -32,42 +38,49 @@ export async function generateAndExportECKeyPair(
   };
 }
 
-export async function initializePrivateKeyAgreement(rawPrivateKey: ArrayBuffer): Promise<CryptoKey> {
+export async function initializePrivateKeyAgreement(
+  rawPrivateKey: ArrayBuffer
+): Promise<CryptoKey> {
   return await crypto.subtle.importKey(
-    "pkcs8",
+    'pkcs8',
     rawPrivateKey,
-    { name: "ECDH", namedCurve: "P-256" },
+    { name: 'ECDH', namedCurve: 'P-256' },
     true,
-    ["deriveKey", "deriveBits"]
+    ['deriveKey', 'deriveBits']
   );
 }
 
-export async function importPrivateKeySigning(rawPrivateKey: ArrayBuffer): Promise<CryptoKey> {
+export async function importPrivateKeySigning(
+  rawPrivateKey: ArrayBuffer
+): Promise<CryptoKey> {
   return await crypto.subtle.importKey(
-    "pkcs8",
+    'pkcs8',
     rawPrivateKey,
-    { name: "ECDSA", namedCurve: "P-256" },
+    { name: 'ECDSA', namedCurve: 'P-256' },
     true,
-    ["sign"]
+    ['sign']
   );
 }
 
 export async function generateSymmetricKey(): Promise<CryptoKey> {
   return await crypto.subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
+    { name: 'AES-GCM', length: 256 },
     true, // `true` allows the key to be exported later if needed
-    ["encrypt", "decrypt"]
+    ['encrypt', 'decrypt']
   );
 }
 
-export async function encryptWithKey(key: CryptoKey, plaintext: string): Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }> {
+export async function encryptWithKey(
+  key: CryptoKey,
+  plaintext: string
+): Promise<{ ciphertext: ArrayBuffer; iv: Uint8Array }> {
   const encoder = new TextEncoder();
   const data = encoder.encode(plaintext);
 
   const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for AES-GCM
 
   const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
+    { name: 'AES-GCM', iv },
     key,
     data
   );
@@ -75,9 +88,13 @@ export async function encryptWithKey(key: CryptoKey, plaintext: string): Promise
   return { ciphertext, iv };
 }
 
-export async function decryptWithKey(key: CryptoKey, ciphertext: ArrayBuffer, iv: Uint8Array): Promise<string> {
+export async function decryptWithKey(
+  key: CryptoKey,
+  ciphertext: ArrayBuffer,
+  iv: Uint8Array
+): Promise<string> {
   const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
+    { name: 'AES-GCM', iv },
     key,
     ciphertext
   );
@@ -86,17 +103,14 @@ export async function decryptWithKey(key: CryptoKey, ciphertext: ArrayBuffer, iv
 }
 
 export async function cryptoKeyToBase64(key: CryptoKey): Promise<string> {
-  const raw = await crypto.subtle.exportKey("raw", key); // ArrayBuffer
+  const raw = await crypto.subtle.exportKey('raw', key); // ArrayBuffer
   return arrayBufferToBase64(raw);
 }
 
 export async function base64ToCryptoKey(base64: string): Promise<CryptoKey> {
   const raw = base64ToArrayBuffer(base64);
-  return await crypto.subtle.importKey(
-    "raw",
-    raw,
-    { name: "AES-GCM" },
-    true,
-    ["encrypt", "decrypt"]
-  );
+  return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, true, [
+    'encrypt',
+    'decrypt',
+  ]);
 }

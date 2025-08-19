@@ -1,18 +1,17 @@
 // import cv from '../../deps/opencv_version';
-import {useSyncExternalStore} from 'react';
-import {toast} from "sonner";
+import { useSyncExternalStore } from 'react';
+import { toast } from 'sonner';
 import {
   generateEmbeddingFromImageData,
   loadTinyCLIPModel,
-  serializeEmbeddingToBase64
-} from "@/lib/embeddings/tinyclip-embeddings";
+  serializeEmbeddingToBase64,
+} from '@/lib/embeddings/tinyclip-embeddings';
 
 export const EmbeddingsSingleton = {
   isLoaded: false,
   hasInitStarted: false,
   listeners: new Set<() => void>(),
 };
-
 
 function notifyAll() {
   EmbeddingsSingleton.listeners.forEach((cb) => cb());
@@ -58,7 +57,7 @@ export function useImageEmbedding() {
     }
 
     const embedding = await generateEmbeddingFromImageData(imageData);
-    console.log("embedding", embedding);
+    console.log('embedding', embedding);
     return serializeEmbeddingToBase64(embedding);
   };
 
@@ -68,4 +67,3 @@ export function useImageEmbedding() {
     calculate: calculateEmbedding,
   };
 }
-

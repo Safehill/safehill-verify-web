@@ -1,16 +1,20 @@
-import React, {JSX} from "react";
-import {formattedDate} from "@/lib/utils";
+import React, { type JSX } from 'react';
+import { formattedDate } from '@/lib/utils';
 
-const ImageMetadata = ({ title, properties, confidence }: {
-   title: JSX.Element | null,
-   properties: {
-     key: string,
-     icon: JSX.Element | null,
-     value: JSX.Element | null,
-     date: Date | null,
-     color: string | null,
-   }[],
-  confidence: number | null,
+const ImageMetadata = ({
+  title,
+  properties,
+  confidence,
+}: {
+  title: JSX.Element | null;
+  properties: {
+    key: string;
+    icon: JSX.Element | null;
+    value: JSX.Element | null;
+    date: Date | null;
+    color: string | null;
+  }[];
+  confidence: number | null;
 }) => {
   return (
     <div className="relative w-full max-w-screen-md mx-auto">
@@ -30,8 +34,8 @@ const ImageMetadata = ({ title, properties, confidence }: {
               {title && title}
               {confidence && (
                 <span className="text-white/90 text-4xl">
-              {confidence.toFixed(1)}%
-            </span>
+                  {confidence.toFixed(1)}%
+                </span>
               )}
             </div>
           )}
@@ -70,7 +74,6 @@ const ImageMetadata = ({ title, properties, confidence }: {
         </div>
       </div>
     </div>
-
   );
 };
 

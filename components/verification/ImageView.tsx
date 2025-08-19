@@ -1,15 +1,12 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import React, { useMemo } from 'react';
-
-export function ConfidentialPlaceholder(
-  {
-    url,
-    height = 300
-  }: {
-    url: string;
-    height?: number
-  }) {
+export function ConfidentialPlaceholder({
+  url,
+  height = 300,
+}: {
+  url: string;
+  height?: number;
+}) {
   const width = height * 1.5;
 
   return (
@@ -34,12 +31,15 @@ export function ConfidentialPlaceholder(
   );
 }
 
-const ImageView = (
-  {
-    file, height, isConfidential = false
-  } : {
-    file: File; height: number, isConfidential: boolean
-  }) => {
+const ImageView = ({
+  file,
+  height,
+  isConfidential = false,
+}: {
+  file: File;
+  height: number;
+  isConfidential: boolean;
+}) => {
   const [url, setURL] = useState<string | null>(null);
 
   useEffect(() => {

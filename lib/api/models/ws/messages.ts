@@ -1,4 +1,4 @@
-import {UserDTO} from "@/lib/api/models/dto/User";
+import type { UserDTO } from '@/lib/api/models/dto/User';
 
 export type AuthSessionInitializationMessage = {
   sessionId: string;
@@ -6,11 +6,10 @@ export type AuthSessionInitializationMessage = {
 };
 
 export type AuthCredentialsMessage = {
-  encryptedPrivateKey: string
-  encryptedPrivateKeyIV: string
-  encryptedPrivateSignature: string
-  encryptedPrivateSignatureIV: string
-  authToken: string
-  user: UserDTO
-}
-
+  encryptedPrivateKey: string;
+  encryptedPrivateKeyIV: string;
+  encryptedPrivateSignature: string;
+  encryptedPrivateSignatureIV: string;
+  authToken: string;
+  user: UserDTO;
+};

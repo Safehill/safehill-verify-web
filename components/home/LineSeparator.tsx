@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function LineSeparator() {
   return (
@@ -8,5 +8,5 @@ export default function LineSeparator() {
         style={{ opacity: 0.7 }}
       ></div>
     </div>
-  )
+  );
 }

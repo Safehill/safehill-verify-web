@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
+import type { UserDTO } from '@/lib/api/models/dto/User';
 import { fetchUsers } from '@/lib/api/user';
-import {UserDTO} from "@/lib/api/models/dto/User";
 
 export const useUsers = (userIds: string[]) => {
-  const uniqueSortedIds = Array.from(new Set(userIds)).sort()
+  const uniqueSortedIds = Array.from(new Set(userIds)).sort();
   return useQuery<UserDTO[]>({
     queryKey: ['users', uniqueSortedIds],
     queryFn: () => fetchUsers(uniqueSortedIds),

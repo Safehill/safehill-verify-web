@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export default function CountingNumbers({
   value,
@@ -18,7 +18,9 @@ export default function CountingNumbers({
   useEffect(() => {
     let startTime: number | undefined;
     const animateCount = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
+      if (!startTime) {
+        startTime = timestamp;
+      }
       const timePassed = timestamp - startTime;
       const progress = timePassed / duration;
       const currentCount = easeOutQuad(progress, 0, value, 1);
@@ -35,6 +37,10 @@ export default function CountingNumbers({
   return <p className={className}>{Intl.NumberFormat().format(count)}</p>;
 }
 const easeOutQuad = (t: number, b: number, c: number, d: number) => {
-  t = t > d ? d : t / d;
+  if (t > d) {
+    t = d;
+  } else {
+    t = t / d;
+  }
   return Math.round(-c * t * (t - 2) + b);
 };

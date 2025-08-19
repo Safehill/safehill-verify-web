@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React from 'react';
-import { ItemizedListProps } from './ItemizedListProps';
 import { motion } from 'framer-motion';
+import type React from 'react';
+import type { ItemizedListProps } from './ItemizedListProps';
 
 const stepVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -24,7 +24,9 @@ const ItemizedList: React.FC<ItemizedListProps> = ({ items }) => {
       {items.map((item, index) => (
         <motion.div
           key={index}
-          className={`flex flex-col md:flex-row md:gap-4 lg:gap-8 ${index === items.length ? '' : 'mb-16'}`}
+          className={`flex flex-col md:flex-row md:gap-4 lg:gap-8 ${
+            index === items.length ? '' : 'mb-16'
+          }`}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.4 }}
@@ -50,7 +52,11 @@ const ItemizedList: React.FC<ItemizedListProps> = ({ items }) => {
                 initial={{ scale: 0.7, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true, amount: 0.7 }}
-                transition={{ type: 'spring', stiffness: 200, delay: index * 0.18 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 200,
+                  delay: index * 0.18,
+                }}
               >
                 <div
                   className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full bg-gradient-to-br from-yellow-100 to-purple-300 text-deepTeal font-bold shadow-lg text-xl md:text-3xl"
@@ -86,9 +92,19 @@ const ItemizedList: React.FC<ItemizedListProps> = ({ items }) => {
                   {/* Animate CTA in step 1 */}
                   {item.cta ?? (
                     <motion.div
-                      initial={{ scale: 0.95, boxShadow: '0 0 0 0 rgba(0,0,0,0)' }}
-                      whileInView={{ scale: 1, boxShadow: '0 4px 32px 0 rgba(255, 230, 100, 0.25)' }}
-                      transition={{ type: 'spring', stiffness: 120, delay: 0.5 }}
+                      initial={{
+                        scale: 0.95,
+                        boxShadow: '0 0 0 0 rgba(0,0,0,0)',
+                      }}
+                      whileInView={{
+                        scale: 1,
+                        boxShadow: '0 4px 32px 0 rgba(255, 230, 100, 0.25)',
+                      }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 120,
+                        delay: 0.5,
+                      }}
                     >
                       {item.cta}
                     </motion.div>

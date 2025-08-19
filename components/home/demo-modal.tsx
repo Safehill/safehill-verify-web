@@ -1,12 +1,12 @@
-import Modal from "@/components/shared/modal";
+import Image from 'next/image';
 import {
-  useState,
-  Dispatch,
-  SetStateAction,
+  type Dispatch,
+  type SetStateAction,
   useCallback,
   useMemo,
-} from "react";
-import Image from "next/image";
+  useState,
+} from 'react';
+import Modal from '@/components/shared/modal';
 
 const DemoModal = ({
   showDemoModal,
@@ -29,9 +29,7 @@ const DemoModal = ({
             />
           </a>
           <h3 className="font-display text-2xl font-bold">Safehill</h3>
-          <p className="text-sm text-gray-500">
-            Authenticity in the age of AI
-          </p>
+          <p className="text-sm text-gray-500">Authenticity in the age of AI</p>
         </div>
       </div>
     </Modal>
@@ -52,6 +50,6 @@ export function useDemoModal() {
 
   return useMemo(
     () => ({ setShowDemoModal, DemoModal: DemoModalCallback }),
-    [setShowDemoModal, DemoModalCallback],
+    [setShowDemoModal, DemoModalCallback]
   );
 }
