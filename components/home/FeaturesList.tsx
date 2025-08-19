@@ -19,22 +19,24 @@ const FeaturesList = () => {
     },
     {
       icon: "🧬",
-      title: "Advanced Traceability",
+      title: "Blockchain-like Traceability",
       titleClass: "text-purple-300",
       content: (
         <>
-          We use fingerprints to track how your content is used, without ever accessing it.
-          Fingerprints can be used to detect misuse, even if the image is altered or tampered with.
+          We use fingerprints to track access to your content in Safehill.
+          <br />
+          <br />
+          We then detect use on the web using its unique features, even if the content is altered or tampered with.
         </>
       ),
     },
     {
-      icon: "🔥",
-      title: "Remove or Revoke",
-      titleClass: "text-red-400",
+      icon: "🤑",
+      title: "Credit and Royalties",
+      titleClass: "text-green-500",
       content: (
         <>
-          You can revoke access and remove all copies of any content you upload until you publish it.
+          Distribute your content with confidence, and rely on our usage monitoring to get credit and royalties for it.
         </>
       ),
     },
@@ -59,6 +61,16 @@ const FeaturesList = () => {
               className="w-[125px] sm:w-[170px] rounded-xl shadow-lg"
             />
           </div>
+        </>
+      ),
+    },
+    {
+      icon: "🔥",
+      title: "Ability to Remove or Revoke",
+      titleClass: "text-red-400",
+      content: (
+        <>
+          You can revoke access and remove all copies of any content you upload until you publish it.
         </>
       ),
     },

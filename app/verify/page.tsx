@@ -118,7 +118,7 @@ export default function VerifyPage() {
         <LoadingSpinner/>
         <MessageView message="Preparing for authentication" sizeClass={4}/>
         <div className="opacity-95 text-gray-500 text-center">
-          This may take a minute or so the first time, as your browser needs to fetch our AI models.
+          This may take a minute or so the first time, as your browser needs to fetch our AI models for content authentication.
           <br />
           Don&apos;t close the page until the process is complete.
         </div>

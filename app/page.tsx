@@ -12,6 +12,9 @@ import SafehillAppLogo from "@/components/shared/SafehillAppLogo";
 import {ImageCarousel} from "@/components/home/ImageCarousel";
 import FeaturesList from '@/components/home/FeaturesList';
 import TypewriterHeadline from '@/components/home/TypewriterHeadline';
+import { HandRaised } from '@/components/shared/icons';
+import TabView from '@/components/shared/TabView';
+import FeaturesGrid from '@/components/home/FeaturesGrid';
 
 export default function Home() {
   const steps: Item[] = [
@@ -38,7 +41,7 @@ export default function Home() {
     },
     {
       icon: null,
-      title: 'Start fingerprinting your content',
+      title: 'Upload your content',
       mainContent: (
         <>
           Start uploading content to our cloud via the app or our site. 
@@ -61,9 +64,7 @@ export default function Home() {
       title: 'Let us worry about the rest',
       mainContent: (
         <>
-          Once fingerprinted assets are in Safehill, you get peace of mind!
-          <br />
-          You get things like:
+          Once fingerprinted assets are in Safehill, you get:
           <br />
         </>
       ),
@@ -79,67 +80,139 @@ export default function Home() {
     },
   ];
 
-  const whys: Item[] = [
+  const fingerprintFeatures = [
+    {
+      icon: '🫆',
+      title: 'Give you ownership',
+      description: 'Over your content. We extract your content\'s unique features and link them to fingerprints, in a way that is resilient to tampering and alterations',
+    },
+    {
+      icon: '⛓️',
+      title: 'Trace Access',
+      description: 'Similarly to "blockchains", we verify and record content access in the network. Like living fingerprints on something you touch.'
+    },
+    {
+      icon: '🔍',
+      title: 'Detect misuse',
+      description: 'We look for copies of your content on the wide web using its unique features and figerprints attached'
+    },
+    {
+      icon: '🛡️',
+      title: 'Keep your content private',
+      description: 'Our technology works without ever accessing the content itself. EVER.'
+    }
+  ];
+
+  const whySafehillFeatures = [
     {
       icon: '🔗',
-      title: 'Collaborate confidentially',
-      mainContent: (
-        <div>
-          Because of our superior security standards
-          <br />
-          and the control over the distribution you get with Safehill,
-          <br />
-          you are protected from any data or security or copyright breach.
-          <br />
-          <br />
-          Sharing password-protected links with your colleagues is a thing of the past!
-        </div>
-      ),
+      title: 'Collaborate Confidentially',
+      description: 'Because of our superior security standards and distribution controls, you are protected from data, security and copyright breaches'
     },
     {
       icon: '🧑‍🎨',
-      title: 'Focus on making great content',
-      mainContent: (
-        <div>
-          Spend less time and money worrying about protecting your valuable work, 
-          <br />
-          and more on what you do best:
-          <br />
-          creating and sharing your beautiful work!
-          {/* <br />
-          <br />
-          Safehill will come to the rescue if copyrights are infringed, by
-          either humans or AI. */}
-        </div>
-      ),
+      title: 'Focus on Making Great Content',
+      description: 'Spend less time and money worrying about protecting your valuable work, and more on what you do best: creating and sharing your beautiful work!'
     },
     {
       icon: '＄🫆',
-      title: 'Get credit and royalties for your work',
-      mainContent: (
-        <div>
-          We love AI generated images and videos!
-          <br />
-          <br />
-          We love them even more if they can be used safely
-          <br />while giving credits to the owner and not infringing copyrights.
-          {/* <br />
-          <br />
-          If AI regulations are the cure, we provide preventive care! */}
-        </div>
-      ),
+      title: 'Get Credit and Royalties',
+      description: 'We love AI generated images and videos! We love them even more if they can be used safely while giving credits to the owner and not infringing copyrights.'
     },
     {
       icon: '💼',
-      title: 'Help your legal team with proof of ownership and distribution',
-      mainContent: (
+      title: 'Help your Legal Team',
+      description: 'With proof of ownership and traceability to prevent and aid IP and copyright battles. We handle the complexities of distributing your copyrighted content.'
+    }
+  ];
+
+  const whyTabs = [
+    {
+      id: 'why-safehill',
+      label: 'Why Safehill',
+      gradient: 'linear-gradient(135deg,rgb(191, 146, 233),rgb(242, 121, 224))',
+      content: (
         <div>
-          We handle the complexities of distributing copyrighted content,
-          <br />
-          letting you focus on your core value proposition.
+          <h1
+            className="animate-fade-up bg-gradient-to-br from-purple-600 to-yellow-100 bg-clip-text text-center font-display text-5xl md:text-6xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 mb-10"
+            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
+          >
+            Why use Safehill
+          </h1>
+
+          <p className="text-center text-xl md:text-2xl font-light tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-10">
+            It&apos;s the tool you&apos;ve been waiting for to protect, share and monetize your work!
+            <br />
+            &nbsp;
+           </p>
+
+          <FeaturesGrid items={whySafehillFeatures} />
         </div>
-      ),
+      )
     },
+    {
+      id: 'fingerprint',
+      label: "Finger… What?",
+      gradient: 'linear-gradient(135deg,rgb(230, 195, 89),rgb(148, 214, 122))',
+      content: (
+        <div>
+          <h1
+            className="animate-fade-up bg-gradient-to-br from-yellow-300 to-yellow-100 bg-clip-text text-center font-display text-5xl md:text-6xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 mb-10"
+            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
+          >
+            What&apos;s a Fingerprint?
+          </h1>
+
+          <p className="text-center text-xl md:text-2xl font-light tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-10">
+            It&apos;s a cryptographically-secure representation of your or your company&apos;s identity,
+            <br />
+            stored exclusively on physical devices you already own.
+            <br /><br />
+            Fingerprints let us …
+           </p>
+
+           <FeaturesGrid items={fingerprintFeatures} />
+        </div>
+      )
+    },
+    {
+      id: 'authenticator',
+      label: 'The Authenticator',
+      gradient: 'linear-gradient(135deg,rgb(119, 167, 243),rgb(193, 131, 251))',
+      content: (
+        <div>
+          <h1
+            className="animate-fade-up bg-gradient-to-br from-cyan-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
+            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
+          >
+            Curious about<br /> the rights and history<br />of an image?
+          </h1>
+          <div>
+            <p
+              className="mt-8 mb-5 animate-fade-up text-center text-purple-200 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light px-2"
+              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
+            >
+              Check out our{" "}
+              <Link
+                href="/authenticate"
+              >
+              tool for authenticating content
+              </Link>
+              !
+            </p>
+            <div className="flex flex-row z-10 w-full justify-center items-center px-2">
+              <Link
+                href="/authenticate"
+                className="flex gap-2 px-6 py-2 bg-purple-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+              >
+                Try it out now
+                <ArrowRightCircleIcon className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )
+    }
   ];
 
   return (
@@ -150,31 +223,6 @@ export default function Home() {
       </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center justify-center pt-32">
         <div className="z-10 w-full">
-          {/*<h1*/}
-          {/*  className="animate-fade-up bg-gradient-to-br from-purple-300 to-yellow-200 bg-clip-text text-center font-display text-6xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] py-10"*/}
-          {/*  style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}*/}
-          {/*>*/}
-          {/*  <HandRaised*/}
-          {/*    className="w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 mx-auto bg-clip-text bg-gradient-to-br from-yellow-200 to-purple-300"*/}
-          {/*    fill="url(#gradient)"*/}
-          {/*    width="100%" // or a specific value like "200px"*/}
-          {/*    height="100%" // or a specific value like "200px"*/}
-          {/*  />*/}
-          {/*  <svg width="0" height="0">*/}
-          {/*    <defs>*/}
-          {/*      <linearGradient*/}
-          {/*        id="gradient"*/}
-          {/*        x1="0%"*/}
-          {/*        y1="0%"*/}
-          {/*        x2="100%"*/}
-          {/*        y2="100%"*/}
-          {/*      >*/}
-          {/*        <stop offset="0%" stopColor="#E9D8FD" /> /!* Purple-300 *!/*/}
-          {/*        <stop offset="100%" stopColor="#FEF9C3" /> /!* Yellow-200 *!/*/}
-          {/*      </linearGradient>*/}
-          {/*    </defs>*/}
-          {/*  </svg>*/}
-          {/*</h1>*/}
 
           <h1
             className="animate-fade-up bg-gradient-to-br from-purple-200 to-orange-300 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-20"
@@ -192,14 +240,14 @@ export default function Home() {
               className="animate-fade-up bg-gradient-to-br from-orange-100 to-purple-100/80 bg-clip-text text-center font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
-              Fingerprint and protect your assets
+              Are you sitting on your assets?
             </h1>
             <p
               className="text-transparent bg-gradient-to-br from-gray-100/90 to-cyan-200/60 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5"
             >
-              from Security, IP and Copyright breaches
+              Attach fingerprints to your content to protect it from Security,
               <br />
-              made by humans and AI
+              IP and Copyright breaches made by humans and AI.
             </p>
             <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-20">
               <Link
@@ -267,7 +315,7 @@ export default function Home() {
               className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold text-transparent drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-10"
               style={{}}
               strings={[
-                "get credit<br />and royalties<br />from it.",
+                "finally get credit<br />and royalties<br />from it.",
                 "prevent<br />unauthorized<br />distribution<br />or leaks.",
                 "share it while<br />retaining<br />control.",
                 "prevent or aid legal<br />battles over<br />copyrights<br />and IP.",
@@ -300,51 +348,13 @@ export default function Home() {
             <LineSeparator />
           </div>
 
-          <div className="z-10 w-full xl:px-20 pt-20 pb-10 px-5">
-            <h1
-              className="animate-fade-up bg-gradient-to-br from-purple-400 to-yellow-100 bg-clip-text text-center font-display text-7xl md:text-8xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 mb-20"
-              style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
-            >
-              Why use Safehill
-            </h1>
+          <div className="z-10 w-full xl:px-20 pb-20 px-5">
+            <TabView
+              tabs={whyTabs}
+              defaultTab="why-safehill"
+            />
+          </div>
 
-            <CenteredItems items={whys} />
-          </div>
-          <div className="my-10">
-            <LineSeparator />
-          </div>
-        </div>
-
-        <div className="z-10 w-full xl:px-20 pt-40">
-          <h1
-            className="animate-fade-up bg-gradient-to-br from-cyan-100 to-purple-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-4"
-            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
-          >
-            Curious about the rights and history of an image?
-          </h1>
-          <div className="pb-20">
-            <p
-              className="mt-8 mb-5 animate-fade-up text-center text-purple-200 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light px-2"
-              style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
-            >
-              Check out our{" "}
-              <Link
-                href="/authenticate"
-              >
-                authenticator tool
-              </Link>
-              !
-            </p>
-            <div className="flex flex-row z-10 w-full justify-center items-center mb-20 px-2">
-              <Link
-                href="/authenticate"
-                className="flex gap-2 px-6 py-2 bg-purple-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
-              >
-                Try it out now
-                <ArrowRightCircleIcon className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
           <div className="my-10">
             <LineSeparator />
           </div>
