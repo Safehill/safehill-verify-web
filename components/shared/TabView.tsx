@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
+import type React from 'react';
+import { useState } from 'react';
 import LineSeparator from '@/components/home/LineSeparator';
+import { cn } from '@/lib/utils';
 
 interface Tab {
   id: string;
@@ -21,14 +22,12 @@ export default function TabView({ tabs, defaultTab, className }: TabViewProps) {
   const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id);
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn('w-full', className)}>
       {/* Mobile: Show all content consecutively */}
       <div className="block sm:hidden">
         {tabs.map((tab, index) => (
           <div key={tab.id}>
-            <div className="py-20">
-              {tab.content}
-            </div>
+            <div className="py-20">{tab.content}</div>
             {index < tabs.length - 1 && (
               <div className="py-10">
                 <LineSeparator />
@@ -46,13 +45,13 @@ export default function TabView({ tabs, defaultTab, className }: TabViewProps) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex-1 px-6 py-4 text-xl rounded-xl transition-all duration-200 whitespace-nowrap mx-2",
+                'flex-1 px-6 py-4 text-xl rounded-xl transition-all duration-200 whitespace-nowrap mx-2',
                 activeTab === tab.id
-                  ? "text-white shadow-lg transform scale-105 font-bold"
-                  : "text-white/70 hover:text-white font-light"
+                  ? 'text-white shadow-lg transform scale-105 font-bold'
+                  : 'text-white/70 hover:text-white font-light'
               )}
               style={{
-                background: activeTab === tab.id ? tab.gradient : 'transparent'
+                background: activeTab === tab.id ? tab.gradient : 'transparent',
               }}
             >
               {tab.label}
@@ -67,10 +66,10 @@ export default function TabView({ tabs, defaultTab, className }: TabViewProps) {
           <div
             key={tab.id}
             className={cn(
-              "transition-all duration-300",
+              'transition-all duration-300',
               activeTab === tab.id
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-4 absolute pointer-events-none"
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-4 absolute pointer-events-none'
             )}
           >
             {activeTab === tab.id && tab.content}

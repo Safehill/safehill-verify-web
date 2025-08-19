@@ -13,13 +13,13 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ["lh3.googleusercontent.com"],
+    domains: ['lh3.googleusercontent.com'],
   },
   async redirects() {
     return [
       {
-        source: "/github",
-        destination: "https://github.com/safehill/",
+        source: '/github',
+        destination: 'https://github.com/safehill/',
         permanent: false,
       },
     ];

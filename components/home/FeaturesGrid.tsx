@@ -11,12 +11,15 @@ interface FeaturesGridProps {
   className?: string;
 }
 
-export default function FeaturesGrid({ items, className = "" }: FeaturesGridProps) {
+export default function FeaturesGrid({
+  items,
+  className = '',
+}: FeaturesGridProps) {
   return (
     <div className={`flex justify-center ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1200px]">
         {items.map((item, index) => (
-          <div 
+          <div
             key={index}
             className="rounded-2xl border-4 border-solid border-white/30 bg-transparent p-6 pt-10 flex flex-col items-center shadow-none max-w-[300px] mx-auto transition-all duration-200 hover:scale-110 active:scale-105 hover:bg-black/30 active:bg-white/30 cursor-pointer"
           >

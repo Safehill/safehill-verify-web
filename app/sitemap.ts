@@ -1,10 +1,10 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     {
-      url: "https://safehill.io",
+      url: 'https://safehill.io',
       lastModified: new Date(),
-    }
+    },
   ];
 }

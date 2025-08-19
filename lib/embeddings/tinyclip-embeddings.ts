@@ -1,10 +1,11 @@
-import * as ort from 'onnxruntime-web';
-
-import { get, set } from 'idb-keyval';
 import { unzipSync } from 'fflate';
 
+import { get, set } from 'idb-keyval';
+import * as ort from 'onnxruntime-web';
+
 const MODEL_KEY = 'tinyclip_model';
-const MODEL_ZIP_URL = 'https://s3.us-east-2.wasabisys.com/safehill-ml-prod/latest/TinyCLIP.onnx.zip';
+const MODEL_ZIP_URL =
+  'https://s3.us-east-2.wasabisys.com/safehill-ml-prod/latest/TinyCLIP.onnx.zip';
 
 let session: ort.InferenceSession | null = null;
 
@@ -12,7 +13,9 @@ let session: ort.InferenceSession | null = null;
  * Load TinyCLIP ONNX model using ONNX Runtime Web
  */
 export async function loadTinyCLIPModel(): Promise<void> {
-  if (session) return;
+  if (session) {
+    return;
+  }
 
   let modelBuffer = await get(MODEL_KEY);
 
@@ -23,7 +26,9 @@ export async function loadTinyCLIPModel(): Promise<void> {
 
     const unzipped = unzipSync(new Uint8Array(zipBuffer));
     const modelBytes = unzipped['TinyCLIP.onnx'];
-    if (!modelBytes) throw new Error("Model file not found in zip");
+    if (!modelBytes) {
+      throw new Error('Model file not found in zip');
+    }
 
     modelBuffer = modelBytes.buffer;
     await set(MODEL_KEY, modelBuffer);
@@ -42,12 +47,16 @@ async function prepareInput(imageData: ImageData): Promise<Float32Array> {
   // Resize the image to 224x224 using an offscreen canvas
   const canvas = new OffscreenCanvas(224, 224);
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Could not get canvas context');
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
+  }
 
   // Draw input ImageData to resized canvas
   const tempCanvas = new OffscreenCanvas(imageData.width, imageData.height);
   const tempCtx = tempCanvas.getContext('2d');
-  if (!tempCtx) throw new Error('Could not get temp canvas context');
+  if (!tempCtx) {
+    throw new Error('Could not get temp canvas context');
+  }
   tempCtx.putImageData(imageData, 0, 0);
   ctx.drawImage(tempCanvas, 0, 0, 224, 224);
 
@@ -73,14 +82,18 @@ async function prepareInput(imageData: ImageData): Promise<Float32Array> {
 /**
  * Generate embedding from ImageData (auto-resizes if needed)
  */
-export async function generateEmbeddingFromImageData(imageData: ImageData): Promise<Float32Array> {
-  if (!session) throw new Error('Model not loaded');
+export async function generateEmbeddingFromImageData(
+  imageData: ImageData
+): Promise<Float32Array> {
+  if (!session) {
+    throw new Error('Model not loaded');
+  }
 
   const input = await prepareInput(imageData);
 
   console.log('First 10 pixels:', input.slice(0, 10)); // R channel
-  console.log('G sample:', input.slice(224*224, 224*224 + 10));
-  console.log('B sample:', input.slice(2*224*224, 2*224*224 + 10));
+  console.log('G sample:', input.slice(224 * 224, 224 * 224 + 10));
+  console.log('B sample:', input.slice(2 * 224 * 224, 2 * 224 * 224 + 10));
 
   const tensor = new ort.Tensor('float32', input, [1, 3, 224, 224]);
 
@@ -114,14 +127,16 @@ export function serializeEmbeddingToBase64(embedding: Float32Array): string {
   }
 
   const base64String = btoa(binary);
-  console.log("serialized embedding to base64:", base64String);
+  console.log('serialized embedding to base64:', base64String);
   return base64String;
 }
 
 /**
  * Deserialize a base64 string back into a Float32Array embedding.
  */
-export function deserializeBase64ToEmbedding(base64String: string): Float32Array {
+export function deserializeBase64ToEmbedding(
+  base64String: string
+): Float32Array {
   // Decode Base64 string to a binary string
   const binaryString = atob(base64String);
 

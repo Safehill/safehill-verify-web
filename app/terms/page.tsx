@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import type React from 'react';
 import MessageView from '@/components/shared/MessageView';
 import Section from '@/components/shared/Section';
 

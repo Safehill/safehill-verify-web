@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import type React from 'react';
+import type { Item } from '@/components/home/ItemizedListProps';
 import MessageView from '@/components/shared/MessageView';
-import { Item } from '@/components/home/ItemizedListProps';
 
 const Section = ({ item }: { item: Item }) => {
   return (
@@ -11,7 +11,9 @@ const Section = ({ item }: { item: Item }) => {
         {item.title}
       </div>
 
-      <div className="mt-4 text-sm md:text-base font-light">{item.mainContent}</div>
+      <div className="mt-4 text-sm md:text-base font-light">
+        {item.mainContent}
+      </div>
     </div>
   );
 };

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { ReactNode } from "react";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { Drawer } from "vaul";
-import useMediaQuery from "@/lib/hooks/use-media-query";
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import type { ReactNode } from 'react';
+import { Drawer } from 'vaul';
+import useMediaQuery from '@/lib/hooks/use-media-query';
 
 export default function Tooltip({
   children,
@@ -20,7 +20,7 @@ export default function Tooltip({
     return (
       <Drawer.Root>
         <Drawer.Trigger
-          className={`${fullWidth ? "w-full" : "inline-flex"} md:hidden`}
+          className={`${fullWidth ? 'w-full' : 'inline-flex'} md:hidden`}
           onClick={(e) => {
             e.stopPropagation();
           }}
@@ -34,7 +34,7 @@ export default function Tooltip({
               <div className="my-3 h-1 w-12 rounded-full bg-gray-300" />
             </div>
             <div className="flex min-h-[150px] w-full items-center justify-center overflow-hidden bg-white align-middle shadow-xl">
-              {typeof content === "string" ? (
+              {typeof content === 'string' ? (
                 <span className="block text-center text-sm text-gray-700">
                   {content}
                 </span>
@@ -63,7 +63,7 @@ export default function Tooltip({
           side="top"
           className="z-[99] hidden animate-slide-up-fade items-center overflow-hidden rounded-md border border-gray-200 bg-white shadow-md md:block"
         >
-          {typeof content === "string" ? (
+          {typeof content === 'string' ? (
             <div className="block max-w-xs px-4 py-2 text-center text-sm text-gray-700">
               {content}
             </div>

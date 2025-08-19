@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { Dispatch, ReactNode, SetStateAction } from "react";
-import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { Drawer } from "vaul";
-import useMediaQuery from "@/lib/hooks/use-media-query";
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import type { Dispatch, ReactNode, SetStateAction } from 'react';
+import { Drawer } from 'vaul';
+import useMediaQuery from '@/lib/hooks/use-media-query';
 
 export default function Popover({
   children,
   content,
-  align = "center",
+  align = 'center',
   openPopover,
   setOpenPopover,
 }: {
   children: ReactNode;
   content: ReactNode | string;
-  align?: "center" | "start" | "end";
+  align?: 'center' | 'start' | 'end';
   openPopover: boolean;
   setOpenPopover: Dispatch<SetStateAction<boolean>>;
   mobileOnly?: boolean;

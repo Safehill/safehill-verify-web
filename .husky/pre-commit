@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Run all linters and formatters
+pnpm check-all
+
+# If any of the above commands fail, the commit will be aborted
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-commit checks failed. Please fix the issues and try again."
+  echo "💡 You can run 'pnpm fix-all' to automatically fix many issues."
+  exit 1
+fi
+
+echo "✅ Pre-commit checks passed!"

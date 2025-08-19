@@ -1,10 +1,17 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {WS_BASE_URL} from "@/lib/api/api";
-import {AuthCredentialsMessage, AuthSessionInitializationMessage} from "@/lib/api/models/ws/messages";
-import {base64ToArrayBuffer} from "@/lib/crypto/base64";
-import {generateSymmetricKey, importPrivateKeySigning, initializePrivateKeyAgreement} from "@/lib/crypto/keys";
-import {AuthenticatedUser} from "@/lib/api/models/AuthenticatedUser";
-import {useAuth} from "@/lib/auth/auth-context";
+import { useCallback, useEffect, useState } from 'react';
+import { WS_BASE_URL } from '@/lib/api/api';
+import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
+import type {
+  AuthCredentialsMessage,
+  AuthSessionInitializationMessage,
+} from '@/lib/api/models/ws/messages';
+import { useAuth } from '@/lib/auth/auth-context';
+import { base64ToArrayBuffer } from '@/lib/crypto/base64';
+import {
+  generateSymmetricKey,
+  importPrivateKeySigning,
+  initializePrivateKeyAgreement,
+} from '@/lib/crypto/keys';
 
 export type SessionWebSocketState = {
   session: AuthSessionInitializationMessage | null;
@@ -17,21 +24,23 @@ export type SessionWebSocketState = {
 };
 
 export const SessionEncryption = {
-  symmetricKey: null as (CryptoKey | null),
-  isInitializing: false
+  symmetricKey: null as CryptoKey | null,
+  isInitializing: false,
 };
 
 export const WebsocketSessionStatus = {
   isConnecting: false,
-  wsRef: null as (WebSocket | null)
+  wsRef: null as WebSocket | null,
 };
 
 export function useSessionWebSocket(): SessionWebSocketState {
-  const [websocketSession, setWebsocketSession] = useState<AuthSessionInitializationMessage | null>(null);
-  const [authenticatedUser, setAuthenticatedUser] = useState<AuthenticatedUser | null>(null);
+  const [websocketSession, setWebsocketSession] =
+    useState<AuthSessionInitializationMessage | null>(null);
+  const [authenticatedUser, setAuthenticatedUser] =
+    useState<AuthenticatedUser | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { setAuthedSession } = useAuth()
+  const { setAuthedSession } = useAuth();
 
   // Perform init once
   if (
@@ -42,8 +51,8 @@ export function useSessionWebSocket(): SessionWebSocketState {
     console.log('Creating encryption key');
     SessionEncryption.isInitializing = true;
 
-    generateSymmetricKey().then(key => {
-      SessionEncryption.symmetricKey = key
+    generateSymmetricKey().then((key) => {
+      SessionEncryption.symmetricKey = key;
     });
   }
 
@@ -56,7 +65,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
     const iv = new Uint8Array(base64ToArrayBuffer(base64IV));
 
     return await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
+      { name: 'AES-GCM', iv },
       symmetricKey,
       ciphertextBuffer
     );
@@ -81,16 +90,18 @@ export function useSessionWebSocket(): SessionWebSocketState {
 
     ws.onmessage = async (event) => {
       const sessionRaw = JSON.parse(event.data);
-      const content = JSON.parse(sessionRaw["content"])
-      switch (sessionRaw["type"]) {
+      const content = JSON.parse(sessionRaw['content']);
+      switch (sessionRaw['type']) {
         case 'session-inititalized':
           setWebsocketSession(content as AuthSessionInitializationMessage);
           WebsocketSessionStatus.isConnecting = false;
           break;
-        case 'auth-credentials':
+        case 'auth-credentials': {
           if (!SessionEncryption.symmetricKey) {
-            console.error("auth credentials received but symmetric key wasn't initialized. This isn't supposed to happen.")
-            return
+            console.error(
+              "auth credentials received but symmetric key wasn't initialized. This isn't supposed to happen."
+            );
+            return;
           }
 
           const credentialsMessage = content as AuthCredentialsMessage;
@@ -104,16 +115,21 @@ export function useSessionWebSocket(): SessionWebSocketState {
             credentialsMessage.encryptedPrivateSignatureIV,
             SessionEncryption.symmetricKey
           );
-          const privateKey = await initializePrivateKeyAgreement(privateKeyData);
-          const privateSignature = await importPrivateKeySigning(privateSignatureData);
+          const privateKey = await initializePrivateKeyAgreement(
+            privateKeyData
+          );
+          const privateSignature = await importPrivateKeySigning(
+            privateSignatureData
+          );
           const authenticatedUser = {
             authToken: credentialsMessage.authToken,
             privateKey: privateKey,
             privateSignature: privateSignature,
-            user: credentialsMessage.user
+            user: credentialsMessage.user,
           } as AuthenticatedUser;
           setAuthenticatedUser(authenticatedUser);
           break;
+        }
       }
     };
 
@@ -138,8 +154,12 @@ export function useSessionWebSocket(): SessionWebSocketState {
 
   // Connect on load
   useEffect(() => {
-    if (WebsocketSessionStatus.isConnecting) { return }
-    if (websocketSession) { return }
+    if (WebsocketSessionStatus.isConnecting) {
+      return;
+    }
+    if (websocketSession) {
+      return;
+    }
 
     setAuthedSession(null);
 

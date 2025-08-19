@@ -1,6 +1,6 @@
 import React from 'react';
-import { ItemizedListProps } from './ItemizedListProps';
-import LineSeparator from "@/components/home/LineSeparator";
+import LineSeparator from '@/components/home/LineSeparator';
+import type { ItemizedListProps } from './ItemizedListProps';
 
 const CenteredItems: React.FC<ItemizedListProps> = ({ items }) => {
   return (

@@ -1,9 +1,9 @@
 import './globals.css';
+import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 import cx from 'classnames';
-import {inter, sfPro} from './fonts';
-import {Analytics as VercelAnalytics} from '@vercel/analytics/react';
-import {AuthProvider} from "@/lib/auth/auth-context";
-import {QueryProvider} from "@/lib/query-provider";
+import { AuthProvider } from '@/lib/auth/auth-context';
+import { QueryProvider } from '@/lib/query-provider';
+import { inter, sfPro } from './fonts';
 
 export default async function RootLayout({
   children,
@@ -14,9 +14,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={cx(sfPro.variable, inter.variable)}>
         <AuthProvider>
-          <QueryProvider>
-            {children}
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
         </AuthProvider>
         <VercelAnalytics />
       </body>

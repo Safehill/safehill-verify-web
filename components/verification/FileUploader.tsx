@@ -1,20 +1,21 @@
 'use client';
 
-import React, {useState} from 'react';
-import {FileUploaderProps} from './FileDetailsProps';
-import {Card, CardContent, CardFooter} from '@/components/shared/card';
-import {Input} from '@/components/shared/input';
-import {FileUp, Loader2, Trash2, Wand2} from "lucide-react";
-import {Button} from '@/components/shared/button';
-import ImageView from "@/components/verification/ImageView";
+import { FileUp, Trash2 } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import { Button } from '@/components/shared/button';
+import { Card, CardContent } from '@/components/shared/card';
+import { Input } from '@/components/shared/input';
+import ImageView from '@/components/verification/ImageView';
+import type { FileUploaderProps } from './FileDetailsProps';
 
 function typeOf(file: File): string | null {
-  let suffix = null
-  const index = file.name.lastIndexOf(".")
+  let suffix = null;
+  const index = file.name.lastIndexOf('.');
   if (index > -1) {
-    suffix = file.name.substring(index + 1)
+    suffix = file.name.substring(index + 1);
   }
-  return file.type || suffix
+  return file.type || suffix;
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({
@@ -43,7 +44,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     //   newFiles = [...newFiles, f];
     // });
     // setStagedFiles(newFiles);
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -63,9 +64,11 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   };
 
   const removeFile = (file: File) => {
-    const newFiles = stagedFiles.filter(f => { return f.name !== file.name });
+    const newFiles = stagedFiles.filter((f) => {
+      return f.name !== file.name;
+    });
     setStagedFiles(newFiles);
-  }
+  };
 
   const authenticateFiles = () => {
     setIsLoading(true);
@@ -96,7 +99,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
               className="border-2 border-dashed rounded-lg p-10 text-center cursor-pointer hover:bg-muted/50 transition-colors"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              onClick={() => document.getElementById("file-upload")?.click()}
+              onClick={() => document.getElementById('file-upload')?.click()}
             >
               <Input
                 id="file-upload"
@@ -107,9 +110,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
                 multiple
               />
               <FileUp className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-1">
-                Drop your image here
-              </h3>
+              <h3 className="text-lg font-medium mb-1">Drop your image here</h3>
               <p className="text-sm text-muted-foreground mb-2">
                 or click to select a file
               </p>
@@ -135,12 +136,17 @@ const FileUploader: React.FC<FileUploaderProps> = ({
                     >
                       <div className="col-span-5 flex items-center gap-3">
                         <div className="w-10 h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                          <ImageView file={file} height={35} isConfidential={false}/>
+                          <ImageView
+                            file={file}
+                            height={35}
+                            isConfidential={false}
+                          />
                         </div>
                         <div>
                           <p className="font-medium">{file.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {typeOf(file)} • {(file.size / (1024 * 1024)).toFixed(2)} MB
+                            {typeOf(file)} •{' '}
+                            {(file.size / (1024 * 1024)).toFixed(2)} MB
                           </p>
                         </div>
                       </div>
@@ -160,7 +166,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({
                 </div>
               </div>
             )}
-
           </CardContent>
           {/*<CardFooter className="flex justify-end">*/}
           {/*  <Button*/}

@@ -1,29 +1,29 @@
-"use client"
+'use client';
 
-import React, {useEffect, useState} from "react"
-import {useRouter} from "next/navigation"
-import {Card} from "@/components/shared/card"
-import InstructionsView from "@/components/login/InstructionsView";
-import ScanQRCodeView from "@/components/login/ScanQRCodeView";
-import {useAuth} from "@/lib/auth/auth-context";
-import {cryptoKeyToBase64, encryptWithKey} from "@/lib/crypto/keys";
-import {useSessionWebSocket} from "@/lib/api/socket";
-import {Button} from "@/components/shared/button";
-import {ArrowDown} from "lucide-react";
-import {arrayBufferToBase64} from "@/lib/crypto/base64";
-import {API_BASE_URL} from "@/lib/api/api";
+import InstructionsView from '@/components/login/InstructionsView';
+import ScanQRCodeView from '@/components/login/ScanQRCodeView';
+import { Button } from '@/components/shared/button';
+import { Card } from '@/components/shared/card';
+import { API_BASE_URL } from '@/lib/api/api';
+import { useSessionWebSocket } from '@/lib/api/socket';
+import { useAuth } from '@/lib/auth/auth-context';
+import { arrayBufferToBase64 } from '@/lib/crypto/base64';
+import { cryptoKeyToBase64, encryptWithKey } from '@/lib/crypto/keys';
+import { ArrowDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Session timeout in seconds (2 minutes)
-const CODE_VALIDITY_IN_SECONDS = 120
+const CODE_VALIDITY_IN_SECONDS = 120;
 
 export default function LoginPage() {
-  const { setAuthedSession } = useAuth()
+  const { setAuthedSession } = useAuth();
 
-  const router = useRouter()
-  const [qrPayload, setQrPayload] = useState<string | null>(null)
-  const [showQRCode, setShowQRCode] = useState(false)
-  const [timeRemaining, setTimeRemaining] = useState(CODE_VALIDITY_IN_SECONDS)
-  const [progress, setProgress] = useState(100)
+  const router = useRouter();
+  const [qrPayload, setQrPayload] = useState<string | null>(null);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(CODE_VALIDITY_IN_SECONDS);
+  const [progress, setProgress] = useState(100);
 
   const {
     session: websocketSession,
@@ -31,38 +31,42 @@ export default function LoginPage() {
     authenticatedUser,
     setAuthenticatedUser,
     error: webSocketError,
-    retry
+    retry,
   } = useSessionWebSocket();
 
   // Countdown timer for session expiration
   useEffect(() => {
-    if (!qrPayload || !!authenticatedUser) return
+    if (!qrPayload || !!authenticatedUser) {
+      return;
+    }
 
     // Start countdown
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
-          clearInterval(interval)
+          clearInterval(interval);
           // Reset session when timer expires
-          setQrPayload(null)
-          setShowQRCode(false)
-          return 0
+          setQrPayload(null);
+          setShowQRCode(false);
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
+        return prev - 1;
+      });
+    }, 1000);
 
-    return () => clearInterval(interval)
-  }, [qrPayload, authenticatedUser])
+    return () => clearInterval(interval);
+  }, [qrPayload, authenticatedUser]);
 
   // Authenticate when the user credentials are available
   useEffect(() => {
-    if (!authenticatedUser) { return; }
+    if (!authenticatedUser) {
+      return;
+    }
 
-    console.log("Authentication successful")
+    console.log('Authentication successful');
 
     // TODO: Set real expiration date
-    var expirationDate = new Date();
+    const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 1);
 
     // Store authentication credentials in memory via context
@@ -71,19 +75,18 @@ export default function LoginPage() {
       privateKey: authenticatedUser.privateKey,
       signature: authenticatedUser.privateSignature,
       user: authenticatedUser.user,
-      expiresAt: expirationDate.getTime()
-    })
+      expiresAt: expirationDate.getTime(),
+    });
 
     // Redirect to dashboard
     setTimeout(() => {
-      router.push("/authed")
+      router.push('/authed');
     }, 500);
-
   }, [authenticatedUser]);
 
   // Update progress bar based on time remaining
   useEffect(() => {
-    setProgress((timeRemaining / CODE_VALIDITY_IN_SECONDS) * 100)
+    setProgress((timeRemaining / CODE_VALIDITY_IN_SECONDS) * 100);
   }, [timeRemaining]);
 
   // Start again
@@ -91,36 +94,37 @@ export default function LoginPage() {
     setAuthenticatedUser(null);
     setQrPayload(null);
     setShowQRCode(false);
-  }
+  };
 
   // Generate the QR code to scan
   const generateQRCode = async () => {
     if (!websocketSession) {
-      throw new Error("Socket session was not initialized");
+      throw new Error('Socket session was not initialized');
     }
     if (!symmetricKey) {
-      throw new Error("Encryption key was not created");
+      throw new Error('Encryption key was not created');
     }
     setShowQRCode(true);
 
     const keyBase64 = await cryptoKeyToBase64(symmetricKey);
-    const { ciphertext, iv } = await encryptWithKey(symmetricKey, websocketSession.requestorIp);
+    const { ciphertext, iv } = await encryptWithKey(
+      symmetricKey,
+      websocketSession.requestorIp
+    );
     const ctBase64 = arrayBufferToBase64(ciphertext);
     const ivBase64 = arrayBufferToBase64(iv.buffer);
-    let qrPayload = `${API_BASE_URL}/sa/web-auth/${websocketSession.sessionId}?key=${keyBase64}&oct=${ctBase64}&oiv=${ivBase64}`
+    const qrPayload = `${API_BASE_URL}/sa/web-auth/${websocketSession.sessionId}?key=${keyBase64}&oct=${ctBase64}&oiv=${ivBase64}`;
     setQrPayload(qrPayload);
 
     setTimeRemaining(CODE_VALIDITY_IN_SECONDS);
-  }
+  };
 
   return (
     <div className="opacity-95 w-full">
       <Card className="w-full max-w-md md:max-w-lg m-auto text-center min-w-5">
         {showQRCode ? (
           <>
-            <h1
-              className="bg-gradient-to-br from-black to-stone-500 bg-clip-text font-display drop-shadow-sm [text-wrap:balance] text-2xl md:text-3xl leading-[3rem] md:leading-[5rem]"
-            >
+            <h1 className="bg-gradient-to-br from-black to-stone-500 bg-clip-text font-display drop-shadow-sm [text-wrap:balance] text-2xl md:text-3xl leading-[3rem] md:leading-[5rem]">
               Scan this code
             </h1>
             <div className="flex flex-col items-center space-y-4">
@@ -138,9 +142,7 @@ export default function LoginPage() {
           </>
         ) : (
           <>
-            <h1
-              className="bg-gradient-to-br from-black to-stone-500 bg-clip-text font-display drop-shadow-sm [text-wrap:balance] text-2xl md:text-3xl leading-[3rem] md:leading-[3rem]"
-            >
+            <h1 className="bg-gradient-to-br from-black to-stone-500 bg-clip-text font-display drop-shadow-sm [text-wrap:balance] text-2xl md:text-3xl leading-[3rem] md:leading-[3rem]">
               Log in to Safehill
             </h1>
             {webSocketError ? (
@@ -159,11 +161,14 @@ export default function LoginPage() {
                 </Button>
               </div>
             ) : (
-              <InstructionsView websocketSession={websocketSession} generateQRCode={generateQRCode} />
+              <InstructionsView
+                websocketSession={websocketSession}
+                generateQRCode={generateQRCode}
+              />
             )}
           </>
         )}
       </Card>
     </div>
-  )
+  );
 }

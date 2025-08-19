@@ -1,8 +1,8 @@
 import '../globals.css';
 import { Suspense } from 'react';
-import Navbar from '@/components/layout/navbar';
+import { Toaster } from 'sonner';
 import Footer from '@/components/layout/footer';
-import {Toaster} from "sonner";
+import Navbar from '@/components/layout/navbar';
 
 export default async function RootLayout({
   children,
@@ -14,7 +14,11 @@ export default async function RootLayout({
       <Toaster />
       <div className="fixed h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-cyan-100" />
       <Suspense fallback="...">
-        <Navbar darkTheme={false} withNavBar={true} currentPage="authenticate"/>
+        <Navbar
+          darkTheme={false}
+          withNavBar={true}
+          currentPage="authenticate"
+        />
       </Suspense>
       <main className="flex min-h-screen w-full flex-col items-center justify-center py-32">
         {children}

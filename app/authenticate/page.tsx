@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
+import Link from 'next/link';
 import Card from '@/components/home/card';
 import WebVitals from '@/components/home/web-vitals';
-import {Button} from "@/components/shared/button";
-import {useRouter} from "next/navigation";
-import Link from "next/link";
+import { Button } from '@/components/shared/button';
 
 export default function AuthenticatePage() {
   return (
@@ -35,9 +34,7 @@ export default function AuthenticatePage() {
           style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}
         >
           <Link href="/verify">
-            <Button>
-              Give it a try
-            </Button>
+            <Button>Give it a try</Button>
           </Link>
         </div>
       </div>
@@ -58,8 +55,7 @@ export default function AuthenticatePage() {
 const features = [
   {
     title: 'Public images',
-    description:
-      'Authenticated by companies partnering with Safehill',
+    description: 'Authenticated by companies partnering with Safehill',
     demo: <WebVitals />,
   },
   {

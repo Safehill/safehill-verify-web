@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Dispatch, SetStateAction } from "react";
-import { cn } from "@/lib/utils";
-import { Drawer } from "vaul";
-import * as Dialog from "@radix-ui/react-dialog";
-import useMediaQuery from "@/lib/hooks/use-media-query";
+import * as Dialog from '@radix-ui/react-dialog';
+import type { Dispatch, SetStateAction } from 'react';
+import { Drawer } from 'vaul';
+import useMediaQuery from '@/lib/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 
 interface ModalProps {
   children: React.ReactNode;
@@ -13,7 +13,12 @@ interface ModalProps {
   setShowModal: Dispatch<SetStateAction<boolean>>;
 }
 
-const Modal = ({ children, className, showModal, setShowModal }: ModalProps) => {
+const Modal = ({
+  children,
+  className,
+  showModal,
+  setShowModal,
+}: ModalProps) => {
   const { isMobile } = useMediaQuery();
 
   if (isMobile) {
@@ -23,8 +28,8 @@ const Modal = ({ children, className, showModal, setShowModal }: ModalProps) => 
         <Drawer.Portal>
           <Drawer.Content
             className={cn(
-              "fixed bottom-0 left-0 right-0 z-50 mt-24 rounded-t-[10px] border-t border-gray-200 bg-white",
-              className,
+              'fixed bottom-0 left-0 right-0 z-50 mt-24 rounded-t-[10px] border-t border-gray-200 bg-white',
+              className
             )}
           >
             <div className="sticky top-0 z-20 flex w-full items-center justify-center rounded-t-[10px] bg-inherit">
@@ -50,8 +55,8 @@ const Modal = ({ children, className, showModal, setShowModal }: ModalProps) => 
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
           className={cn(
-            "animate-scale-in fixed inset-0 z-40 m-auto max-h-fit w-full max-w-md overflow-hidden border border-gray-200 bg-white p-0 shadow-xl md:rounded-2xl",
-            className,
+            'animate-scale-in fixed inset-0 z-40 m-auto max-h-fit w-full max-w-md overflow-hidden border border-gray-200 bg-white p-0 shadow-xl md:rounded-2xl',
+            className
           )}
         >
           {children}
