@@ -13,7 +13,7 @@ import { useState } from 'react';
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterPublished, setFilterPublished] = useState<'all' | 'published' | 'unpublished'>('all');
+  const [filterVisibility, setFilterVisibility] = useState<'all' | 'public' | 'confidential' | 'unshared'>('all');
   const [filterPricing, setFilterPricing] = useState<'all' | 'paid' | 'free'>('all');
   const [sortBy, setSortBy] = useState<'lastUpdated' | 'name'>('lastUpdated');
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
@@ -29,15 +29,14 @@ export default function Dashboard() {
 
   // Filter collections based on search and filters
   const filteredCollections = allCollections.filter((collection: any) => {
-    const matchesPublishedFilter = filterPublished === 'all' ||
-                                 (filterPublished === 'published' && collection.isPublished) ||
-                                 (filterPublished === 'unpublished' && !collection.isPublished);
+    const matchesVisibilityFilter = filterVisibility === 'all' ||
+                                   collection.visibility === filterVisibility;
 
     const matchesPricingFilter = filterPricing === 'all' ||
                                 (filterPricing === 'paid' && collection.hasPricing) ||
                                 (filterPricing === 'free' && !collection.hasPricing);
 
-    return matchesPublishedFilter && matchesPricingFilter;
+    return matchesVisibilityFilter && matchesPricingFilter;
   });
 
   // Sort collections
@@ -107,40 +106,51 @@ export default function Dashboard() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-gray-700 text-sm font-medium mb-2 block">Status</label>
+                    <label className="text-gray-700 text-sm font-medium mb-2 block">Visibility</label>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          name="published"
+                          name="visibility"
                           value="all"
-                          checked={filterPublished === 'all'}
-                          onChange={(e) => setFilterPublished(e.target.value as any)}
-                          className="text-green-500"
+                          checked={filterVisibility === 'all'}
+                          onChange={(e) => setFilterVisibility(e.target.value as any)}
+                          className="text-blue-300"
                         />
                         <span className="text-gray-900 text-sm">All</span>
                       </label>
                       <label className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          name="published"
-                          value="published"
-                          checked={filterPublished === 'published'}
-                          onChange={(e) => setFilterPublished(e.target.value as any)}
+                          name="visibility"
+                          value="public"
+                          checked={filterVisibility === 'public'}
+                          onChange={(e) => setFilterVisibility(e.target.value as any)}
                           className="text-green-500"
                         />
-                        <span className="text-gray-900 text-sm">Published</span>
+                        <span className="text-gray-900 text-sm">Public</span>
                       </label>
                       <label className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          name="published"
-                          value="unpublished"
-                          checked={filterPublished === 'unpublished'}
-                          onChange={(e) => setFilterPublished(e.target.value as any)}
-                          className="text-green-500"
+                          name="visibility"
+                          value="confidential"
+                          checked={filterVisibility === 'confidential'}
+                          onChange={(e) => setFilterVisibility(e.target.value as any)}
+                          className="text-yellow-500"
                         />
-                        <span className="text-gray-900 text-sm">Unpublished</span>
+                        <span className="text-gray-900 text-sm">Confidential</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="visibility"
+                          value="unshared"
+                          checked={filterVisibility === 'unshared'}
+                          onChange={(e) => setFilterVisibility(e.target.value as any)}
+                          className="text-gray-500"
+                        />
+                        <span className="text-gray-900 text-sm">Unshared</span>
                       </label>
                     </div>
                   </div>
@@ -288,12 +298,12 @@ export default function Dashboard() {
             </div>
             <h3 className="mt-2 text-sm font-medium text-white">No collections found</h3>
             <p className="mt-1 text-sm text-white/80">
-              {searchQuery || filterPublished !== 'all' || filterPricing !== 'all'
+              {searchQuery || filterVisibility !== 'all' || filterPricing !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'Get started by creating your first collection.'
               }
             </p>
-            {!searchQuery && filterPublished === 'all' && filterPricing === 'all' ? (
+            {!searchQuery && filterVisibility === 'all' && filterPricing === 'all' ? (
               <div className="mt-6 flex justify-center">
                 <Button
                   className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg opacity-50 cursor-not-allowed"
@@ -309,7 +319,7 @@ export default function Dashboard() {
                 className="flex gap-2 px-6 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
                 onClick={() => {
                   setSearchQuery('');
-                  setFilterPublished('all');
+                  setFilterVisibility('all');
                   setFilterPricing('all');
                 }}
                 >

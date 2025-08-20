@@ -109,16 +109,22 @@ export default function CollectionDetail() {
 
           <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
             <div className="text-center">
-              <p className="text-xs font-medium text-white/60">Status</p>
+              <p className="text-xs font-medium text-white/60">Visibility</p>
               <div className="flex items-center justify-center mt-2 h-10">
-                                 {collection.isPublished ? (
+                {collection.visibility === 'public' && (
                    <Badge variant="secondary" className="text-sm bg-green-500/80 text-white border-green-400/50">
                      <Eye className="mr-1 h-4 w-4" />
-                     Published
+                     Public
                    </Badge>
-                 ) : (
-                   <Badge variant="outline" className="text-xs bg-white/20 text-white border-white/30">
-                     Draft
+                 )}
+                 {collection.visibility === 'confidential' && (
+                   <Badge variant="outline" className="text-sm bg-orange-500/80 text-white border-orange-400/50">
+                     Confidential
+                   </Badge>
+                 )}
+                 {collection.visibility === 'unshared' && (
+                   <Badge variant="outline" className="text-sm bg-gray-500/80 text-white border-gray-400/50">
+                     Unshared
                    </Badge>
                  )}
               </div>

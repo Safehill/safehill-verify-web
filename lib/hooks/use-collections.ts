@@ -1,5 +1,8 @@
-import { collectionsApi } from '@/lib/api/collections';
+import { collectionsApi, type Visibility } from '@/lib/api/collections';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+
+// Re-export types for convenience
+export type { Visibility };
 
 // Query keys
 export const collectionKeys = {

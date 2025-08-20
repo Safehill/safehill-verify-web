@@ -19,19 +19,28 @@ export default function CollectionCard({ collection, href, onMouseEnter }: Colle
         <div className="flex flex-col">
           {/* Header: Badges and States - Fixed height, no padding */}
           <div className="h-12 flex items-center justify-end space-x-1 pr-6">
-            {collection.isPublished && (
+            {collection.visibility === 'public' && (
               <Badge variant="secondary" className="text-xs bg-green-500/80 text-white border-green-400/50">
                 <Eye className="mr-1 h-3 w-3" />
-                Published
+                Public
+              </Badge>
+            )}
+            {collection.visibility === 'confidential' && (
+              <Badge variant="outline" className="text-xs bg-yellow-500/80 text-white border-yellow-400/50">
+                <Lock className="mr-1 h-3 w-3" />
+                Confidential
+              </Badge>
+            )}
+            {collection.visibility === 'unshared' && (
+              <Badge variant="outline" className="text-xs bg-gray-500/80 text-white border-gray-400/50">
+                <Lock className="mr-1 h-3 w-3" />
+                Unshared
               </Badge>
             )}
             {collection.hasPricing && (
               <Badge variant="outline" className="text-xs bg-purple-500/80 text-white border-purple-400/50">
                 $20
               </Badge>
-            )}
-            {!collection.isPublished && !collection.hasPricing && (
-                <Lock className="h-5 w-5 text-white" />
             )}
           </div>
 

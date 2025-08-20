@@ -5,7 +5,7 @@ const mockCollections = [
     name: 'Nature Photography',
     description: 'A collection of stunning nature photographs from around the world, featuring landscapes, wildlife, and botanical subjects.',
     assetCount: 24,
-    isPublished: true,
+    visibility: 'public' as Visibility,
     hasPricing: true,
     lastUpdated: '2 days ago',
     previewAssets: [
@@ -22,7 +22,7 @@ const mockCollections = [
     name: 'Urban Architecture',
     description: 'Modern and classic architectural photography showcasing cityscapes, buildings, and urban design elements.',
     assetCount: 18,
-    isPublished: false,
+    visibility: 'confidential' as Visibility,
     hasPricing: false,
     lastUpdated: '1 week ago',
     previewAssets: [
@@ -39,7 +39,7 @@ const mockCollections = [
     name: 'Portrait Series',
     description: 'Professional portrait photography featuring diverse subjects in various lighting and style approaches.',
     assetCount: 12,
-    isPublished: true,
+    visibility: 'unshared' as Visibility,
     hasPricing: false,
     lastUpdated: '3 days ago',
     previewAssets: [
@@ -56,7 +56,7 @@ const mockCollections = [
     name: 'Abstract Art',
     description: 'Experimental and abstract photography exploring patterns, textures, and creative compositions.',
     assetCount: 31,
-    isPublished: false,
+    visibility: 'public' as Visibility,
     hasPricing: true,
     lastUpdated: '5 days ago',
     previewAssets: [
@@ -73,7 +73,7 @@ const mockCollections = [
     name: 'Travel Diary',
     description: 'Personal travel photography documenting journeys, cultures, and experiences from various destinations.',
     assetCount: 45,
-    isPublished: true,
+    visibility: 'confidential' as Visibility,
     hasPricing: true,
     lastUpdated: '1 day ago',
     previewAssets: [
@@ -90,7 +90,7 @@ const mockCollections = [
     name: 'Product Photography',
     description: 'High-quality product shots for commercial use, featuring various items in professional studio settings.',
     assetCount: 8,
-    isPublished: false,
+    visibility: 'unshared' as Visibility,
     hasPricing: false,
     lastUpdated: '2 weeks ago',
     previewAssets: [
@@ -111,7 +111,7 @@ const mockCollectionDetails = {
     name: 'Nature Photography',
     description: 'A collection of stunning nature photographs from around the world, featuring landscapes, wildlife, and botanical subjects.',
     assetCount: 24,
-    isPublished: true,
+    visibility: 'public' as Visibility,
     hasPricing: true,
     lastUpdated: '2 days ago',
     assets: [
@@ -125,7 +125,7 @@ const mockCollectionDetails = {
     name: 'Urban Architecture',
     description: 'Modern and classic architectural photography showcasing cityscapes, buildings, and urban design elements.',
     assetCount: 18,
-    isPublished: false,
+    visibility: 'confidential' as Visibility,
     hasPricing: false,
     lastUpdated: '1 week ago',
     assets: [
@@ -138,7 +138,7 @@ const mockCollectionDetails = {
     name: 'Portrait Series',
     description: 'Professional portrait photography featuring diverse subjects in various lighting and style approaches.',
     assetCount: 12,
-    isPublished: true,
+    visibility: 'unshared' as Visibility,
     hasPricing: false,
     lastUpdated: '3 days ago',
     assets: [
@@ -151,7 +151,7 @@ const mockCollectionDetails = {
     name: 'Abstract Art',
     description: 'Experimental and abstract photography exploring patterns, textures, and creative compositions.',
     assetCount: 31,
-    isPublished: false,
+    visibility: 'public' as Visibility,
     hasPricing: true,
     lastUpdated: '5 days ago',
     assets: [
@@ -164,7 +164,7 @@ const mockCollectionDetails = {
     name: 'Travel Diary',
     description: 'Personal travel photography documenting journeys, cultures, and experiences from various destinations.',
     assetCount: 45,
-    isPublished: true,
+    visibility: 'confidential' as Visibility,
     hasPricing: true,
     lastUpdated: '1 day ago',
     assets: [
@@ -177,7 +177,7 @@ const mockCollectionDetails = {
     name: 'Product Photography',
     description: 'High-quality product shots for commercial use, featuring various items in professional studio settings.',
     assetCount: 8,
-    isPublished: false,
+    visibility: 'unshared' as Visibility,
     hasPricing: false,
     lastUpdated: '2 weeks ago',
     assets: [
@@ -188,12 +188,14 @@ const mockCollectionDetails = {
 };
 
 // Types
+export type Visibility = 'public' | 'confidential' | 'unshared';
+
 export interface Collection {
   id: string;
   name: string;
   description: string;
   assetCount: number;
-  isPublished: boolean;
+  visibility: Visibility;
   hasPricing: boolean;
   lastUpdated: string;
   thumbnailUrl?: string;
