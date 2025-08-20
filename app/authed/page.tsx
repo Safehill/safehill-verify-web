@@ -1,118 +1,15 @@
 'use client';
 
-import CollectionCard from '@/components/authed/CollectionCard';
 import DashboardTopBar from '@/components/layout/dashboard-top-bar';
 import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import Popover from '@/components/shared/popover';
-import { ArrowUpDown, Filter, Plus, Search, X } from 'lucide-react';
+import CollectionCard from '@/components/verification/CollectionCard';
+import { useCollections, usePrefetchCollection, useSearchCollections } from '@/lib/hooks/use-collections';
+import { ArrowUpDown, Filter, Loader2, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
-// Mock data for collections
-const mockCollections = [
-  {
-    id: '1',
-    name: 'Nature Photography',
-    description: 'A collection of stunning nature photographs from around the world, featuring landscapes, wildlife, and botanical subjects.',
-    assetCount: 24,
-    isPublished: true,
-    hasPricing: true,
-    lastUpdated: '2 days ago',
-    previewAssets: [
-      { id: '1', name: 'Mountain Lake', type: 'image' as const },
-      { id: '2', name: 'Forest Path', type: 'image' as const },
-      { id: '3', name: 'Sunset Valley', type: 'image' as const },
-      { id: '4', name: 'Wildlife Portrait', type: 'image' as const },
-      { id: '5', name: 'Botanical Close-up', type: 'image' as const },
-      { id: '6', name: 'Landscape Panorama', type: 'image' as const },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Urban Architecture',
-    description: 'Modern and classic architectural photography showcasing cityscapes, buildings, and urban design elements.',
-    assetCount: 18,
-    isPublished: false,
-    hasPricing: false,
-    lastUpdated: '1 week ago',
-    previewAssets: [
-      { id: '7', name: 'Modern Skyscraper', type: 'image' as const },
-      { id: '8', name: 'Historic Building', type: 'image' as const },
-      { id: '9', name: 'City Street', type: 'image' as const },
-      { id: '10', name: 'Architectural Detail', type: 'image' as const },
-      { id: '11', name: 'Urban Landscape', type: 'image' as const },
-      { id: '12', name: 'Building Interior', type: 'image' as const },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Portrait Series',
-    description: 'Professional portrait photography featuring diverse subjects in various lighting and style approaches.',
-    assetCount: 12,
-    isPublished: true,
-    hasPricing: false,
-    lastUpdated: '3 days ago',
-    previewAssets: [
-      { id: '13', name: 'Professional Headshot', type: 'image' as const },
-      { id: '14', name: 'Environmental Portrait', type: 'image' as const },
-      { id: '15', name: 'Studio Portrait', type: 'image' as const },
-      { id: '16', name: 'Candid Portrait', type: 'image' as const },
-      { id: '17', name: 'Group Portrait', type: 'image' as const },
-      { id: '18', name: 'Artistic Portrait', type: 'image' as const },
-    ],
-  },
-  {
-    id: '4',
-    name: 'Abstract Art',
-    description: 'Experimental and abstract photography exploring patterns, textures, and creative compositions.',
-    assetCount: 31,
-    isPublished: false,
-    hasPricing: true,
-    lastUpdated: '5 days ago',
-    previewAssets: [
-      { id: '19', name: 'Abstract Pattern', type: 'image' as const },
-      { id: '20', name: 'Texture Study', type: 'image' as const },
-      { id: '21', name: 'Color Composition', type: 'image' as const },
-      { id: '22', name: 'Geometric Form', type: 'image' as const },
-      { id: '23', name: 'Light Play', type: 'image' as const },
-      { id: '24', name: 'Abstract Motion', type: 'image' as const },
-    ],
-  },
-  {
-    id: '5',
-    name: 'Travel Diary',
-    description: 'Personal travel photography documenting journeys, cultures, and experiences from various destinations.',
-    assetCount: 45,
-    isPublished: true,
-    hasPricing: true,
-    lastUpdated: '1 day ago',
-    previewAssets: [
-      { id: '25', name: 'Travel Video', type: 'video' as const },
-      { id: '26', name: 'Cultural Event', type: 'image' as const },
-      { id: '27', name: 'Local Market', type: 'image' as const },
-      { id: '28', name: 'Landmark Photo', type: 'image' as const },
-      { id: '29', name: 'Street Scene', type: 'image' as const },
-      { id: '30', name: 'Travel Document', type: 'document' as const },
-    ],
-  },
-  {
-    id: '6',
-    name: 'Product Photography',
-    description: 'High-quality product shots for commercial use, featuring various items in professional studio settings.',
-    assetCount: 8,
-    isPublished: false,
-    hasPricing: false,
-    lastUpdated: '2 weeks ago',
-    previewAssets: [
-      { id: '31', name: 'Product Shot 1', type: 'image' as const },
-      { id: '32', name: 'Product Shot 2', type: 'image' as const },
-      { id: '33', name: 'Product Shot 3', type: 'image' as const },
-      { id: '34', name: 'Product Shot 4', type: 'image' as const },
-      { id: '35', name: 'Product Shot 5', type: 'image' as const },
-      { id: '36', name: 'Product Shot 6', type: 'image' as const },
-    ],
-  },
-];
+
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,11 +19,16 @@ export default function Dashboard() {
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [openSortPopover, setOpenSortPopover] = useState(false);
 
-  // Filter collections based on search and filters
-  const filteredCollections = mockCollections.filter(collection => {
-    const matchesSearch = collection.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         collection.description.toLowerCase().includes(searchQuery.toLowerCase());
+  // React Query hooks
+  const { data: collections = [], isLoading, error } = useCollections();
+  const { data: searchResults, isLoading: isSearching } = useSearchCollections(searchQuery);
+  const prefetchCollection = usePrefetchCollection();
 
+  // Use search results if there's a search query, otherwise use all collections
+  const allCollections = searchQuery ? (searchResults || []) : collections;
+
+  // Filter collections based on search and filters
+  const filteredCollections = allCollections.filter((collection: any) => {
     const matchesPublishedFilter = filterPublished === 'all' ||
                                  (filterPublished === 'published' && collection.isPublished) ||
                                  (filterPublished === 'unpublished' && !collection.isPublished);
@@ -135,7 +37,7 @@ export default function Dashboard() {
                                 (filterPricing === 'paid' && collection.hasPricing) ||
                                 (filterPricing === 'free' && !collection.hasPricing);
 
-    return matchesSearch && matchesPublishedFilter && matchesPricingFilter;
+    return matchesPublishedFilter && matchesPricingFilter;
   });
 
   // Sort collections
@@ -348,13 +250,34 @@ export default function Dashboard() {
         </div>
 
         {/* Collections Grid */}
-        {sortedCollections.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <span className="ml-2 text-white">Loading collections...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="mx-auto h-12 w-12 text-white/60">
+              <X className="h-full w-full" />
+            </div>
+            <h3 className="mt-2 text-sm font-medium text-white">Error loading collections</h3>
+            <p className="mt-1 text-sm text-white/80">
+              {error instanceof Error ? error.message : 'Something went wrong'}
+            </p>
+          </div>
+        ) : isSearching ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <span className="ml-2 text-white">Searching collections...</span>
+          </div>
+        ) : sortedCollections.length > 0 ? (
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
             {sortedCollections.map((collection) => (
               <CollectionCard
                 key={collection.id}
                 collection={collection}
                 href={`/authed/collections/${collection.id}`}
+                onMouseEnter={() => prefetchCollection(collection.id)}
               />
             ))}
           </div>

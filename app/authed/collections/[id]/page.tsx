@@ -3,39 +3,69 @@
 import DashboardTopBar from '@/components/layout/dashboard-top-bar';
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
-import { ArrowLeft, Eye, Plus, Settings } from 'lucide-react';
+import { useCollection } from '@/lib/hooks/use-collections';
+import { ArrowLeft, Eye, Loader2, Plus, Settings, X } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
-// Mock collection data
-const mockCollection = {
-  id: '1',
-  name: 'Nature Photography',
-  description: 'A collection of stunning nature photographs from around the world, featuring landscapes, wildlife, and botanical subjects.',
-  assetCount: 24,
-  isPublished: true,
-  hasPricing: true,
-  lastUpdated: '2 days ago',
-  assets: [
-    { id: '1', name: 'Mountain Lake', type: 'image', size: '2.4 MB', uploaded: '1 day ago' },
-    { id: '2', name: 'Forest Path', type: 'image', size: '1.8 MB', uploaded: '2 days ago' },
-    { id: '3', name: 'Sunset Valley', type: 'image', size: '3.1 MB', uploaded: '3 days ago' },
-  ]
-};
+
 
 export default function CollectionDetail() {
   const params = useParams();
-  const _collectionId = params.id as string;
+  const collectionId = params.id as string;
 
-  // In a real app, you'd fetch the collection data based on the ID
-  const collection = mockCollection;
+  // Fetch collection data using React Query
+  const { data: collection, isLoading, error } = useCollection(collectionId);
 
   const breadcrumbs = [
     { label: 'Collections', href: '/authed' },
-    { label: collection.name }
+    { label: collection?.name || 'Loading...' }
   ];
 
-      return (
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
+        <DashboardTopBar breadcrumbs={breadcrumbs} />
+        <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <span className="ml-2 text-white">Loading collection...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !collection) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
+        <DashboardTopBar breadcrumbs={breadcrumbs} />
+        <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
+          <div className="text-center py-12">
+            <div className="mx-auto h-12 w-12 text-white/60">
+              <X className="h-full w-full" />
+            </div>
+            <h3 className="mt-2 text-sm font-medium text-white">Error loading collection</h3>
+            <p className="mt-1 text-sm text-white/80">
+              {error instanceof Error ? error.message : 'Collection not found'}
+            </p>
+            <div className="mt-6">
+              <Button className="flex gap-2 px-4 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-gray-200" asChild>
+                <Link href="/authed">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to Collections</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
       <DashboardTopBar breadcrumbs={breadcrumbs} />
 
@@ -153,7 +183,7 @@ export default function CollectionDetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/20">
-                    {collection.assets.map((asset) => (
+                    {collection.assets.map((asset: any) => (
                       <tr key={asset.id} className="hover:bg-white/10 transition-colors">
                         <td className="px-4 py-3">
                           <div className="h-12 w-12 bg-white/20 rounded-lg flex items-center justify-center">

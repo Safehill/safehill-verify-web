@@ -122,13 +122,13 @@ export default function Home() {
       icon: '🧑‍🎨',
       title: 'Focus on Making Great Content',
       description:
-        'Spend less time and money worrying about protecting your valuable work, and more on what you do best: creating and sharing your beautiful work!',
+        'Spend less time and money worrying about protecting your valuable work, and more on what you do best: creating and sharing your art.',
     },
     {
       icon: '＄🫆',
       title: 'Get Credit and Royalties',
       description:
-        'We love AI generated images and videos! We love them even more if they can be used safely while giving credits to the owner and not infringing copyrights.',
+        'Whether it is AI generated or plain copied by humans, we ensure that if trending content on the web is too similar to your work you get credits and royalties.',
     },
     {
       icon: '💼',

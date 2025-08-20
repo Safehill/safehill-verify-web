@@ -39,7 +39,7 @@ const FeaturesList = () => {
       content: (
         <>
           Distribute your content with confidence, and rely on
-          our monitoring system to get credit and royalties.
+          our monitoring system to get credit and lose money on royalties.
         </>
       ),
     },
