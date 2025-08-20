@@ -38,8 +38,8 @@ const FeaturesList = () => {
       titleClass: 'text-green-500',
       content: (
         <>
-          Distribute your content with confidence, and rely on our usage
-          monitoring to get credit and royalties for it.
+          Distribute your content with confidence, and rely on
+          our monitoring system to get credit and royalties.
         </>
       ),
     },

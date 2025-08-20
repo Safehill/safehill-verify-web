@@ -1,11 +1,3 @@
-import {
-  ArrowDownCircleIcon,
-  ArrowRightCircleIcon,
-  CalendarDaysIcon,
-  FingerprintIcon,
-} from 'lucide-react';
-import Link from 'next/link';
-import React, { Suspense } from 'react';
 import { DownloadAppButtons } from '@/components/home/DownloadAppButtons';
 import FeaturesGrid from '@/components/home/FeaturesGrid';
 import FeaturesList from '@/components/home/FeaturesList';
@@ -18,6 +10,14 @@ import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import SafehillAppLogo from '@/components/shared/SafehillAppLogo';
 import TabView from '@/components/shared/TabView';
+import {
+  ArrowDownCircleIcon,
+  ArrowRightCircleIcon,
+  CalendarDaysIcon,
+  FingerprintIcon,
+} from 'lucide-react';
+import Link from 'next/link';
+import { Suspense } from 'react';
 
 export default function Home() {
   const steps: Item[] = [
@@ -134,7 +134,7 @@ export default function Home() {
       icon: '💼',
       title: 'Help your Legal Team',
       description:
-        'With proof of ownership and traceability to prevent and aid IP and copyright battles. We handle the complexities of distributing your copyrighted content.',
+        'With proof of ownership and traceability, you prevent IP and copyright battles. We handle the complexities of distributing and monitor use of your copyrighted content.',
     },
   ];
 
@@ -149,12 +149,12 @@ export default function Home() {
             className="animate-fade-up bg-gradient-to-br from-purple-600 to-yellow-100 bg-clip-text text-center font-display text-5xl md:text-6xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] md:leading-[5rem] px-5 mb-10"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
-            Why use Safehill
+            Why use Safehill?
           </h1>
 
           <p className="text-center text-xl md:text-2xl font-light tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-10">
             It&apos;s the tool you&apos;ve been waiting for to protect, share
-            and monetize your work!
+            and monetize your work
             <br />
             &nbsp;
           </p>
@@ -258,6 +258,9 @@ export default function Home() {
               Attach fingerprints to your content to protect it from Security,
               <br />
               IP and Copyright breaches made by humans and AI.
+              <br />
+              <br />
+              Make them yours forever.
             </p>
             <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-20">
               <Link
@@ -337,7 +340,7 @@ export default function Home() {
                 'finally get credit<br />and royalties<br />from it.',
                 'prevent<br />unauthorized<br />distribution<br />or leaks.',
                 'share it while<br />retaining<br />control.',
-                'prevent or aid legal<br />battles over<br />copyrights<br />and IP.',
+                'prevent and aid legal<br />battles over<br />copyrights<br />and IP.',
                 'avoid<br />AI-generated<br />copyright <br />infringements.',
               ]}
             />

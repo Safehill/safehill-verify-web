@@ -1,0 +1,200 @@
+'use client';
+
+import DashboardTopBar from '@/components/layout/dashboard-top-bar';
+import { Badge } from '@/components/shared/badge';
+import { Button } from '@/components/shared/button';
+import { ArrowLeft, Eye, Plus, Settings } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+
+// Mock collection data
+const mockCollection = {
+  id: '1',
+  name: 'Nature Photography',
+  description: 'A collection of stunning nature photographs from around the world, featuring landscapes, wildlife, and botanical subjects.',
+  assetCount: 24,
+  isPublished: true,
+  hasPricing: true,
+  lastUpdated: '2 days ago',
+  assets: [
+    { id: '1', name: 'Mountain Lake', type: 'image', size: '2.4 MB', uploaded: '1 day ago' },
+    { id: '2', name: 'Forest Path', type: 'image', size: '1.8 MB', uploaded: '2 days ago' },
+    { id: '3', name: 'Sunset Valley', type: 'image', size: '3.1 MB', uploaded: '3 days ago' },
+  ]
+};
+
+export default function CollectionDetail() {
+  const params = useParams();
+  const _collectionId = params.id as string;
+
+  // In a real app, you'd fetch the collection data based on the ID
+  const collection = mockCollection;
+
+  const breadcrumbs = [
+    { label: 'Collections', href: '/authed' },
+    { label: collection.name }
+  ];
+
+      return (
+    <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
+      <DashboardTopBar breadcrumbs={breadcrumbs} />
+
+      <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
+        {/* Header */}
+        <div className="mb-8">
+          {/* Buttons Row */}
+          <div className="flex items-center justify-between mb-6">
+            <Button className="flex gap-2 px-4 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-gray-200" asChild>
+              <Link href="/authed">
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back</span>
+              </Link>
+            </Button>
+            <div className="flex items-center space-x-3">
+              <Button
+                className="flex gap-2 px-4 py-2 bg-purple-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
+                disabled
+              >
+                <Settings className="h-4 w-4" />
+                <span>Settings</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Title and Description */}
+          <div>
+            <h1 className="text-4xl font-bold from-purple-100 bg-gradient-to-br to-orange-300 bg-clip-text text-transparent">{collection.name}</h1>
+            <p className="mt-2 font-extralight text-white/80">{collection.description}</p>
+          </div>
+        </div>
+
+        {/* Collection Stats */}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-5">
+          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/60">Total Assets</p>
+              <p className="text-3xl font-bold text-white mt-2 h-10">{collection.assetCount}</p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/60">Status</p>
+              <div className="flex items-center justify-center mt-2 h-10">
+                                 {collection.isPublished ? (
+                   <Badge variant="secondary" className="text-sm bg-green-500/80 text-white border-green-400/50">
+                     <Eye className="mr-1 h-4 w-4" />
+                     Published
+                   </Badge>
+                 ) : (
+                   <Badge variant="outline" className="text-xs bg-white/20 text-white border-white/30">
+                     Draft
+                   </Badge>
+                 )}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/60">Pricing</p>
+              <div className="flex items-center justify-center mt-2 h-10">
+                                   {collection.hasPricing ? (
+                     <Badge variant="outline" className="text-sm bg-purple-500/80 text-white border-purple-400/50">
+                       $20
+                     </Badge>
+                   ) : (
+                     <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
+                       Free
+                     </Badge>
+                   )}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/60">Revenue Generated</p>
+              <p className="text-3xl font-bold text-white mt-2 h-10">$0</p>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+            <div className="text-center">
+              <p className="text-xs font-medium text-white/60">Last Updated</p>
+              <p className="text-sm text-white/80 mt-2 pt-2 h-10">{collection.lastUpdated}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Assets List */}
+        <div className="rounded-2xl border-2 border-solid border-white/30 bg-transparent shadow-none">
+          <div className="flex items-center justify-between pl-5 pr-3 py-4">
+            <h2 className="text-2xl font-semibold text-white">Assets</h2>
+            <Button
+              className="flex gap-2 px-4 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
+              disabled
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Asset</span>
+            </Button>
+          </div>
+          <div>
+            {collection.assets.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/20">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60"></th>
+                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60">Name</th>
+                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60">Type & Size</th>
+                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60">Uploaded</th>
+                      <th className="px-4 py-3 text-right text-sm font-extralight text-white/60">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/20">
+                    {collection.assets.map((asset) => (
+                      <tr key={asset.id} className="hover:bg-white/10 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="h-12 w-12 bg-white/20 rounded-lg flex items-center justify-center">
+                            <span className="text-white/60 text-sm">IMG</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-white">{asset.name}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="text-sm text-white/80">{asset.type} • {asset.size}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-sm text-white/80">{asset.uploaded}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            {/* Placeholder for more actions */}
+                            <Button className="flex gap-2 px-2 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20">
+                              {/* Replace with icon for quick look */}
+                              <span>⋯</span>
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-white/80">No assets in this collection yet.</p>
+                <Button className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800 mt-4">
+                  <Plus className="h-4 w-4" />
+                  <span>Add First Asset</span>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

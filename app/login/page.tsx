@@ -161,10 +161,29 @@ export default function LoginPage() {
                 </Button>
               </div>
             ) : (
-              <InstructionsView
-                websocketSession={websocketSession}
-                generateQRCode={generateQRCode}
-              />
+              <>
+                <InstructionsView
+                  websocketSession={websocketSession}
+                  generateQRCode={generateQRCode}
+                />
+
+                {/* Development-only bypass link */}
+                {process.env.NODE_ENV === 'development' && (
+                  <div className="mt-8 pt-6 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 mb-3">
+                      Development Mode Only
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push('/dev-login')}
+                      className="text-xs bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+                    >
+                      ⚠️ Development Login Bypass
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
