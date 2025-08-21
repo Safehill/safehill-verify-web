@@ -380,8 +380,12 @@ export default function CollectionDetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/20">
-                    {sortedAssets.map((asset: any) => (
-                      <AssetTableRow key={asset.id} asset={asset} />
+                    {sortedAssets.map((asset: any, index: number) => (
+                      <AssetTableRow
+                        key={asset.id}
+                        asset={asset}
+                        isLastRow={index === sortedAssets.length - 1}
+                      />
                     ))}
                   </tbody>
                 </table>

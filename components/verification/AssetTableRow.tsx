@@ -14,9 +14,10 @@ interface AssetTableRowProps {
     size: string;
     uploaded: string;
   };
+  isLastRow?: boolean;
 }
 
-export default function AssetTableRow({ asset }: AssetTableRowProps) {
+export default function AssetTableRow({ asset, isLastRow = false }: AssetTableRowProps) {
   const { data: imageData, isLoading, error } = useImage(asset.id);
 
   // Debug logging
@@ -24,8 +25,8 @@ export default function AssetTableRow({ asset }: AssetTableRowProps) {
 
   return (
     <tr className="hover:bg-white/10 transition-colors">
-      <td className="w-16 px-4 py-3">
-        <div className="h-12 w-12 bg-white/20 rounded-lg flex items-center justify-center overflow-hidden">
+      <td className="w-16 p-0 relative">
+        <div className={`absolute inset-0 bg-white/20 flex items-center justify-center overflow-hidden ${isLastRow ? 'rounded-bl-2xl' : ''}`}>
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin text-white/60" />
           ) : error ? (
