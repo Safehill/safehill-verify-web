@@ -5,6 +5,7 @@ import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import Popover from '@/components/shared/popover';
 import CollectionCard from '@/components/verification/CollectionCard';
+import { useAuth } from '@/lib/auth/auth-context';
 import { useCollections, usePrefetchCollection, useSearchCollections } from '@/lib/hooks/use-collections';
 import { ArrowUpDown, Filter, Loader2, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
@@ -14,10 +15,14 @@ import { useState } from 'react';
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisibility, setFilterVisibility] = useState<'all' | 'public' | 'confidential' | 'unshared'>('all');
+  const [filterOwnership, setFilterOwnership] = useState<'all' | 'owned' | 'shared'>('all');
   const [filterPricing, setFilterPricing] = useState<'all' | 'paid' | 'free'>('all');
   const [sortBy, setSortBy] = useState<'lastUpdated' | 'name'>('lastUpdated');
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [openSortPopover, setOpenSortPopover] = useState(false);
+
+  const { authedSession } = useAuth();
+  const currentUserId = authedSession?.user.identifier;
 
   // React Query hooks
   const { data: collections = [], isLoading, error } = useCollections();
@@ -32,27 +37,24 @@ export default function Dashboard() {
     const matchesVisibilityFilter = filterVisibility === 'all' ||
                                    collection.visibility === filterVisibility;
 
-    const matchesPricingFilter = filterPricing === 'all' ||
-                                (filterPricing === 'paid' && collection.hasPricing) ||
-                                (filterPricing === 'free' && !collection.hasPricing);
+    const matchesOwnershipFilter = filterOwnership === 'all' ||
+                                  (filterOwnership === 'owned' && collection.createdBy === currentUserId) ||
+                                  (filterOwnership === 'shared' && collection.createdBy !== currentUserId);
 
-    return matchesVisibilityFilter && matchesPricingFilter;
+    const matchesPricingFilter = filterPricing === 'all' ||
+                                (filterPricing === 'paid' && collection.pricing > 0) ||
+                                (filterPricing === 'free' && collection.pricing === 0);
+
+    return matchesVisibilityFilter && matchesOwnershipFilter && matchesPricingFilter;
   });
 
   // Sort collections
   const sortedCollections = [...filteredCollections].sort((a, b) => {
     if (sortBy === 'lastUpdated') {
-      // Simple sorting based on the "X days ago" format
-      const getDays = (timeStr: string) => {
-        if (timeStr.includes('day')) {
-          return parseInt(timeStr.split(' ')[0]);
-        }
-        if (timeStr.includes('week')) {
-          return parseInt(timeStr.split(' ')[0]) * 7;
-        }
-        return 999; // For "X weeks ago" or other formats
-      };
-      return getDays(a.lastUpdated) - getDays(b.lastUpdated);
+      // Sort by actual timestamp (newest first)
+      const dateA = new Date(a.lastUpdated).getTime();
+      const dateB = new Date(b.lastUpdated).getTime();
+      return dateB - dateA; // Descending order (newest first)
     } else {
       return a.name.localeCompare(b.name);
     }
@@ -151,6 +153,45 @@ export default function Dashboard() {
                           className="text-gray-500"
                         />
                         <span className="text-gray-900 text-sm">Unshared</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-gray-700 text-sm font-medium mb-2 block">Ownership</label>
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="ownership"
+                          value="all"
+                          checked={filterOwnership === 'all'}
+                          onChange={(e) => setFilterOwnership(e.target.value as any)}
+                          className="text-blue-500"
+                        />
+                        <span className="text-gray-900 text-sm">All</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="ownership"
+                          value="owned"
+                          checked={filterOwnership === 'owned'}
+                          onChange={(e) => setFilterOwnership(e.target.value as any)}
+                          className="text-blue-500"
+                        />
+                        <span className="text-gray-900 text-sm">Owned by me</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="ownership"
+                          value="shared"
+                          checked={filterOwnership === 'shared'}
+                          onChange={(e) => setFilterOwnership(e.target.value as any)}
+                          className="text-blue-500"
+                        />
+                        <span className="text-gray-900 text-sm">Shared with me</span>
                       </label>
                     </div>
                   </div>
@@ -288,6 +329,7 @@ export default function Dashboard() {
                 collection={collection}
                 href={`/authed/collections/${collection.id}`}
                 onMouseEnter={() => prefetchCollection(collection.id)}
+                isOwned={collection.createdBy === currentUserId}
               />
             ))}
           </div>
@@ -298,12 +340,12 @@ export default function Dashboard() {
             </div>
             <h3 className="mt-2 text-sm font-medium text-white">No collections found</h3>
             <p className="mt-1 text-sm text-white/80">
-              {searchQuery || filterVisibility !== 'all' || filterPricing !== 'all'
+              {searchQuery || filterVisibility !== 'all' || filterOwnership !== 'all' || filterPricing !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
                 : 'Get started by creating your first collection.'
               }
             </p>
-            {!searchQuery && filterVisibility === 'all' && filterPricing === 'all' ? (
+            {!searchQuery && filterVisibility === 'all' && filterOwnership === 'all' && filterPricing === 'all' ? (
               <div className="mt-6 flex justify-center">
                 <Button
                   className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg opacity-50 cursor-not-allowed"
@@ -320,6 +362,7 @@ export default function Dashboard() {
                 onClick={() => {
                   setSearchQuery('');
                   setFilterVisibility('all');
+                  setFilterOwnership('all');
                   setFilterPricing('all');
                 }}
                 >

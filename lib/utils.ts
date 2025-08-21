@@ -1,3 +1,4 @@
+import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
 import { type ClassValue, clsx } from 'clsx';
 import ms from 'ms';
 import { twMerge } from 'tailwind-merge';
@@ -6,11 +7,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const timeAgo = (timestamp: Date, timeOnly?: boolean): string => {
+export const timeAgo = (timestamp: string | Date, timeOnly?: boolean): string => {
   if (!timestamp) {
     return 'never';
   }
-  return `${ms(Date.now() - new Date(timestamp).getTime())}${
+
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+
+  if (isNaN(date.getTime())) {
+    return 'invalid date';
+  }
+
+  return `${ms(Date.now() - date.getTime())}${
     timeOnly ? '' : ' ago'
   }`;
 };
@@ -83,4 +91,18 @@ export const formattedDate = (date: Date, includeHour: boolean = false) => {
     hour: includeHour ? 'numeric' : undefined,
     minute: includeHour ? 'numeric' : undefined,
   });
+};
+
+// Convert AuthedSession to AuthenticatedUser format
+export const convertToAuthenticatedUser = (authedSession: any): AuthenticatedUser | null => {
+  if (!authedSession) {
+    return null;
+  }
+
+  return {
+    authToken: authedSession.bearerToken,
+    privateKey: authedSession.privateKey,
+    privateSignature: authedSession.signature,
+    user: authedSession.user,
+  };
 };

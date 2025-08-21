@@ -1,21 +1,76 @@
 'use client';
 
 import DashboardTopBar from '@/components/layout/dashboard-top-bar';
+import { Avatar, AvatarFallback } from '@/components/shared/avatar';
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
-import { useCollection } from '@/lib/hooks/use-collections';
+import { useAuth } from '@/lib/auth/auth-context';
+import { useCollection, useUser } from '@/lib/hooks/use-collections';
+import { cn, timeAgo } from '@/lib/utils';
 import { ArrowLeft, Eye, Loader2, Plus, Settings, X } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 
 
+// Generate a color based on user identifier (same as dashboard-top-bar.tsx)
+function getAvatarColor(identifier: string): string {
+  const colors = [
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-purple-500',
+    'bg-pink-500',
+    'bg-indigo-500',
+    'bg-teal-500',
+    'bg-orange-500',
+    'bg-red-500',
+    'bg-yellow-500',
+    'bg-emerald-500',
+  ];
+
+  // Simple hash function to get consistent color for same identifier
+  let hash = 0;
+  for (let i = 0; i < identifier.length; i++) {
+    const char = identifier.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  return colors[Math.abs(hash) % colors.length];
+}
+
+// Get initials from user name or identifier (same as dashboard-top-bar.tsx)
+function getInitials(name?: string, identifier?: string): string {
+  if (name) {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  if (identifier) {
+    return identifier.slice(0, 2).toUpperCase();
+  }
+
+  return 'U';
+}
+
 export default function CollectionDetail() {
   const params = useParams();
   const collectionId = params.id as string;
+  const { authedSession } = useAuth();
+  const currentUserId = authedSession?.user.identifier;
 
   // Fetch collection data using React Query
   const { data: collection, isLoading, error } = useCollection(collectionId);
+  const { data: user } = useUser(collection?.createdBy || '');
+
+  // Avatar styling
+  const avatarColor = collection?.createdBy ? getAvatarColor(collection.createdBy) : 'bg-gray-500';
+  const initials = getInitials(user?.name, collection?.createdBy);
+  const isOwned = collection?.createdBy === currentUserId;
 
   const breadcrumbs = [
     { label: 'Collections', href: '/authed' },
@@ -81,20 +136,32 @@ export default function CollectionDetail() {
               </Link>
             </Button>
             <div className="flex items-center space-x-3">
-              <Button
-                className="flex gap-2 px-4 py-2 bg-purple-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
-                disabled
-              >
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
-              </Button>
+              {isOwned && (
+                <Button
+                  className="flex gap-2 px-4 py-2 bg-purple-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
+                  disabled
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>Settings</span>
+                </Button>
+              )}
             </div>
           </div>
 
           {/* Title and Description */}
           <div>
-            <h1 className="text-4xl font-bold from-purple-100 bg-gradient-to-br to-orange-300 bg-clip-text text-transparent">{collection.name}</h1>
-            <p className="mt-2 font-extralight text-white/80">{collection.description}</p>
+            <div className="flex items-start space-x-4 mb-4">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className={cn(avatarColor, 'text-white font-medium text-lg')}>
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-5xl font-bold from-purple-100 bg-gradient-to-br to-orange-300 bg-clip-text text-transparent mb-4">{collection.name}</h1>
+                <p className="font-extralight text-white/80 mb-1">{collection.description}</p>
+                <p className="font-extralight text-gray-500 text-sm">Created and owned by <span className="font-black text-white/80">{user?.name}</span></p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -131,34 +198,40 @@ export default function CollectionDetail() {
             </div>
           </div>
 
-          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
-            <div className="text-center">
-              <p className="text-xs font-medium text-white/60">Pricing</p>
-              <div className="flex items-center justify-center mt-2 h-10">
-                                   {collection.hasPricing ? (
-                     <Badge variant="outline" className="text-sm bg-purple-500/80 text-white border-purple-400/50">
-                       $20
-                     </Badge>
-                   ) : (
-                     <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
-                       Free
-                     </Badge>
-                   )}
+          {/* Show pricing only if not unshared */}
+          {collection.visibility !== 'unshared' && (
+            <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+              <div className="text-center">
+                <p className="text-xs font-medium text-white/60">Pricing</p>
+                <div className="flex items-center justify-center mt-2 h-10">
+                  {collection.pricing > 0 ? (
+                    <Badge variant="outline" className="text-sm bg-purple-500/80 text-white border-purple-400/50">
+                      ${collection.pricing}
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
+                      Free
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
-            <div className="text-center">
-              <p className="text-xs font-medium text-white/60">Revenue Generated</p>
-              <p className="text-3xl font-bold text-white mt-2 h-10">$0</p>
+          {/* Show revenue only if not unshared */}
+          {collection.visibility !== 'unshared' && (
+            <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+              <div className="text-center">
+                <p className="text-xs font-medium text-white/60">Revenue Generated</p>
+                <p className="text-3xl font-bold text-white mt-2 h-10">$0</p>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
             <div className="text-center">
               <p className="text-xs font-medium text-white/60">Last Updated</p>
-              <p className="text-sm text-white/80 mt-2 pt-2 h-10">{collection.lastUpdated}</p>
+              <p className="text-sm text-white/80 mt-2 pt-2 h-10">{timeAgo(collection.lastUpdated)}</p>
             </div>
           </div>
         </div>
@@ -203,7 +276,7 @@ export default function CollectionDetail() {
                           <p className="text-sm text-white/80">{asset.type} • {asset.size}</p>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-sm text-white/80">{asset.uploaded}</span>
+                          <span className="text-sm text-white/80">{timeAgo(asset.uploaded)}</span>
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end space-x-2">
