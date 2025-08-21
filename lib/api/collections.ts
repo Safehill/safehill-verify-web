@@ -297,6 +297,31 @@ const mockUsers = {
   'dev-user-123': { identifier: 'dev-user-123', name: 'Development User', email: 'dev@safehill.io' },
 };
 
+// Mock image data for testing
+const mockImages = {
+  '1': { id: '1', name: 'Mountain Lake', url: 'https://picsum.photos/300/300?random=1', thumbnailUrl: 'https://picsum.photos/150/150?random=1' },
+  '2': { id: '2', name: 'Forest Path', url: 'https://picsum.photos/300/300?random=2', thumbnailUrl: 'https://picsum.photos/150/150?random=2' },
+  '3': { id: '3', name: 'Sunset Valley', url: 'https://picsum.photos/300/300?random=3', thumbnailUrl: 'https://picsum.photos/150/150?random=3' },
+  '4': { id: '4', name: 'Modern Skyscraper', url: 'https://picsum.photos/300/300?random=4', thumbnailUrl: 'https://picsum.photos/150/150?random=4' },
+  '5': { id: '5', name: 'Historic Building', url: 'https://picsum.photos/300/300?random=5', thumbnailUrl: 'https://picsum.photos/150/150?random=5' },
+  '6': { id: '6', name: 'Professional Headshot', url: 'https://picsum.photos/300/300?random=6', thumbnailUrl: 'https://picsum.photos/150/150?random=6' },
+  '7': { id: '7', name: 'Environmental Portrait', url: 'https://picsum.photos/300/300?random=7', thumbnailUrl: 'https://picsum.photos/150/150?random=7' },
+  '8': { id: '8', name: 'Abstract Pattern', url: 'https://picsum.photos/300/300?random=8', thumbnailUrl: 'https://picsum.photos/150/150?random=8' },
+  '9': { id: '9', name: 'Texture Study', url: 'https://picsum.photos/300/300?random=9', thumbnailUrl: 'https://picsum.photos/150/150?random=9' },
+  '10': { id: '10', name: 'Travel Video', url: 'https://picsum.photos/300/300?random=10', thumbnailUrl: 'https://picsum.photos/150/150?random=10' },
+  '11': { id: '11', name: 'Cultural Event', url: 'https://picsum.photos/300/300?random=11', thumbnailUrl: 'https://picsum.photos/150/150?random=11' },
+  '12': { id: '12', name: 'Product Shot 1', url: 'https://picsum.photos/300/300?random=12', thumbnailUrl: 'https://picsum.photos/150/150?random=12' },
+  '13': { id: '13', name: 'Product Shot 2', url: 'https://picsum.photos/300/300?random=13', thumbnailUrl: 'https://picsum.photos/150/150?random=13' },
+  '14': { id: '14', name: 'Test Image 1', url: 'https://picsum.photos/300/300?random=14', thumbnailUrl: 'https://picsum.photos/150/150?random=14' },
+  '15': { id: '15', name: 'Test Image 2', url: 'https://picsum.photos/300/300?random=15', thumbnailUrl: 'https://picsum.photos/150/150?random=15' },
+  '16': { id: '16', name: 'Test Document', url: 'https://picsum.photos/300/300?random=16', thumbnailUrl: 'https://picsum.photos/150/150?random=16' },
+  '17': { id: '17', name: 'Private Image 1', url: 'https://picsum.photos/300/300?random=17', thumbnailUrl: 'https://picsum.photos/150/150?random=17' },
+  '18': { id: '18', name: 'Private Image 2', url: 'https://picsum.photos/300/300?random=18', thumbnailUrl: 'https://picsum.photos/150/150?random=18' },
+  '19': { id: '19', name: 'Shared Image 1', url: 'https://picsum.photos/300/300?random=19', thumbnailUrl: 'https://picsum.photos/150/150?random=19' },
+  '20': { id: '20', name: 'Shared Image 2', url: 'https://picsum.photos/300/300?random=20', thumbnailUrl: 'https://picsum.photos/150/150?random=20' },
+  '21': { id: '21', name: 'Shared Document', url: 'https://picsum.photos/300/300?random=21', thumbnailUrl: 'https://picsum.photos/150/150?random=21' },
+};
+
 // Mock sharing data - tracks which collections are shared with which users
 const mockSharedCollections = {
   'dev-user-123': ['9'], // Collection 9 is shared with dev-user-123
@@ -321,6 +346,13 @@ export interface Collection {
     type: 'image' | 'video' | 'document';
     thumbnailUrl?: string;
   }>;
+}
+
+export interface ImageData {
+  id: string;
+  name: string;
+  url: string;
+  thumbnailUrl: string;
 }
 
 export interface CollectionDetail extends Collection {
@@ -412,5 +444,23 @@ export const collectionsApi = {
   getUser: async (userId: string) => {
     await new Promise(resolve => setTimeout(resolve, 100));
     return mockUsers[userId as keyof typeof mockUsers];
+  },
+
+  // Get image data by ID
+  getImage: async (imageId: string): Promise<ImageData> => {
+    await new Promise(resolve => setTimeout(resolve, 150));
+
+    console.log('getImage called with:', imageId);
+    console.log('Available mock images:', Object.keys(mockImages));
+
+    const image = mockImages[imageId as keyof typeof mockImages];
+
+    console.log('Found image:', image);
+
+    if (!image) {
+      throw new Error(`Image with id ${imageId} not found`);
+    }
+
+    return image;
   }
 };

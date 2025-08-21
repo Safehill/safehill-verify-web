@@ -70,6 +70,17 @@ export const useUser = (userId: string) => {
   });
 };
 
+// Hook to get image data
+export const useImage = (imageId: string) => {
+  return useQuery({
+    queryKey: ['image', imageId],
+    queryFn: () => collectionsApi.getImage(imageId),
+    enabled: !!imageId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
 // Hook to prefetch a collection (useful for navigation)
 export const usePrefetchCollection = () => {
   const queryClient = useQueryClient();
