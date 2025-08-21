@@ -4,12 +4,16 @@ import DashboardTopBar from '@/components/layout/dashboard-top-bar';
 import { Avatar, AvatarFallback } from '@/components/shared/avatar';
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
+import SegmentedControl from '@/components/shared/segmented-control';
+import AssetGallery from '@/components/verification/AssetGallery';
+import AssetTableRow from '@/components/verification/AssetTableRow';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCollection, useUser } from '@/lib/hooks/use-collections';
 import { cn, timeAgo } from '@/lib/utils';
-import { ArrowLeft, Eye, Loader2, Plus, Settings, X } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, Eye, Grid, List, Loader2, Plus, Settings, X } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useMemo, useState } from 'react';
 
 
 
@@ -57,15 +61,84 @@ function getInitials(name?: string, identifier?: string): string {
   return 'U';
 }
 
+type SortField = 'name' | 'size' | 'uploaded' | null;
+type SortDirection = 'asc' | 'desc';
+
 export default function CollectionDetail() {
   const params = useParams();
   const collectionId = params.id as string;
   const { authedSession } = useAuth();
   const currentUserId = authedSession?.user.identifier;
+  const [viewMode, setViewMode] = useState<'gallery' | 'table'>('gallery');
+  const [sortField, setSortField] = useState<SortField>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   // Fetch collection data using React Query
   const { data: collection, isLoading, error } = useCollection(collectionId);
   const { data: user } = useUser(collection?.createdBy || '');
+
+  // Sort assets based on current sort state
+  const sortedAssets = useMemo(() => {
+    if (!collection?.assets || !sortField) {
+      return collection?.assets || [];
+    }
+
+    return [...collection.assets].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'size':
+          // Extract numeric size from string (e.g., "2.5 MB" -> 2.5)
+          aValue = parseFloat(a.size.split(' ')[0]);
+          bValue = parseFloat(b.size.split(' ')[0]);
+          break;
+        case 'uploaded':
+          aValue = new Date(a.uploaded).getTime();
+          bValue = new Date(b.uploaded).getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (sortDirection === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+  }, [collection?.assets, sortField, sortDirection]);
+
+  // Handle header click for sorting
+  const handleHeaderClick = (field: SortField) => {
+    if (sortField === field) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortField(null);
+        setSortDirection('asc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Get sort icon for header
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return null;
+    }
+    return sortDirection === 'asc' ? (
+      <ChevronUp className="h-4 w-4 ml-1" />
+    ) : (
+      <ChevronDown className="h-4 w-4 ml-1" />
+    );
+  };
 
   // Avatar styling
   const avatarColor = collection?.createdBy ? getAvatarColor(collection.createdBy) : 'bg-gray-500';
@@ -240,68 +313,89 @@ export default function CollectionDetail() {
         <div className="rounded-2xl border-2 border-solid border-white/30 bg-transparent shadow-none">
           <div className="flex items-center justify-between pl-5 pr-3 py-4">
             <h2 className="text-2xl font-semibold text-white">Assets</h2>
-            <Button
-              className="flex gap-2 px-4 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
-              disabled
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Asset</span>
-            </Button>
+            <div className="flex items-center gap-4">
+              <SegmentedControl
+                options={[
+                  { value: 'gallery', label: 'Gallery', icon: <Grid className="h-4 w-4" /> },
+                  { value: 'table', label: 'Table', icon: <List className="h-4 w-4" /> },
+                ]}
+                value={viewMode}
+                onChange={(value) => setViewMode(value as 'gallery' | 'table')}
+              />
+              <Button
+                className="flex gap-2 px-4 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
+                disabled
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Asset</span>
+              </Button>
+            </div>
           </div>
-          <div>
-            {collection.assets.length > 0 ? (
+          {/* Line Separator */}
+          <div className={`border-t border-white/10`}></div>
+
+          {collection.assets.length > 0 ? (
+            viewMode === 'gallery' ? (
+              <AssetGallery assets={collection.assets} />
+            ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-white/20">
-                  <thead>
+                  <thead className="bg-white/40">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60"></th>
-                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60">Name</th>
-                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60">Type & Size</th>
-                      <th className="px-4 py-3 text-left text-sm font-extralight text-white/60">Uploaded</th>
-                      <th className="px-4 py-3 text-right text-sm font-extralight text-white/60">Actions</th>
+                      <th className="w-16 px-4 py-3 text-left text-sm text-gray-800"></th>
+                      <th
+                        className="px-4 py-3 text-left text-sm text-gray-800 cursor-pointer hover:bg-white/60 transition-colors select-none"
+                        onClick={() => handleHeaderClick('name')}
+                      >
+                        <div className="flex items-center">
+                          <span>Name</span>
+                          <div className="w-4 ml-1 flex justify-center">
+                            {getSortIcon('name')}
+                          </div>
+                        </div>
+                      </th>
+                      <th
+                        className="px-4 py-3 text-left text-sm text-gray-800 cursor-pointer hover:bg-white/60 transition-colors select-none"
+                        onClick={() => handleHeaderClick('size')}
+                      >
+                        <div className="flex items-center">
+                          <span>Type & Size</span>
+                          <div className="w-4 ml-1 flex justify-center">
+                            {getSortIcon('size')}
+                          </div>
+                        </div>
+                      </th>
+                      <th
+                        className="px-4 py-3 text-left text-sm text-gray-800 cursor-pointer hover:bg-white/60 transition-colors select-none"
+                        onClick={() => handleHeaderClick('uploaded')}
+                      >
+                        <div className="flex items-center">
+                          <span>Uploaded</span>
+                          <div className="w-4 ml-1 flex justify-center">
+                            {getSortIcon('uploaded')}
+                          </div>
+                        </div>
+                      </th>
+                      <th className="px-4 py-3 text-right text-sm text-gray-800">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/20">
-                    {collection.assets.map((asset: any) => (
-                      <tr key={asset.id} className="hover:bg-white/10 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="h-12 w-12 bg-white/20 rounded-lg flex items-center justify-center">
-                            <span className="text-white/60 text-sm">IMG</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-white">{asset.name}</p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="text-sm text-white/80">{asset.type} • {asset.size}</p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-white/80">{timeAgo(asset.uploaded)}</span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            {/* Placeholder for more actions */}
-                            <Button className="flex gap-2 px-2 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20">
-                              {/* Replace with icon for quick look */}
-                              <span>⋯</span>
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
+                    {sortedAssets.map((asset: any) => (
+                      <AssetTableRow key={asset.id} asset={asset} />
                     ))}
                   </tbody>
                 </table>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-white/80">No assets in this collection yet.</p>
-                <Button className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800 mt-4">
-                  <Plus className="h-4 w-4" />
-                  <span>Add First Asset</span>
-                </Button>
-              </div>
-            )}
-          </div>
+            )
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-white/80">No assets in this collection yet.</p>
+              <Button className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800 mt-4">
+                <Plus className="h-4 w-4" />
+                <span>Add First Asset</span>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
