@@ -1,16 +1,17 @@
 'use client';
 
+import useMediaQuery from '@/lib/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 import * as Dialog from '@radix-ui/react-dialog';
 import type { Dispatch, SetStateAction } from 'react';
 import { Drawer } from 'vaul';
-import useMediaQuery from '@/lib/hooks/use-media-query';
-import { cn } from '@/lib/utils';
 
 interface ModalProps {
   children: React.ReactNode;
   className?: string;
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
+  title?: string;
 }
 
 const Modal = ({
@@ -18,6 +19,7 @@ const Modal = ({
   className,
   showModal,
   setShowModal,
+  title,
 }: ModalProps) => {
   const { isMobile } = useMediaQuery();
 
@@ -55,10 +57,11 @@ const Modal = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
           className={cn(
-            'animate-scale-in fixed inset-0 z-40 m-auto max-h-fit w-full max-w-md overflow-hidden border border-gray-200 bg-white p-0 shadow-xl md:rounded-2xl',
+            'animate-scale-in fixed inset-0 z-40 m-auto max-h-fit w-full max-w-md overflow-hidden border border-gray-200 bg-white p-0 shadow-xl rounded-2xl',
             className
           )}
         >
+          {title && <Dialog.Title className="absolute left-[-10000px]">{title}</Dialog.Title>}
           {children}
         </Dialog.Content>
       </Dialog.Portal>

@@ -86,8 +86,12 @@ export default function DashboardTopBar({ breadcrumbs }: DashboardTopBarProps) {
         <div className="flex items-center space-x-2">
           {/* Safehill Logo */}
           <Link href="/authed" className="flex items-center">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-300 to-cyan-500 flex items-center justify-center">
+              <img
+                src="/images/snoog-white.png"
+                alt="Logo"
+                className="w-[40px] object-cover object-top py-3 mx-2"
+              />
             </div>
           </Link>
 

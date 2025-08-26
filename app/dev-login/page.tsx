@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/shared/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
-import { Input } from '@/components/shared/input';
 import { useAuth } from '@/lib/auth/auth-context';
 import { AlertTriangle, Key, Shield, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -21,8 +20,6 @@ export default function DevLogin() {
   const router = useRouter();
   const { setAuthedSession } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
-  const [confirmationCode, setConfirmationCode] = useState('');
 
   // Check if we're in development mode
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -36,11 +33,6 @@ export default function DevLogin() {
   const handleDevLogin = async () => {
     if (!isDevelopment) {
       alert('This feature is only available in development mode');
-      return;
-    }
-
-    if (confirmationCode !== 'DEV-MODE-2024') {
-      setShowWarning(true);
       return;
     }
 
@@ -100,28 +92,6 @@ export default function DevLogin() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              Development Confirmation Code
-            </label>
-            <Input
-              type="password"
-              placeholder="Enter DEV-MODE-2024"
-              value={confirmationCode}
-              onChange={(e) => {
-                setConfirmationCode(e.target.value);
-                setShowWarning(false);
-              }}
-              className="border-red-200 focus:border-red-500"
-            />
-            {showWarning && (
-              <div className="flex items-center space-x-2 text-sm text-red-600">
-                <AlertTriangle className="h-4 w-4" />
-                <span>Incorrect confirmation code</span>
-              </div>
-            )}
-          </div>
-
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <div className="flex items-start space-x-2">
               <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
@@ -137,7 +107,7 @@ export default function DevLogin() {
 
           <Button
             onClick={handleDevLogin}
-            disabled={isLoading || !confirmationCode}
+            disabled={isLoading}
             className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400"
           >
             {isLoading ? 'Logging in...' : 'Login as Development User'}

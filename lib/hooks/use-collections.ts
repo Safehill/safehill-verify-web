@@ -1,10 +1,10 @@
-import { collectionsApi, type Visibility } from '@/lib/api/collections';
+import { collectionsApi, type CollectionDetail, type Visibility } from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import { convertToAuthenticatedUser } from '@/lib/utils';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Re-export types for convenience
-export type { Visibility };
+export type { CollectionDetail, Visibility };
 
 // Query keys
 export const collectionKeys = {
@@ -108,4 +108,28 @@ export const useInvalidateCollections = () => {
   return () => {
     queryClient.invalidateQueries({ queryKey: collectionKeys.all });
   };
+};
+
+// Hook to update a collection
+export const useUpdateCollection = () => {
+  const queryClient = useQueryClient();
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      updates
+    }: {
+      id: string;
+      updates: { visibility?: Visibility; pricing?: number }
+    }) => collectionsApi.updateCollection(id, updates, authenticatedUser!),
+    onSuccess: (updatedCollection: CollectionDetail) => {
+      // Update the collection in the cache
+      queryClient.setQueryData(collectionKeys.detail(updatedCollection.id), updatedCollection);
+
+      // Invalidate the collections list to refresh it
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+    },
+  });
 };

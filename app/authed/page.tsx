@@ -1,10 +1,10 @@
 'use client';
 
-import DashboardTopBar from '@/components/layout/dashboard-top-bar';
+import CollectionCard from '@/components/authed/CollectionCard';
+import DashboardTopBar from '@/components/authed/dashboard-top-bar';
 import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import Popover from '@/components/shared/popover';
-import CollectionCard from '@/components/verification/CollectionCard';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCollections, usePrefetchCollection, useSearchCollections } from '@/lib/hooks/use-collections';
 import { ArrowUpDown, Filter, Loader2, Plus, Search, X } from 'lucide-react';
@@ -14,7 +14,7 @@ import { useState } from 'react';
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterVisibility, setFilterVisibility] = useState<'all' | 'public' | 'confidential' | 'unshared'>('all');
+  const [filterVisibility, setFilterVisibility] = useState<'all' | 'public' | 'confidential' | 'not-shared'>('all');
   const [filterOwnership, setFilterOwnership] = useState<'all' | 'owned' | 'shared'>('all');
   const [filterPricing, setFilterPricing] = useState<'all' | 'paid' | 'free'>('all');
   const [sortBy, setSortBy] = useState<'lastUpdated' | 'name'>('lastUpdated');
@@ -147,12 +147,12 @@ export default function Dashboard() {
                         <input
                           type="radio"
                           name="visibility"
-                          value="unshared"
-                          checked={filterVisibility === 'unshared'}
+                          value="not-shared"
+                          checked={filterVisibility === 'not-shared'}
                           onChange={(e) => setFilterVisibility(e.target.value as any)}
                           className="text-gray-500"
                         />
-                        <span className="text-gray-900 text-sm">Unshared</span>
+                        <span className="text-gray-900 text-sm">Not Shared</span>
                       </label>
                     </div>
                   </div>
@@ -197,7 +197,7 @@ export default function Dashboard() {
                   </div>
 
                   <div>
-                    <label className="text-gray-700 text-sm font-medium mb-2 block">Pricing</label>
+                    <label className="text-gray-700 text-sm font-medium mb-2 block">Price</label>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
                         <input
@@ -259,6 +259,17 @@ export default function Dashboard() {
                 <div className="text-base text-gray-900 font-medium mb-3">Sort by:</div>
 
                 <div className="space-y-2">
+                <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="sort"
+                      value="name"
+                      checked={sortBy === 'name'}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="text-blue-500"
+                    />
+                    <span className="text-gray-900 text-sm">Name</span>
+                  </label>
                   <label className="flex items-center space-x-2">
                     <input
                       type="radio"
@@ -269,17 +280,6 @@ export default function Dashboard() {
                       className="text-blue-500"
                     />
                     <span className="text-gray-900 text-sm">Last Updated</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="sort"
-                      value="name"
-                      checked={sortBy === 'name'}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      className="text-blue-500"
-                    />
-                    <span className="text-gray-900 text-sm">Name</span>
                   </label>
                 </div>
               </div>

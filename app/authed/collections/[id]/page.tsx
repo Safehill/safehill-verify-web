@@ -1,12 +1,15 @@
 'use client';
 
-import DashboardTopBar from '@/components/layout/dashboard-top-bar';
+import AssetGallery from '@/components/authed/AssetGallery';
+import AssetTableRow from '@/components/authed/AssetTableRow';
+import CollectionSettingsModal from '@/components/authed/CollectionSettingsModal';
+import DashboardTopBar from '@/components/authed/dashboard-top-bar';
 import { Avatar, AvatarFallback } from '@/components/shared/avatar';
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
+import CopyButton from '@/components/shared/CopyButton';
 import SegmentedControl from '@/components/shared/segmented-control';
-import AssetGallery from '@/components/verification/AssetGallery';
-import AssetTableRow from '@/components/verification/AssetTableRow';
+import { generateCollectionLink } from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCollection, useUser } from '@/lib/hooks/use-collections';
 import { cn, timeAgo } from '@/lib/utils';
@@ -72,6 +75,7 @@ export default function CollectionDetail() {
   const [viewMode, setViewMode] = useState<'gallery' | 'table'>('gallery');
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Fetch collection data using React Query
   const { data: collection, isLoading, error } = useCollection(collectionId);
@@ -211,8 +215,8 @@ export default function CollectionDetail() {
             <div className="flex items-center space-x-3">
               {isOwned && (
                 <Button
-                  className="flex gap-2 px-4 py-2 bg-purple-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
-                  disabled
+                  className="flex gap-2 px-4 py-2 bg-purple-300/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
+                  onClick={() => setShowSettingsModal(true)}
                 >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
@@ -231,8 +235,32 @@ export default function CollectionDetail() {
               </Avatar>
               <div>
                 <h1 className="text-5xl font-bold from-purple-100 bg-gradient-to-br to-orange-300 bg-clip-text text-transparent mb-4">{collection.name}</h1>
-                <p className="font-extralight text-white/80 mb-1">{collection.description}</p>
-                <p className="font-extralight text-gray-500 text-sm">Created and owned by <span className="font-black text-white/80">{user?.name}</span></p>
+                <p className="text-white/80 mb-1">{collection.description}</p>
+                <p className="text-gray-500 text-sm">Created and owned by <span className="font-black text-white/80">{user?.name}</span>. Last updated <span className="font-semibold text-white/80">{timeAgo(collection.lastUpdated)}</span>.</p>
+                {(collection.visibility === 'public' || collection.visibility === 'confidential') && (
+                  <div className="flex items-center space-x-3 mt-3">
+                    <div
+                      className={`
+                        text-sm font-mono text-gray-400
+                        border-b-2
+                        ${collection.visibility === 'public' ? 'border-green-500' : ''}
+                        ${collection.visibility === 'confidential' ? 'border-orange-500' : ''}
+                        pb-0.5
+                      `}
+                      style={{
+                        display: 'inline-block'
+                      }}
+                    >
+                      {generateCollectionLink(collectionId)}
+                    </div>
+                    <CopyButton
+                      text={generateCollectionLink(collectionId)}
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-2 text-gray-400 hover:text-gray-800 hover:bg-white/10 focus:text-gray-800 focus:bg-white/10 transition-colors"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -262,23 +290,30 @@ export default function CollectionDetail() {
                      Confidential
                    </Badge>
                  )}
-                 {collection.visibility === 'unshared' && (
+                 {collection.visibility === 'not-shared' && (
                    <Badge variant="outline" className="text-sm bg-gray-500/80 text-white border-gray-400/50">
-                     Unshared
+                     Not Shared
                    </Badge>
                  )}
               </div>
             </div>
           </div>
 
-          {/* Show pricing only if not unshared */}
-          {collection.visibility !== 'unshared' && (
+          {/* Show pricing only if not not-shared */}
+          {collection.visibility !== 'not-shared' && (
             <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
               <div className="text-center">
-                <p className="text-xs font-medium text-white/60">Pricing</p>
+                <p className="text-xs font-medium text-white/60">Price to Access</p>
                 <div className="flex items-center justify-center mt-2 h-10">
                   {collection.pricing > 0 ? (
-                    <Badge variant="outline" className="text-sm bg-purple-500/80 text-white border-purple-400/50">
+                    <Badge
+                      variant="outline"
+                      className={
+                        collection.visibility === 'confidential'
+                          ? "text-sm bg-purple-500/80 text-white border-purple-400/50"
+                          : "text-sm bg-gray-500/80 text-white border-gray-400/50"
+                      }
+                    >
                       ${collection.pricing}
                     </Badge>
                   ) : (
@@ -291,8 +326,8 @@ export default function CollectionDetail() {
             </div>
           )}
 
-          {/* Show revenue only if not unshared */}
-          {collection.visibility !== 'unshared' && (
+          {/* Show revenue only if not not-shared */}
+          {collection.visibility !== 'not-shared' && isOwned && (
             <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
               <div className="text-center">
                 <p className="text-xs font-medium text-white/60">Revenue Generated</p>
@@ -301,12 +336,14 @@ export default function CollectionDetail() {
             </div>
           )}
 
-          <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
-            <div className="text-center">
-              <p className="text-xs font-medium text-white/60">Last Updated</p>
-              <p className="text-sm text-white/80 mt-2 pt-2 h-10">{timeAgo(collection.lastUpdated)}</p>
+          {collection.visibility === 'confidential' && isOwned && (
+            <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+              <div className="text-center">
+                <p className="text-xs font-medium text-white/60">Paying Users</p>
+                <p className="text-3xl font-bold text-white mt-2 h-10">0</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Assets List */}
@@ -402,6 +439,13 @@ export default function CollectionDetail() {
           )}
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <CollectionSettingsModal
+        showModal={showSettingsModal}
+        setShowModal={setShowSettingsModal}
+        collection={collection}
+      />
     </div>
   );
 }

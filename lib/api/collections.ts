@@ -43,7 +43,7 @@ const mockCollections = [
     name: 'Portrait Series',
     description: 'Professional portrait photography featuring diverse subjects in various lighting and style approaches.',
     assetCount: 12,
-    visibility: 'unshared' as Visibility,
+    visibility: 'not-shared' as Visibility,
     pricing: 0,
     lastUpdated: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
     createdBy: 'user1',
@@ -97,7 +97,7 @@ const mockCollections = [
     name: 'Product Photography',
     description: 'High-quality product shots for commercial use, featuring various items in professional studio settings.',
     assetCount: 8,
-    visibility: 'unshared' as Visibility,
+    visibility: 'not-shared' as Visibility,
     pricing: 0,
     lastUpdated: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks ago
     createdBy: 'user3',
@@ -112,7 +112,7 @@ const mockCollections = [
   },
   {
     id: '7',
-    name: 'Development Test Collection',
+    name: 'Public Development Collection',
     description: 'A test collection for development and testing purposes.',
     assetCount: 5,
     visibility: 'public' as Visibility,
@@ -128,9 +128,9 @@ const mockCollections = [
   {
     id: '8',
     name: 'Private Development Collection',
-    description: 'A private collection for testing unshared visibility.',
+    description: 'A private collection for testing not-shared visibility.',
     assetCount: 3,
-    visibility: 'unshared' as Visibility,
+    visibility: 'not-shared' as Visibility,
     pricing: 0,
     lastUpdated: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
     createdBy: 'dev-user-123',
@@ -192,7 +192,7 @@ const mockCollectionDetails = {
     name: 'Portrait Series',
     description: 'Professional portrait photography featuring diverse subjects in various lighting and style approaches.',
     assetCount: 12,
-    visibility: 'unshared' as Visibility,
+    visibility: 'not-shared' as Visibility,
     pricing: 0,
     lastUpdated: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
     createdBy: 'user1',
@@ -231,13 +231,13 @@ const mockCollectionDetails = {
   },
   '6': {
     id: '6',
-    name: 'Product Photography',
-    description: 'High-quality product shots for commercial use, featuring various items in professional studio settings.',
+    name: 'Confidential Development Collection',
+    description: 'A confidential collection for testing confidential visibility.',
     assetCount: 8,
-    visibility: 'unshared' as Visibility,
+    visibility: 'confidential' as Visibility,
     pricing: 0,
     lastUpdated: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks ago
-    createdBy: 'user3',
+    createdBy: 'dev-user-123',
     assets: [
       { id: '12', name: 'Product Shot 1', type: 'image', size: '1.6 MB', uploaded: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString() },
       { id: '13', name: 'Product Shot 2', type: 'image', size: '1.8 MB', uploaded: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString() },
@@ -245,7 +245,7 @@ const mockCollectionDetails = {
   },
   '7': {
     id: '7',
-    name: 'Development Test Collection',
+    name: 'Public Development Collection',
     description: 'A test collection for development and testing purposes.',
     assetCount: 5,
     visibility: 'public' as Visibility,
@@ -261,9 +261,9 @@ const mockCollectionDetails = {
   '8': {
     id: '8',
     name: 'Private Development Collection',
-    description: 'A private collection for testing unshared visibility.',
+    description: 'A private collection for testing not-shared visibility.',
     assetCount: 3,
-    visibility: 'unshared' as Visibility,
+    visibility: 'not-shared' as Visibility,
     pricing: 0,
     lastUpdated: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
     createdBy: 'dev-user-123',
@@ -328,7 +328,7 @@ const mockSharedCollections = {
 };
 
 // Types
-export type Visibility = 'public' | 'confidential' | 'unshared';
+export type Visibility = 'public' | 'confidential' | 'not-shared';
 
 export interface Collection {
   id: string;
@@ -364,6 +364,12 @@ export interface CollectionDetail extends Collection {
     uploaded: string; // ISO string timestamp
   }>;
 }
+
+// Utility function to generate collection link
+export const generateCollectionLink = (collectionId: string): string => {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${baseUrl}/collections/${collectionId}`;
+};
 
 // API functions
 export const collectionsApi = {
@@ -412,6 +418,51 @@ export const collectionsApi = {
     }
 
     return collection;
+  },
+
+  // Update collection (only if owned by user)
+  updateCollection: async (
+    id: string,
+    updates: { visibility?: Visibility; pricing?: number },
+    authenticatedUser: AuthenticatedUser
+  ): Promise<CollectionDetail> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    const collection = mockCollectionDetails[id as keyof typeof mockCollectionDetails];
+
+    if (!collection) {
+      throw new Error(`Collection with id ${id} not found`);
+    }
+
+    const userId = authenticatedUser.user.identifier;
+
+    // Only owners can update collections
+    if (collection.createdBy !== userId) {
+      throw new Error('Access denied - only collection owners can update collections');
+    }
+
+    // Update the collection in memory
+    const updatedCollection = {
+      ...collection,
+      ...updates,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    // Update both mock data structures
+    mockCollectionDetails[id as keyof typeof mockCollectionDetails] = updatedCollection;
+
+    // Find and update in mockCollections array
+    const collectionIndex = mockCollections.findIndex(c => c.id === id);
+    if (collectionIndex !== -1) {
+      mockCollections[collectionIndex] = {
+        ...mockCollections[collectionIndex],
+        ...updates,
+        lastUpdated: new Date().toISOString(),
+      };
+    }
+
+    return updatedCollection;
   },
 
   // Search collections (only user's own collections + shared collections)

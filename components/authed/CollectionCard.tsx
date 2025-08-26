@@ -120,14 +120,14 @@ export default function CollectionCard({ collection, href, onMouseEnter, isOwned
                   Confidential
                 </Badge>
               )}
-              {collection.visibility === 'unshared' && (
+              {collection.visibility === 'not-shared' && (
                 <Badge variant="outline" className="text-xs bg-gray-500/80 text-white border-gray-400/50">
                   <Lock className="mr-1 h-3 w-3" />
-                  Unshared
+                  Not Shared
                 </Badge>
               )}
-              {/* Show pricing badge only if not unshared and pricing > 0 */}
-              {collection.visibility !== 'unshared' && collection.pricing > 0 && (
+              {/* Show pricing badge only if not not-shared and pricing > 0 */}
+              {collection.visibility !== 'not-shared' && collection.pricing > 0 && (
                 <Badge variant="outline" className="text-xs bg-purple-500/80 text-white border-purple-400/50">
                   ${collection.pricing}
                 </Badge>
