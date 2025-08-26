@@ -44,7 +44,7 @@ const FeaturesList = () => {
       ),
     },
     {
-      icon: '🙈',
+      icon: '💾',
       title: 'Controlled Distribution',
       titleClass: 'text-yellow-300',
       content: (
@@ -54,11 +54,6 @@ const FeaturesList = () => {
           <div className="flex flex-row gap-4 my-5 justify-center">
             <img
               src="/images/share-choice-3.png"
-              alt="Sharing options"
-              className="w-[125px] sm:w-[170px] rounded-xl shadow-lg"
-            />
-            <img
-              src="/images/share-choice-4.png"
               alt="Sharing options"
               className="w-[125px] sm:w-[170px] rounded-xl shadow-lg"
             />

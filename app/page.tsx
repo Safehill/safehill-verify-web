@@ -192,7 +192,7 @@ export default function Home() {
     },
     {
       id: 'authenticator',
-      label: 'The Authenticator',
+      label: 'Image Authentication',
       gradient: 'linear-gradient(135deg,rgb(119, 167, 243),rgb(193, 131, 251))',
       content: (
         <div>
