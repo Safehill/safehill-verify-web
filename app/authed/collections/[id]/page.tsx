@@ -4,6 +4,7 @@ import AssetGallery from '@/components/authed/AssetGallery';
 import AssetTableRow from '@/components/authed/AssetTableRow';
 import CollectionSettingsModal from '@/components/authed/CollectionSettingsModal';
 import DashboardTopBar from '@/components/authed/dashboard-top-bar';
+import FullScreenAssetGallery from '@/components/authed/FullScreenAssetGallery';
 import { Avatar, AvatarFallback } from '@/components/shared/avatar';
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
@@ -13,45 +14,29 @@ import { generateCollectionLink } from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCollection, useUser } from '@/lib/hooks/use-collections';
 import { cn, timeAgo } from '@/lib/utils';
-import { ArrowLeft, ChevronDown, ChevronUp, Eye, Grid, List, Loader2, Plus, Settings, X } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  Grid,
+  List,
+  Loader2,
+  Plus,
+  Settings,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
-
-
-
-// Generate a color based on user identifier (same as dashboard-top-bar.tsx)
-function getAvatarColor(identifier: string): string {
-  const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-    'bg-teal-500',
-    'bg-orange-500',
-    'bg-red-500',
-    'bg-yellow-500',
-    'bg-emerald-500',
-  ];
-
-  // Simple hash function to get consistent color for same identifier
-  let hash = 0;
-  for (let i = 0; i < identifier.length; i++) {
-    const char = identifier.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-}
+import { getAvatarColor } from '@/lib/utils';
 
 // Get initials from user name or identifier (same as dashboard-top-bar.tsx)
 function getInitials(name?: string, identifier?: string): string {
   if (name) {
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -76,6 +61,8 @@ export default function CollectionDetail() {
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showFullScreenGallery, setShowFullScreenGallery] = useState(false);
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
 
   // Fetch collection data using React Query
   const { data: collection, isLoading, error } = useCollection(collectionId);
@@ -132,6 +119,12 @@ export default function CollectionDetail() {
     }
   };
 
+  // Handle asset click to open full screen gallery
+  const handleAssetClick = (assetIndex: number) => {
+    setSelectedAssetIndex(assetIndex);
+    setShowFullScreenGallery(true);
+  };
+
   // Get sort icon for header
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
@@ -145,13 +138,15 @@ export default function CollectionDetail() {
   };
 
   // Avatar styling
-  const avatarColor = collection?.createdBy ? getAvatarColor(collection.createdBy) : 'bg-gray-500';
+  const avatarColor = collection?.createdBy
+    ? getAvatarColor(collection.createdBy)
+    : 'bg-gray-500';
   const initials = getInitials(user?.name, collection?.createdBy);
   const isOwned = collection?.createdBy === currentUserId;
 
   const breadcrumbs = [
     { label: 'Collections', href: '/authed' },
-    { label: collection?.name || 'Loading...' }
+    { label: collection?.name || 'Loading...' },
   ];
 
   // Show loading state
@@ -179,12 +174,17 @@ export default function CollectionDetail() {
             <div className="mx-auto h-12 w-12 text-white/60">
               <X className="h-full w-full" />
             </div>
-            <h3 className="mt-2 text-sm font-medium text-white">Error loading collection</h3>
+            <h3 className="mt-2 text-sm font-medium text-white">
+              Error loading collection
+            </h3>
             <p className="mt-1 text-sm text-white/80">
               {error instanceof Error ? error.message : 'Collection not found'}
             </p>
             <div className="mt-6">
-              <Button className="flex gap-2 px-4 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-gray-200" asChild>
+              <Button
+                className="flex gap-2 px-4 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-gray-200"
+                asChild
+              >
                 <Link href="/authed">
                   <ArrowLeft className="h-4 w-4" />
                   <span>Back to Collections</span>
@@ -206,7 +206,10 @@ export default function CollectionDetail() {
         <div className="mb-8">
           {/* Buttons Row */}
           <div className="flex items-center justify-between mb-6">
-            <Button className="flex gap-2 px-4 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-gray-200" asChild>
+            <Button
+              className="flex gap-2 px-4 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-gray-200"
+              asChild
+            >
               <Link href="/authed">
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back</span>
@@ -229,26 +232,47 @@ export default function CollectionDetail() {
           <div>
             <div className="flex items-start space-x-4 mb-4">
               <Avatar className="h-12 w-12">
-                <AvatarFallback className={cn(avatarColor, 'text-white font-medium text-lg')}>
+                <AvatarFallback
+                  className={cn(avatarColor, 'text-white font-medium text-lg')}
+                >
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-5xl font-bold from-purple-100 bg-gradient-to-br to-orange-300 bg-clip-text text-transparent mb-4">{collection.name}</h1>
+                <h1 className="text-5xl font-bold from-purple-100 bg-gradient-to-br to-orange-300 bg-clip-text text-transparent mb-4">
+                  {collection.name}
+                </h1>
                 <p className="text-white/80 mb-1">{collection.description}</p>
-                <p className="text-gray-500 text-sm">Created and owned by <span className="font-black text-white/80">{user?.name}</span>. Last updated <span className="font-semibold text-white/80">{timeAgo(collection.lastUpdated)}</span>.</p>
-                {(collection.visibility === 'public' || collection.visibility === 'confidential') && (
+                <p className="text-gray-500 text-sm">
+                  Created and owned by{' '}
+                  <span className="font-black text-white/80">{user?.name}</span>
+                  . Last updated{' '}
+                  <span className="font-semibold text-white/80">
+                    {timeAgo(collection.lastUpdated)}
+                  </span>
+                  .
+                </p>
+                {(collection.visibility === 'public' ||
+                  collection.visibility === 'confidential') && (
                   <div className="flex items-center space-x-3 mt-3">
                     <div
                       className={`
                         text-sm font-mono text-gray-400
                         border-b-2
-                        ${collection.visibility === 'public' ? 'border-green-500' : ''}
-                        ${collection.visibility === 'confidential' ? 'border-orange-500' : ''}
+                        ${
+                          collection.visibility === 'public'
+                            ? 'border-green-500'
+                            : ''
+                        }
+                        ${
+                          collection.visibility === 'confidential'
+                            ? 'border-orange-500'
+                            : ''
+                        }
                         pb-0.5
                       `}
                       style={{
-                        display: 'inline-block'
+                        display: 'inline-block',
                       }}
                     >
                       {generateCollectionLink(collectionId)}
@@ -271,7 +295,9 @@ export default function CollectionDetail() {
           <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
             <div className="text-center">
               <p className="text-xs font-medium text-white/60">Total Assets</p>
-              <p className="text-3xl font-bold text-white mt-2 h-10">{collection.assetCount}</p>
+              <p className="text-3xl font-bold text-white mt-2 h-10">
+                {collection.assetCount}
+              </p>
             </div>
           </div>
 
@@ -280,21 +306,30 @@ export default function CollectionDetail() {
               <p className="text-xs font-medium text-white/60">Visibility</p>
               <div className="flex items-center justify-center mt-2 h-10">
                 {collection.visibility === 'public' && (
-                   <Badge variant="secondary" className="text-sm bg-green-500/80 text-white border-green-400/50">
-                     <Eye className="mr-1 h-4 w-4" />
-                     Public
-                   </Badge>
-                 )}
-                 {collection.visibility === 'confidential' && (
-                   <Badge variant="outline" className="text-sm bg-orange-500/80 text-white border-orange-400/50">
-                     Confidential
-                   </Badge>
-                 )}
-                 {collection.visibility === 'not-shared' && (
-                   <Badge variant="outline" className="text-sm bg-gray-500/80 text-white border-gray-400/50">
-                     Not Shared
-                   </Badge>
-                 )}
+                  <Badge
+                    variant="secondary"
+                    className="text-sm bg-green-500/80 text-white border-green-400/50"
+                  >
+                    <Eye className="mr-1 h-4 w-4" />
+                    Public
+                  </Badge>
+                )}
+                {collection.visibility === 'confidential' && (
+                  <Badge
+                    variant="outline"
+                    className="text-sm bg-orange-500/80 text-white border-orange-400/50"
+                  >
+                    Confidential
+                  </Badge>
+                )}
+                {collection.visibility === 'not-shared' && (
+                  <Badge
+                    variant="outline"
+                    className="text-sm bg-gray-500/80 text-white border-gray-400/50"
+                  >
+                    Not Shared
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -303,21 +338,26 @@ export default function CollectionDetail() {
           {collection.visibility !== 'not-shared' && (
             <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
               <div className="text-center">
-                <p className="text-xs font-medium text-white/60">Price to Access</p>
+                <p className="text-xs font-medium text-white/60">
+                  Price to Access
+                </p>
                 <div className="flex items-center justify-center mt-2 h-10">
                   {collection.pricing > 0 ? (
                     <Badge
                       variant="outline"
                       className={
                         collection.visibility === 'confidential'
-                          ? "text-sm bg-purple-500/80 text-white border-purple-400/50"
-                          : "text-sm bg-gray-500/80 text-white border-gray-400/50"
+                          ? 'text-sm bg-purple-500/80 text-white border-purple-400/50'
+                          : 'text-sm bg-gray-500/80 text-white border-gray-400/50'
                       }
                     >
                       ${collection.pricing}
                     </Badge>
                   ) : (
-                    <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
+                    <Badge
+                      variant="secondary"
+                      className="text-sm bg-white/20 text-white border-white/30"
+                    >
                       Free
                     </Badge>
                   )}
@@ -330,7 +370,9 @@ export default function CollectionDetail() {
           {collection.visibility !== 'not-shared' && isOwned && (
             <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
               <div className="text-center">
-                <p className="text-xs font-medium text-white/60">Revenue Generated</p>
+                <p className="text-xs font-medium text-white/60">
+                  Revenue Generated
+                </p>
                 <p className="text-3xl font-bold text-white mt-2 h-10">$0</p>
               </div>
             </div>
@@ -339,7 +381,9 @@ export default function CollectionDetail() {
           {collection.visibility === 'confidential' && isOwned && (
             <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
               <div className="text-center">
-                <p className="text-xs font-medium text-white/60">Paying Users</p>
+                <p className="text-xs font-medium text-white/60">
+                  Paying Users
+                </p>
                 <p className="text-3xl font-bold text-white mt-2 h-10">0</p>
               </div>
             </div>
@@ -353,8 +397,16 @@ export default function CollectionDetail() {
             <div className="flex items-center gap-4">
               <SegmentedControl
                 options={[
-                  { value: 'gallery', label: 'Gallery', icon: <Grid className="h-4 w-4" /> },
-                  { value: 'table', label: 'Table', icon: <List className="h-4 w-4" /> },
+                  {
+                    value: 'gallery',
+                    label: 'Gallery',
+                    icon: <Grid className="h-4 w-4" />,
+                  },
+                  {
+                    value: 'table',
+                    label: 'Table',
+                    icon: <List className="h-4 w-4" />,
+                  },
                 ]}
                 value={viewMode}
                 onChange={(value) => setViewMode(value as 'gallery' | 'table')}
@@ -373,7 +425,10 @@ export default function CollectionDetail() {
 
           {collection.assets.length > 0 ? (
             viewMode === 'gallery' ? (
-              <AssetGallery assets={collection.assets} />
+              <AssetGallery
+                assets={collection.assets}
+                onAssetClick={handleAssetClick}
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-white/20">
@@ -413,7 +468,9 @@ export default function CollectionDetail() {
                           </div>
                         </div>
                       </th>
-                      <th className="px-4 py-3 text-right text-sm text-gray-800">Actions</th>
+                      <th className="px-4 py-3 text-right text-sm text-gray-800">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/20">
@@ -422,6 +479,7 @@ export default function CollectionDetail() {
                         key={asset.id}
                         asset={asset}
                         isLastRow={index === sortedAssets.length - 1}
+                        onClick={() => handleAssetClick(index)}
                       />
                     ))}
                   </tbody>
@@ -445,6 +503,15 @@ export default function CollectionDetail() {
         showModal={showSettingsModal}
         setShowModal={setShowSettingsModal}
         collection={collection}
+      />
+
+      {/* Full Screen Asset Gallery */}
+      <FullScreenAssetGallery
+        assets={sortedAssets}
+        initialAssetIndex={selectedAssetIndex}
+        isOpen={showFullScreenGallery}
+        onClose={() => setShowFullScreenGallery(false)}
+        collectionId={collectionId}
       />
     </div>
   );

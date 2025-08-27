@@ -1,4 +1,4 @@
-import { FingerprintIcon } from 'lucide-react'; // or your custom icon
+import FingerprintIcon from '@/components/shared/FingerprintIcon';
 import { useMemo } from 'react';
 
 const COLORS = [
@@ -58,10 +58,8 @@ export const ImageCarousel = () => {
                 alt={`Image ${idx}`}
                 className="w-full h-full object-cover transition-opacity duration-300"
               />
-              <div
-                className={`absolute top-2 right-2 bg-white rounded-full p-1 shadow-md ${img.color}`}
-              >
-                <FingerprintIcon size={16} />
+              <div className="absolute top-2 right-2">
+                <FingerprintIcon color={img.color} size={16} />
               </div>
             </div>
           ))}

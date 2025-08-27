@@ -117,7 +117,10 @@ export default function WarningModal({
 
               {requireConfirmation && (
                 <div className="mt-4 text-left pt-5">
-                  <label htmlFor="confirmation-input" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="confirmation-input"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     {confirmationLabel}
                   </label>
                   <input

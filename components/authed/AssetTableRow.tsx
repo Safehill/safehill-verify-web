@@ -1,10 +1,10 @@
 'use client';
 
-import { Button } from '@/components/shared/button';
 import { useImage } from '@/lib/hooks/use-collections';
 import { timeAgo } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
+import { Eye, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { Button } from '../shared/button';
 
 interface AssetTableRowProps {
   asset: {
@@ -15,18 +15,27 @@ interface AssetTableRowProps {
     uploaded: string;
   };
   isLastRow?: boolean;
+  onClick?: () => void;
 }
 
-export default function AssetTableRow({ asset, isLastRow = false }: AssetTableRowProps) {
+export default function AssetTableRow({
+  asset,
+  isLastRow = false,
+  onClick,
+}: AssetTableRowProps) {
   const { data: imageData, isLoading, error } = useImage(asset.id);
 
-  // Debug logging
-  console.log('AssetTableRow:', { assetId: asset.id, imageData, isLoading, error });
-
   return (
-    <tr className="hover:bg-white/10 transition-colors">
+    <tr
+      className="hover:bg-white/10 transition-colors cursor-pointer"
+      onClick={onClick}
+    >
       <td className="w-16 p-0 relative">
-        <div className={`absolute inset-0 bg-white/20 flex items-center justify-center overflow-hidden ${isLastRow ? 'rounded-bl-2xl' : ''}`}>
+        <div
+          className={`absolute inset-0 bg-white/20 flex items-center justify-center overflow-hidden ${
+            isLastRow ? 'rounded-bl-2xl' : ''
+          }`}
+        >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin text-white/60" />
           ) : error ? (
@@ -48,7 +57,9 @@ export default function AssetTableRow({ asset, isLastRow = false }: AssetTableRo
         <p className="font-medium text-white">{asset.name}</p>
       </td>
       <td className="px-4 py-3">
-        <p className="text-sm text-white/80">{asset.type} • {asset.size}</p>
+        <p className="text-sm text-white/80">
+          {asset.type} • {asset.size}
+        </p>
       </td>
       <td className="px-4 py-3">
         <span className="text-sm text-white/80">{timeAgo(asset.uploaded)}</span>
@@ -58,7 +69,7 @@ export default function AssetTableRow({ asset, isLastRow = false }: AssetTableRo
           {/* Placeholder for more actions */}
           <Button className="flex gap-2 px-2 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20">
             {/* Replace with icon for quick look */}
-            <span>⋯</span>
+            <Eye />
           </Button>
         </div>
       </td>

@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "next/core-web-vitals"
-  ],
+  "extends": ["next/core-web-vitals"],
   "rules": {
     "react-hooks/exhaustive-deps": "warn",
     "@next/next/no-img-element": "warn",
@@ -31,15 +29,6 @@
       }
     ]
   },
-  "plugins": [
-    "@typescript-eslint",
-    "unused-imports"
-  ],
-  "ignorePatterns": [
-    "node_modules/",
-    ".next/",
-    "out/",
-    "build/",
-    "dist/"
-  ]
+  "plugins": ["@typescript-eslint", "unused-imports"],
+  "ignorePatterns": ["node_modules/", ".next/", "out/", "build/", "dist/"]
 }

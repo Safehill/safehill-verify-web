@@ -12,9 +12,13 @@ interface AssetGalleryProps {
     size: string;
     uploaded: string;
   }>;
+  onAssetClick?: (assetIndex: number) => void;
 }
 
-export default function AssetGallery({ assets }: AssetGalleryProps) {
+export default function AssetGallery({
+  assets,
+  onAssetClick,
+}: AssetGalleryProps) {
   if (assets.length === 0) {
     return (
       <div className="text-center py-8">
@@ -25,21 +29,34 @@ export default function AssetGallery({ assets }: AssetGalleryProps) {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-5">
-      {assets.map((asset) => (
-        <AssetCard key={asset.id} asset={asset} />
+      {assets.map((asset, index) => (
+        <AssetCard
+          key={asset.id}
+          asset={asset}
+          onClick={() => onAssetClick?.(index)}
+        />
       ))}
     </div>
   );
 }
 
-function AssetCard({ asset }: { asset: AssetGalleryProps['assets'][0] }) {
+function AssetCard({
+  asset,
+  onClick,
+}: {
+  asset: AssetGalleryProps['assets'][0];
+  onClick?: () => void;
+}) {
   const { data: imageData, isLoading, error } = useImage(asset.id);
 
   // Debug logging
-  console.log('AssetCard:', { assetId: asset.id, imageData, isLoading, error });
+  // console.log('AssetCard:', { assetId: asset.id, imageData, isLoading, error });
 
   return (
-    <div className="group relative aspect-square rounded-lg overflow-hidden bg-white/10 border border-white/20 hover:border-white/40 transition-all duration-200 hover:scale-105">
+    <div
+      className="group relative aspect-square rounded-lg overflow-hidden bg-white/10 border border-white/20 hover:border-white/40 transition-all duration-200 hover:scale-105 cursor-pointer"
+      onClick={onClick}
+    >
       {isLoading ? (
         <div className="flex items-center justify-center h-full">
           <Loader2 className="h-6 w-6 animate-spin text-white/60" />
@@ -65,7 +82,9 @@ function AssetCard({ asset }: { asset: AssetGalleryProps['assets'][0] }) {
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200" />
           <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <p className="text-white text-xs truncate">{imageData.name}</p>
-            <p className="text-white/70 text-xs">{asset.type} • {asset.size}</p>
+            <p className="text-white/70 text-xs">
+              {asset.type} • {asset.size}
+            </p>
           </div>
         </>
       ) : (

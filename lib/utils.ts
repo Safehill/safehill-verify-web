@@ -7,7 +7,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const timeAgo = (timestamp: string | Date, timeOnly?: boolean): string => {
+export const timeAgo = (
+  timestamp: string | Date,
+  timeOnly?: boolean
+): string => {
   if (!timestamp) {
     return 'never';
   }
@@ -18,9 +21,7 @@ export const timeAgo = (timestamp: string | Date, timeOnly?: boolean): string =>
     return 'invalid date';
   }
 
-  return `${ms(Date.now() - date.getTime())}${
-    timeOnly ? '' : ' ago'
-  }`;
+  return `${ms(Date.now() - date.getTime())}${timeOnly ? '' : ' ago'}`;
 };
 
 export async function fetcher<JSON = any>(
@@ -94,7 +95,9 @@ export const formattedDate = (date: Date, includeHour: boolean = false) => {
 };
 
 // Convert AuthedSession to AuthenticatedUser format
-export const convertToAuthenticatedUser = (authedSession: any): AuthenticatedUser | null => {
+export const convertToAuthenticatedUser = (
+  authedSession: any
+): AuthenticatedUser | null => {
   if (!authedSession) {
     return null;
   }
@@ -106,3 +109,66 @@ export const convertToAuthenticatedUser = (authedSession: any): AuthenticatedUse
     user: authedSession.user,
   };
 };
+
+const COLORS = [
+  'text-red-200',
+  'text-red-500',
+  'text-green-500',
+  'text-green-800',
+  'text-blue-500',
+  'text-yellow-500',
+  'text-yellow-800',
+  'text-purple-500',
+  'text-pink-500',
+  'text-pink-200',
+  'text-orange-500',
+  'text-orange-200',
+  'text-cyan-500',
+];
+
+export function getFingerprintColor(identifier: string): string {
+  // Simple hash function to get consistent color for same identifier
+  let hash = 0;
+  for (let i = 0; i < identifier.length; i++) {
+    const char = identifier.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  return COLORS[Math.abs(hash) % COLORS.length];
+}
+
+// User colors for consistent user identification (base colors without prefix)
+const USER_COLORS = [
+  'blue-500',
+  'green-500',
+  'purple-500',
+  'pink-500',
+  'indigo-500',
+  'teal-500',
+  'orange-500',
+  'red-500',
+  'yellow-500',
+  'emerald-500',
+];
+
+// Helper function to generate consistent hash for user identifier
+function getUserHash(identifier: string): number {
+  let hash = 0;
+  for (let i = 0; i < identifier.length; i++) {
+    const char = identifier.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+}
+
+export function getUserColor(identifier: string): string {
+  const colorIndex = getUserHash(identifier) % USER_COLORS.length;
+  return `text-${USER_COLORS[colorIndex]}`;
+}
+
+export function getAvatarColor(identifier: string): string {
+  const colorIndex = getUserHash(identifier) % USER_COLORS.length;
+  return `bg-${USER_COLORS[colorIndex]}`;
+}

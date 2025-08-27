@@ -61,7 +61,11 @@ const Modal = ({
             className
           )}
         >
-          {title && <Dialog.Title className="absolute left-[-10000px]">{title}</Dialog.Title>}
+          {title && (
+            <Dialog.Title className="absolute left-[-10000px]">
+              {title}
+            </Dialog.Title>
+          )}
           {children}
         </Dialog.Content>
       </Dialog.Portal>
