@@ -1,8 +1,7 @@
 'use client';
 
-import { Avatar, AvatarFallback } from '@/components/shared/avatar';
 import Popover from '@/components/shared/popover';
-import { getUserColor } from '@/lib/utils';
+import { getAvatarColorValue } from '@/lib/utils';
 import { FingerprintIcon as LucideFingerprintIcon, User } from 'lucide-react';
 import { useState } from 'react';
 
@@ -17,6 +16,7 @@ interface Asset {
 interface AssetFingerprintPopoverProps {
   asset: Asset;
   children?: React.ReactNode;
+  onOpenChange?: (open: boolean) => void;
 }
 
 // Mock data for demonstration - in real app this would come from API
@@ -78,15 +78,12 @@ function AssetFingerprintRow({
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-2">
         <div className="rounded-full bg-purple-500/30 shadow-lg flex items-center justify-center h-8 w-8">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback
-              className={`${getUserColor(
-                owner.identifier
-              )} text-white text-2xl`}
-            >
-              {owner.icon}
-            </AvatarFallback>
-          </Avatar>
+          <div 
+            className="h-8 w-8 rounded-full flex items-center justify-center text-white text-2xl"
+            style={{ backgroundColor: getAvatarColorValue(owner.identifier) }}
+          >
+            {owner.icon}
+          </div>
         </div>
         <div>
           <div className="font-light text-white">{owner.name}</div>
@@ -99,9 +96,17 @@ function AssetFingerprintRow({
 
 export default function AssetFingerprintPopover({
   children,
+  onOpenChange,
 }: AssetFingerprintPopoverProps) {
   // Use internal state for uncontrolled popover
   const [open, setOpen] = useState(false);
+
+  // Notify parent component when open state changes
+  const handleOpenChange = (newOpen: boolean | ((prev: boolean) => boolean)) => {
+    const isOpen = typeof newOpen === 'function' ? newOpen(open) : newOpen;
+    setOpen(isOpen);
+    onOpenChange?.(isOpen);
+  };
 
   const popoverContent = (
     <div className="w-full sm:w-[25rem] overflow-y-auto text-white p-2 py-5 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 h-[min(800px,100vh-100px)]">
@@ -164,7 +169,7 @@ export default function AssetFingerprintPopover({
   return (
     <Popover
       openPopover={open}
-      setOpenPopover={setOpen}
+      setOpenPopover={handleOpenChange}
       content={popoverContent}
       align="end"
       darkTheme={true}

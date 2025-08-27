@@ -5,7 +5,7 @@ import AssetTableRow from '@/components/authed/AssetTableRow';
 import CollectionSettingsModal from '@/components/authed/CollectionSettingsModal';
 import DashboardTopBar from '@/components/authed/dashboard-top-bar';
 import FullScreenAssetGallery from '@/components/authed/FullScreenAssetGallery';
-import { Avatar, AvatarFallback } from '@/components/shared/avatar';
+
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
 import CopyButton from '@/components/shared/CopyButton';
@@ -13,7 +13,7 @@ import SegmentedControl from '@/components/shared/segmented-control';
 import { generateCollectionLink } from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCollection, useUser } from '@/lib/hooks/use-collections';
-import { cn, timeAgo } from '@/lib/utils';
+import { timeAgo } from '@/lib/utils';
 import {
   ArrowLeft,
   ChevronDown,
@@ -29,7 +29,7 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
-import { getAvatarColor } from '@/lib/utils';
+import { getAvatarColorValue } from '@/lib/utils';
 
 // Get initials from user name or identifier (same as dashboard-top-bar.tsx)
 function getInitials(name?: string, identifier?: string): string {
@@ -138,9 +138,9 @@ export default function CollectionDetail() {
   };
 
   // Avatar styling
-  const avatarColor = collection?.createdBy
-    ? getAvatarColor(collection.createdBy)
-    : 'bg-gray-500';
+  const avatarColorValue = collection?.createdBy
+    ? getAvatarColorValue(collection.createdBy)
+    : '#6b7280';
   const initials = getInitials(user?.name, collection?.createdBy);
   const isOwned = collection?.createdBy === currentUserId;
 
@@ -231,13 +231,12 @@ export default function CollectionDetail() {
           {/* Title and Description */}
           <div>
             <div className="flex items-start space-x-4 mb-4">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback
-                  className={cn(avatarColor, 'text-white font-medium text-lg')}
-                >
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <div 
+                className="h-12 w-12 rounded-full flex items-center justify-center text-white font-medium text-lg"
+                style={{ backgroundColor: avatarColorValue }}
+              >
+                {initials}
+              </div>
               <div>
                 <h1 className="text-5xl font-bold from-purple-100 bg-gradient-to-br to-orange-300 bg-clip-text text-transparent mb-4">
                   {collection.name}

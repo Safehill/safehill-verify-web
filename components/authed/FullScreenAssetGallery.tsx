@@ -163,6 +163,7 @@ function AssetImageView({
   collection?: any;
 }) {
   const { data: imageData, isLoading, error } = useImage(asset.id);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -198,8 +199,15 @@ function AssetImageView({
 
       {/* Fingerprint Icon Overlaid on Image */}
       <div className="absolute top-4 right-4 z-20">
-        <AssetFingerprintPopover asset={asset}>
-          <button className="transition-all duration-200 hover:scale-110">
+        <AssetFingerprintPopover 
+          asset={asset}
+          onOpenChange={setIsPopoverOpen}
+        >
+          <button 
+            className={`transition-all duration-200 hover:opacity-50 rounded-full p-1 ${
+              isPopoverOpen ? 'bg-gray-600/80' : 'bg-white/20'
+            }`}
+          >
             <FingerprintIcon
               color={userColor}
               size={20}

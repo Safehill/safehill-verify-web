@@ -172,3 +172,21 @@ export function getAvatarColor(identifier: string): string {
   const colorIndex = getUserHash(identifier) % USER_COLORS.length;
   return `bg-${USER_COLORS[colorIndex]}`;
 }
+
+// Alternative function that returns the actual color value for inline styles
+export function getAvatarColorValue(identifier: string): string {
+  const colorIndex = getUserHash(identifier) % USER_COLORS.length;
+  const colorMap: { [key: string]: string } = {
+    'blue-500': '#3b82f6',
+    'green-500': '#10b981',
+    'purple-500': '#8b5cf6',
+    'pink-500': '#ec4899',
+    'indigo-500': '#6366f1',
+    'teal-500': '#14b8a6',
+    'orange-500': '#f97316',
+    'red-500': '#ef4444',
+    'yellow-500': '#eab308',
+    'emerald-500': '#10b981',
+  };
+  return colorMap[USER_COLORS[colorIndex]] || '#6b7280';
+}

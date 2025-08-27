@@ -1,9 +1,8 @@
 'use client';
 
-import { Avatar, AvatarFallback } from '@/components/shared/avatar';
 import Popover from '@/components/shared/popover';
 import { useAuth } from '@/lib/auth/auth-context';
-import { cn } from '@/lib/utils';
+import { getAvatarColorValue } from '@/lib/utils';
 import { ChevronRight, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -17,38 +16,12 @@ interface DashboardTopBarProps {
   breadcrumbs: BreadcrumbItem[];
 }
 
-// Generate a color based on user identifier
-function getAvatarColor(identifier: string): string {
-  const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-    'bg-teal-500',
-    'bg-orange-500',
-    'bg-red-500',
-    'bg-yellow-500',
-    'bg-emerald-500',
-  ];
-
-  // Simple hash function to get consistent color for same identifier
-  let hash = 0;
-  for (let i = 0; i < identifier.length; i++) {
-    const char = identifier.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-}
-
 // Get initials from user name or identifier
 function getInitials(name?: string, identifier?: string): string {
   if (name) {
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -65,9 +38,9 @@ export default function DashboardTopBar({ breadcrumbs }: DashboardTopBarProps) {
   const { authedSession, logout } = useAuth();
   const [openPopover, setOpenPopover] = useState(false);
 
-  const avatarColor = authedSession?.user.identifier
-    ? getAvatarColor(authedSession.user.identifier)
-    : 'bg-gray-500';
+  const avatarColorValue = authedSession?.user.identifier
+    ? getAvatarColorValue(authedSession.user.identifier)
+    : '#6b7280';
 
   const initials = getInitials(
     authedSession?.user.name,
@@ -86,9 +59,9 @@ export default function DashboardTopBar({ breadcrumbs }: DashboardTopBarProps) {
         <div className="flex items-center space-x-2">
           {/* Safehill Logo */}
           <Link href="/authed" className="flex items-center">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-green-300 to-cyan-500 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-300 to-pink-100 flex items-center justify-center hover:scale-110 transition-all duration-300">
               <img
-                src="/images/snoog-white.png"
+                src="/images/snoog-black.png"
                 alt="Logo"
                 className="w-[40px] object-cover object-top py-3 mx-2"
               />
@@ -149,16 +122,14 @@ export default function DashboardTopBar({ breadcrumbs }: DashboardTopBarProps) {
             setOpenPopover={setOpenPopover}
             align="end"
           >
-            <button
-              className="flex items-center space-x-2 rounded-full p-1 hover:bg-gray-100 transition-colors"
-              onClick={() => setOpenPopover(!openPopover)}
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className={cn(avatarColor, 'text-white font-medium text-sm')}>
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-            </button>
+            <div className="flex items-center space-x-2 rounded-full p-1 hover:bg-gray-100 transition-colors cursor-pointer">
+              <div 
+                className="h-8 w-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
+                style={{ backgroundColor: avatarColorValue }}
+              >
+                {initials}
+              </div>
+            </div>
           </Popover>
         </div>
       </div>

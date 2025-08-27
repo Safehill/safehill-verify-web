@@ -1,10 +1,10 @@
 'use client';
 
-import { Avatar, AvatarFallback } from '@/components/shared/avatar';
+
 import { Badge } from '@/components/shared/badge';
 import type { Collection } from '@/lib/api/collections';
 import { useUser } from '@/lib/hooks/use-collections';
-import { cn, timeAgo } from '@/lib/utils';
+import { cn, timeAgo, getAvatarColorValue } from '@/lib/utils';
 import { Calendar, Eye, ImageIcon, Lock } from 'lucide-react';
 import Link from 'next/link';
 
@@ -15,38 +15,12 @@ interface CollectionCardProps {
   isOwned?: boolean;
 }
 
-// Generate a color based on user identifier (same as dashboard-top-bar.tsx)
-function getAvatarColor(identifier: string): string {
-  const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-    'bg-teal-500',
-    'bg-orange-500',
-    'bg-red-500',
-    'bg-yellow-500',
-    'bg-emerald-500',
-  ];
-
-  // Simple hash function to get consistent color for same identifier
-  let hash = 0;
-  for (let i = 0; i < identifier.length; i++) {
-    const char = identifier.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-}
-
 // Get initials from user name or identifier (same as dashboard-top-bar.tsx)
 function getInitials(name?: string, identifier?: string): string {
   if (name) {
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -59,33 +33,38 @@ function getInitials(name?: string, identifier?: string): string {
   return 'U';
 }
 
-export default function CollectionCard({ collection, href, onMouseEnter, isOwned = false }: CollectionCardProps) {
+export default function CollectionCard({
+  collection,
+  href,
+  onMouseEnter,
+  isOwned = false,
+}: CollectionCardProps) {
   const { data: user } = useUser(collection.createdBy);
 
   // Avatar styling
-  const avatarColor = user?.identifier ? getAvatarColor(user.identifier) : 'bg-gray-500';
+  const avatarColorValue = user?.identifier
+    ? getAvatarColorValue(user.identifier)
+    : '#6b7280';
   const initials = getInitials(user?.name, user?.identifier);
 
   // Determine styling based on ownership
   const cardStyles = isOwned
-    ? "rounded-2xl border-2 border-solid border-white/30 bg-white/90 flex flex-col shadow-none w-full min-w-[350px] transition-all duration-200 hover:scale-[1.02] active:scale-[1.01] hover:bg-white/95 active:bg-white cursor-pointer h-full"
-    : "rounded-2xl border-2 border-solid border-white/30 bg-purple-100/5 flex flex-col shadow-none w-full min-w-[350px] transition-all duration-200 hover:scale-[1.02] active:scale-[1.01] hover:bg-black/30 active:bg-white/30 cursor-pointer h-full";
+    ? 'rounded-2xl border-2 border-solid border-white/30 bg-white/90 flex flex-col shadow-none w-full min-w-[350px] transition-all duration-200 hover:scale-[1.02] active:scale-[1.01] hover:bg-white/95 active:bg-white cursor-pointer h-full'
+    : 'rounded-2xl border-2 border-solid border-white/30 bg-purple-100/5 flex flex-col shadow-none w-full min-w-[350px] transition-all duration-200 hover:scale-[1.02] active:scale-[1.01] hover:bg-black/30 active:bg-white/30 cursor-pointer h-full';
 
-  const textStyles = isOwned
-    ? "text-gray-900"
-    : "text-white/80";
+  const textStyles = isOwned ? 'text-gray-900' : 'text-white/80';
 
   const titleStyles = isOwned
-    ? "text-left text-lg md:text-xl font-semibold tracking-[-0.01em] bg-gradient-to-br from-gray-800/90 to-teal-900/60 bg-clip-text text-transparent mb-1"
-    : "text-left text-lg md:text-xl font-semibold tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-1";
+    ? 'text-left text-lg md:text-xl font-semibold tracking-[-0.01em] bg-gradient-to-br from-gray-800/90 to-teal-900/60 bg-clip-text text-transparent mb-1'
+    : 'text-left text-lg md:text-xl font-semibold tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-1';
 
   const descriptionStyles = isOwned
-    ? "text-left text-sm font-light tracking-[-0.01em] text-gray-700 mb-6"
-    : "text-left text-sm font-light tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-6";
+    ? 'text-left text-sm font-light tracking-[-0.01em] text-gray-700 mb-6'
+    : 'text-left text-sm font-light tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-6';
 
   const footerStyles = isOwned
-    ? "h-8 px-6 flex items-center justify-end text-xs text-gray-600 w-full"
-    : "h-8 px-6 flex items-center justify-end text-xs text-white/80 w-full";
+    ? 'h-8 px-6 flex items-center justify-end text-xs text-gray-600 w-full'
+    : 'h-8 px-6 flex items-center justify-end text-xs text-white/80 w-full';
 
   return (
     <Link href={href} className="block" onMouseEnter={onMouseEnter}>
@@ -96,11 +75,15 @@ export default function CollectionCard({ collection, href, onMouseEnter, isOwned
           <div className="h-12 flex items-center justify-between px-6">
             {/* User Info - Left side, max 50% width */}
             <div className="flex items-center space-x-2 min-w-0 flex-1 max-w-[50%]">
-              <Avatar className={cn("h-6 w-6 flex-shrink-0", isOwned ? "shadow-md" : "")}>
-                <AvatarFallback className={cn(avatarColor, 'text-white font-medium text-xs')}>
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+              <div
+                className={cn(
+                  'h-6 w-6 flex-shrink-0 rounded-full flex items-center justify-center text-white font-medium text-xs',
+                  isOwned ? 'shadow-md' : ''
+                )}
+                style={{ backgroundColor: avatarColorValue }}
+              >
+                {initials}
+              </div>
               <span className={`text-xs truncate ${textStyles}`}>
                 {user?.name || 'Unknown User'}
               </span>
@@ -109,29 +92,42 @@ export default function CollectionCard({ collection, href, onMouseEnter, isOwned
             {/* Visibility and Pricing Badges - Right side */}
             <div className="flex items-center space-x-1 flex-shrink-0">
               {collection.visibility === 'public' && (
-                <Badge variant="secondary" className="text-xs bg-green-500/80 text-white border-green-400/50">
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-green-500/80 text-white border-green-400/50"
+                >
                   <Eye className="mr-1 h-3 w-3" />
                   Public
                 </Badge>
               )}
               {collection.visibility === 'confidential' && (
-                <Badge variant="outline" className="text-xs bg-yellow-500/80 text-white border-yellow-400/50">
+                <Badge
+                  variant="outline"
+                  className="text-xs bg-yellow-500/80 text-white border-yellow-400/50"
+                >
                   <Lock className="mr-1 h-3 w-3" />
                   Confidential
                 </Badge>
               )}
               {collection.visibility === 'not-shared' && (
-                <Badge variant="outline" className="text-xs bg-gray-500/80 text-white border-gray-400/50">
+                <Badge
+                  variant="outline"
+                  className="text-xs bg-gray-500/80 text-white border-gray-400/50"
+                >
                   <Lock className="mr-1 h-3 w-3" />
                   Not Shared
                 </Badge>
               )}
               {/* Show pricing badge only if not not-shared and pricing > 0 */}
-              {collection.visibility !== 'not-shared' && collection.pricing > 0 && (
-                <Badge variant="outline" className="text-xs bg-purple-500/80 text-white border-purple-400/50">
-                  ${collection.pricing}
-                </Badge>
-              )}
+              {collection.visibility !== 'not-shared' &&
+                collection.pricing > 0 && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs bg-purple-500/80 text-white border-purple-400/50"
+                  >
+                    ${collection.pricing}
+                  </Badge>
+                )}
             </div>
           </div>
 
@@ -158,16 +154,18 @@ export default function CollectionCard({ collection, href, onMouseEnter, isOwned
         </div>
 
         {/* Line Separator */}
-        <div className={`border-t ${isOwned ? 'border-gray-300' : 'border-white/10'}`}></div>
+        <div
+          className={`border-t ${
+            isOwned ? 'border-gray-300' : 'border-white/10'
+          }`}
+        ></div>
 
         {/* Bottom Section: Content and Footer - With padding */}
         <div className="flex flex-col flex-1 pt-5">
           {/* Content area with padding */}
           <div className="px-6 flex-1 flex flex-col">
             {/* Title: Left aligned */}
-            <h3 className={titleStyles}>
-              {collection.name}
-            </h3>
+            <h3 className={titleStyles}>{collection.name}</h3>
 
             {/* Description: Left aligned, italic if no description */}
             <p className={descriptionStyles}>
