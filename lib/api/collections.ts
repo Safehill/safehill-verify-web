@@ -625,7 +625,7 @@ export interface CollectionDetail extends Collection {
 // Utility function to generate collection link
 export const generateCollectionLink = (collectionId: string): string => {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  return `${baseUrl}/collections/${collectionId}`;
+  return `${baseUrl}/authed/collections/${collectionId}`;
 };
 
 // API functions

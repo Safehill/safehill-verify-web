@@ -149,11 +149,12 @@ export default function LoginPage() {
               <div className="space-y-8 pb-5">
                 <div className="flex flex-col items-center justify-center text-muted-foreground gap-5 text-sm bg-red-100 text-red-700 p-10">
                   Sorry, there was a problem connecting to the server
+                  <b>If you have an open session, please close it and try again.</b>
                   <br />
                   {webSocketError}
                 </div>
                 <div className="flex flex-col items-center justify-center text-muted-foreground gap-5 text-lg">
-                  Please try again
+                  Try again
                   <ArrowDown />
                 </div>
                 <Button variant="default" onClick={retry} className="gap-2">
