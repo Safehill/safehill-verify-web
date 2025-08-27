@@ -6,17 +6,25 @@ import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import Popover from '@/components/shared/popover';
 import { useAuth } from '@/lib/auth/auth-context';
-import { useCollections, usePrefetchCollection, useSearchCollections } from '@/lib/hooks/use-collections';
+import {
+  useCollections,
+  usePrefetchCollection,
+  useSearchCollections,
+} from '@/lib/hooks/use-collections';
 import { ArrowUpDown, Filter, Loader2, Plus, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
-
-
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterVisibility, setFilterVisibility] = useState<'all' | 'public' | 'confidential' | 'not-shared'>('all');
-  const [filterOwnership, setFilterOwnership] = useState<'all' | 'owned' | 'shared'>('all');
-  const [filterPricing, setFilterPricing] = useState<'all' | 'paid' | 'free'>('all');
+  const [filterVisibility, setFilterVisibility] = useState<
+    'all' | 'public' | 'confidential' | 'not-shared'
+  >('all');
+  const [filterOwnership, setFilterOwnership] = useState<
+    'all' | 'owned' | 'shared'
+  >('all');
+  const [filterPricing, setFilterPricing] = useState<'all' | 'paid' | 'free'>(
+    'all'
+  );
   const [sortBy, setSortBy] = useState<'lastUpdated' | 'name'>('lastUpdated');
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [openSortPopover, setOpenSortPopover] = useState(false);
@@ -26,26 +34,31 @@ export default function Dashboard() {
 
   // React Query hooks
   const { data: collections = [], isLoading, error } = useCollections();
-  const { data: searchResults, isLoading: isSearching } = useSearchCollections(searchQuery);
+  const { data: searchResults, isLoading: isSearching } =
+    useSearchCollections(searchQuery);
   const prefetchCollection = usePrefetchCollection();
 
   // Use search results if there's a search query, otherwise use all collections
-  const allCollections = searchQuery ? (searchResults || []) : collections;
+  const allCollections = searchQuery ? searchResults || [] : collections;
 
   // Filter collections based on search and filters
   const filteredCollections = allCollections.filter((collection: any) => {
-    const matchesVisibilityFilter = filterVisibility === 'all' ||
-                                   collection.visibility === filterVisibility;
+    const matchesVisibilityFilter =
+      filterVisibility === 'all' || collection.visibility === filterVisibility;
 
-    const matchesOwnershipFilter = filterOwnership === 'all' ||
-                                  (filterOwnership === 'owned' && collection.createdBy === currentUserId) ||
-                                  (filterOwnership === 'shared' && collection.createdBy !== currentUserId);
+    const matchesOwnershipFilter =
+      filterOwnership === 'all' ||
+      (filterOwnership === 'owned' && collection.createdBy === currentUserId) ||
+      (filterOwnership === 'shared' && collection.createdBy !== currentUserId);
 
-    const matchesPricingFilter = filterPricing === 'all' ||
-                                (filterPricing === 'paid' && collection.pricing > 0) ||
-                                (filterPricing === 'free' && collection.pricing === 0);
+    const matchesPricingFilter =
+      filterPricing === 'all' ||
+      (filterPricing === 'paid' && collection.pricing > 0) ||
+      (filterPricing === 'free' && collection.pricing === 0);
 
-    return matchesVisibilityFilter && matchesOwnershipFilter && matchesPricingFilter;
+    return (
+      matchesVisibilityFilter && matchesOwnershipFilter && matchesPricingFilter
+    );
   });
 
   // Sort collections
@@ -60,11 +73,9 @@ export default function Dashboard() {
     }
   });
 
-  const breadcrumbs = [
-    { label: 'Collections', href: '/authed' }
-  ];
+  const breadcrumbs = [{ label: 'Collections', href: '/authed' }];
 
-      return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
       <DashboardTopBar breadcrumbs={breadcrumbs} />
 
@@ -73,7 +84,9 @@ export default function Dashboard() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text font-display text-3xl md:text-5xl font-bold text-transparent drop-shadow-sm [text-wrap:balance]">Collections</h1>
+              <h1 className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text font-display text-3xl md:text-5xl font-bold text-transparent drop-shadow-sm [text-wrap:balance]">
+                Collections
+              </h1>
               <p className="mt-2 text-white/80 font-extralight">
                 Manage and organize your digital assets
               </p>
@@ -88,7 +101,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-                        {/* Search and Filter Bar */}
+        {/* Search and Filter Bar */}
         <div className="mb-6 flex items-center space-x-2">
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
@@ -104,11 +117,15 @@ export default function Dashboard() {
           <Popover
             content={
               <div className="w-full p-4">
-                <div className="text-base text-gray-900 font-medium mb-3">Filter by:</div>
+                <div className="text-base text-gray-900 font-medium mb-3">
+                  Filter by:
+                </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-gray-700 text-sm font-medium mb-2 block">Visibility</label>
+                    <label className="text-gray-700 text-sm font-medium mb-2 block">
+                      Visibility
+                    </label>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
                         <input
@@ -116,7 +133,9 @@ export default function Dashboard() {
                           name="visibility"
                           value="all"
                           checked={filterVisibility === 'all'}
-                          onChange={(e) => setFilterVisibility(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterVisibility(e.target.value as any)
+                          }
                           className="text-blue-300"
                         />
                         <span className="text-gray-900 text-sm">All</span>
@@ -127,7 +146,9 @@ export default function Dashboard() {
                           name="visibility"
                           value="public"
                           checked={filterVisibility === 'public'}
-                          onChange={(e) => setFilterVisibility(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterVisibility(e.target.value as any)
+                          }
                           className="text-green-500"
                         />
                         <span className="text-gray-900 text-sm">Public</span>
@@ -138,10 +159,14 @@ export default function Dashboard() {
                           name="visibility"
                           value="confidential"
                           checked={filterVisibility === 'confidential'}
-                          onChange={(e) => setFilterVisibility(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterVisibility(e.target.value as any)
+                          }
                           className="text-yellow-500"
                         />
-                        <span className="text-gray-900 text-sm">Confidential</span>
+                        <span className="text-gray-900 text-sm">
+                          Confidential
+                        </span>
                       </label>
                       <label className="flex items-center space-x-2">
                         <input
@@ -149,16 +174,22 @@ export default function Dashboard() {
                           name="visibility"
                           value="not-shared"
                           checked={filterVisibility === 'not-shared'}
-                          onChange={(e) => setFilterVisibility(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterVisibility(e.target.value as any)
+                          }
                           className="text-gray-500"
                         />
-                        <span className="text-gray-900 text-sm">Not Shared</span>
+                        <span className="text-gray-900 text-sm">
+                          Not Shared
+                        </span>
                       </label>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-gray-700 text-sm font-medium mb-2 block">Ownership</label>
+                    <label className="text-gray-700 text-sm font-medium mb-2 block">
+                      Ownership
+                    </label>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
                         <input
@@ -166,7 +197,9 @@ export default function Dashboard() {
                           name="ownership"
                           value="all"
                           checked={filterOwnership === 'all'}
-                          onChange={(e) => setFilterOwnership(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterOwnership(e.target.value as any)
+                          }
                           className="text-blue-500"
                         />
                         <span className="text-gray-900 text-sm">All</span>
@@ -177,10 +210,14 @@ export default function Dashboard() {
                           name="ownership"
                           value="owned"
                           checked={filterOwnership === 'owned'}
-                          onChange={(e) => setFilterOwnership(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterOwnership(e.target.value as any)
+                          }
                           className="text-blue-500"
                         />
-                        <span className="text-gray-900 text-sm">Owned by me</span>
+                        <span className="text-gray-900 text-sm">
+                          Owned by me
+                        </span>
                       </label>
                       <label className="flex items-center space-x-2">
                         <input
@@ -188,16 +225,22 @@ export default function Dashboard() {
                           name="ownership"
                           value="shared"
                           checked={filterOwnership === 'shared'}
-                          onChange={(e) => setFilterOwnership(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterOwnership(e.target.value as any)
+                          }
                           className="text-blue-500"
                         />
-                        <span className="text-gray-900 text-sm">Shared with me</span>
+                        <span className="text-gray-900 text-sm">
+                          Shared with me
+                        </span>
                       </label>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-gray-700 text-sm font-medium mb-2 block">Price</label>
+                    <label className="text-gray-700 text-sm font-medium mb-2 block">
+                      Price
+                    </label>
                     <div className="space-y-2">
                       <label className="flex items-center space-x-2">
                         <input
@@ -205,7 +248,9 @@ export default function Dashboard() {
                           name="pricing"
                           value="all"
                           checked={filterPricing === 'all'}
-                          onChange={(e) => setFilterPricing(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterPricing(e.target.value as any)
+                          }
                           className="text-purple-500"
                         />
                         <span className="text-gray-900 text-sm">All</span>
@@ -216,7 +261,9 @@ export default function Dashboard() {
                           name="pricing"
                           value="paid"
                           checked={filterPricing === 'paid'}
-                          onChange={(e) => setFilterPricing(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterPricing(e.target.value as any)
+                          }
                           className="text-purple-500"
                         />
                         <span className="text-gray-900 text-sm">Paid</span>
@@ -227,7 +274,9 @@ export default function Dashboard() {
                           name="pricing"
                           value="free"
                           checked={filterPricing === 'free'}
-                          onChange={(e) => setFilterPricing(e.target.value as any)}
+                          onChange={(e) =>
+                            setFilterPricing(e.target.value as any)
+                          }
                           className="text-purple-500"
                         />
                         <span className="text-gray-900 text-sm">Free</span>
@@ -256,10 +305,12 @@ export default function Dashboard() {
           <Popover
             content={
               <div className="w-full max-w-xs p-4">
-                <div className="text-base text-gray-900 font-medium mb-3">Sort by:</div>
+                <div className="text-base text-gray-900 font-medium mb-3">
+                  Sort by:
+                </div>
 
                 <div className="space-y-2">
-                <label className="flex items-center space-x-2">
+                  <label className="flex items-center space-x-2">
                     <input
                       type="radio"
                       name="sort"
@@ -311,7 +362,9 @@ export default function Dashboard() {
             <div className="mx-auto h-12 w-12 text-white/60">
               <X className="h-full w-full" />
             </div>
-            <h3 className="mt-2 text-sm font-medium text-white">Error loading collections</h3>
+            <h3 className="mt-2 text-sm font-medium text-white">
+              Error loading collections
+            </h3>
             <p className="mt-1 text-sm text-white/80">
               {error instanceof Error ? error.message : 'Something went wrong'}
             </p>
@@ -338,14 +391,21 @@ export default function Dashboard() {
             <div className="mx-auto h-12 w-12 text-white/60">
               <Search className="h-full w-full" />
             </div>
-            <h3 className="mt-2 text-sm font-medium text-white">No collections found</h3>
+            <h3 className="mt-2 text-sm font-medium text-white">
+              No collections found
+            </h3>
             <p className="mt-1 text-sm text-white/80">
-              {searchQuery || filterVisibility !== 'all' || filterOwnership !== 'all' || filterPricing !== 'all'
+              {searchQuery ||
+              filterVisibility !== 'all' ||
+              filterOwnership !== 'all' ||
+              filterPricing !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
-                : 'Get started by creating your first collection.'
-              }
+                : 'Get started by creating your first collection.'}
             </p>
-            {!searchQuery && filterVisibility === 'all' && filterOwnership === 'all' && filterPricing === 'all' ? (
+            {!searchQuery &&
+            filterVisibility === 'all' &&
+            filterOwnership === 'all' &&
+            filterPricing === 'all' ? (
               <div className="mt-6 flex justify-center">
                 <Button
                   className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg opacity-50 cursor-not-allowed"
@@ -358,13 +418,13 @@ export default function Dashboard() {
             ) : (
               <div className="mt-6 flex justify-center">
                 <Button
-                className="flex gap-2 px-6 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
-                onClick={() => {
-                  setSearchQuery('');
-                  setFilterVisibility('all');
-                  setFilterOwnership('all');
-                  setFilterPricing('all');
-                }}
+                  className="flex gap-2 px-6 py-2 bg-gray-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setFilterVisibility('all');
+                    setFilterOwnership('all');
+                    setFilterPricing('all');
+                  }}
                 >
                   <X className="h-4 w-4" />
                   <span>Clear Filters</span>

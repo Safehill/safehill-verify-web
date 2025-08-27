@@ -3,11 +3,12 @@
 import type { UserDTO } from '@/lib/api/models/dto/User';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-    createContext,
-    type ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from 'react';
 
 // Define types for our authentication data
@@ -47,11 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Logout function - clears credentials and redirects to login
-  const logout = () => {
+  const logout = useCallback(() => {
     setAuthedSession(null);
     setIsAuthenticated(false);
     router.push('/login');
-  };
+  }, [router]);
 
   // Check token expiration periodically
   useEffect(() => {
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkExpiration = () => {
       if (authedSession.expiresAt < Date.now()) {
-        console.log('Authentication expired');
+        // console.log('Authentication expired');
         logout();
       }
     };
@@ -72,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Then check every minute
     const interval = setInterval(checkExpiration, 60 * 1000);
     return () => clearInterval(interval);
-  }, [authedSession]);
+  }, [authedSession, logout]);
 
   // Redirect to login if accessing protected route without authentication
   useEffect(() => {

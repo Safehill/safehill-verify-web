@@ -20,7 +20,7 @@ export async function loadTinyCLIPModel(): Promise<void> {
   let modelBuffer = await get(MODEL_KEY);
 
   if (!modelBuffer) {
-    console.log('Model not cached, downloading...');
+    // console.log('Model not cached, downloading...');
     const res = await fetch(MODEL_ZIP_URL);
     const zipBuffer = await res.arrayBuffer();
 
@@ -32,9 +32,9 @@ export async function loadTinyCLIPModel(): Promise<void> {
 
     modelBuffer = modelBytes.buffer;
     await set(MODEL_KEY, modelBuffer);
-    console.log('Model cached in IndexedDB');
+    // console.log('Model cached in IndexedDB');
   } else {
-    console.log('Loaded model from IndexedDB');
+    // console.log('Loaded model from IndexedDB');
   }
 
   session = await ort.InferenceSession.create(modelBuffer);
@@ -91,9 +91,9 @@ export async function generateEmbeddingFromImageData(
 
   const input = await prepareInput(imageData);
 
-  console.log('First 10 pixels:', input.slice(0, 10)); // R channel
-  console.log('G sample:', input.slice(224 * 224, 224 * 224 + 10));
-  console.log('B sample:', input.slice(2 * 224 * 224, 2 * 224 * 224 + 10));
+  // console.log('First 10 pixels:', input.slice(0, 10)); // R channel
+  // console.log('G sample:', input.slice(224 * 224, 224 * 224 + 10));
+  // console.log('B sample:', input.slice(2 * 224 * 224, 2 * 224 * 224 + 10));
 
   const tensor = new ort.Tensor('float32', input, [1, 3, 224, 224]);
 
@@ -127,7 +127,7 @@ export function serializeEmbeddingToBase64(embedding: Float32Array): string {
   }
 
   const base64String = btoa(binary);
-  console.log('serialized embedding to base64:', base64String);
+  // console.log('serialized embedding to base64:', base64String);
   return base64String;
 }
 

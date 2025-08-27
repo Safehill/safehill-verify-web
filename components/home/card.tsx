@@ -26,14 +26,14 @@ export default function Card({
         <div className="prose-sm mt-4 leading-normal text-gray-500 [text-wrap:balance] md:prose">
           <ReactMarkdown
             components={{
-              a: ({ node, ...props }) => (
+              a: ({ node: _node, ...props }) => (
                 <a
                   target="_blank"
                   {...props}
                   className="font-light text-gray-800 underline transition-colors"
                 />
               ),
-              code: ({ node, ...props }) => (
+              code: ({ node: _node, ...props }) => (
                 <code
                   {...props}
                   // @ts-expect-error (to fix "Received `true` for a non-boolean attribute `inline`." warning)

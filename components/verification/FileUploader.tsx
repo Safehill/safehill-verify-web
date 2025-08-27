@@ -1,12 +1,12 @@
 'use client';
 
-import { FileUp, Trash2 } from 'lucide-react';
-import type React from 'react';
-import { useState } from 'react';
 import { Button } from '@/components/shared/button';
 import { Card, CardContent } from '@/components/shared/card';
 import { Input } from '@/components/shared/input';
 import ImageView from '@/components/verification/ImageView';
+import { FileUp, Trash2 } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 import type { FileUploaderProps } from './FileDetailsProps';
 
 function typeOf(file: File): string | null {
@@ -68,11 +68,6 @@ const FileUploader: React.FC<FileUploaderProps> = ({
       return f.name !== file.name;
     });
     setStagedFiles(newFiles);
-  };
-
-  const authenticateFiles = () => {
-    setIsLoading(true);
-    onSubmit(stagedFiles);
   };
 
   return (

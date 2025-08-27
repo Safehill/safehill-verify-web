@@ -36,8 +36,11 @@ export default function CollectionSettingsModal({
   // Warning modal states
   const [showPublicWarning, setShowPublicWarning] = useState(false);
   const [showConfidentialInfo, setShowConfidentialInfo] = useState(false);
-  const [showUnsavedChangesWarning, setShowUnsavedChangesWarning] = useState(false);
-  const [pendingVisibilityChange, setPendingVisibilityChange] = useState<string | null>(null);
+  const [showUnsavedChangesWarning, setShowUnsavedChangesWarning] =
+    useState(false);
+  const [pendingVisibilityChange, setPendingVisibilityChange] = useState<
+    string | null
+  >(null);
   const [publicConfirmationText, setPublicConfirmationText] = useState('');
 
   // API mutation
@@ -67,7 +70,10 @@ export default function CollectionSettingsModal({
     if (newVisibility === 'public' && visibility !== 'public') {
       setPendingVisibilityChange(newVisibility);
       setShowPublicWarning(true);
-    } else if (newVisibility === 'confidential' && visibility !== 'confidential') {
+    } else if (
+      newVisibility === 'confidential' &&
+      visibility !== 'confidential'
+    ) {
       setPendingVisibilityChange(newVisibility);
       setShowConfidentialInfo(true);
     } else {
@@ -114,8 +120,8 @@ export default function CollectionSettingsModal({
         },
       });
       setShowModal(false);
-    } catch (error) {
-      console.error('Failed to update collection:', error);
+    } catch (_error) {
+      // console.error('Failed to update collection:', error);
       // You might want to show an error toast here
     }
   };
@@ -153,8 +159,8 @@ export default function CollectionSettingsModal({
       });
       setShowModal(false);
       setShowUnsavedChangesWarning(false);
-    } catch (error) {
-      console.error('Failed to update collection:', error);
+    } catch (_error) {
+      // console.error('Failed to update collection:', error);
       // You might want to show an error toast here
     }
   };
@@ -167,10 +173,6 @@ export default function CollectionSettingsModal({
     setShowModal(false);
     setShowUnsavedChangesWarning(false);
   };
-
-
-
-
 
   // Check if there are unsaved changes
   const hasChanges =
@@ -196,7 +198,9 @@ export default function CollectionSettingsModal({
               Cancel
             </Button>
             <div className="text-center">
-              <div className="text-2xl font-semibold text-gray-900">Collection Settings</div>
+              <div className="text-2xl font-semibold text-gray-900">
+                Collection Settings
+              </div>
               <div className="text-sm text-gray-600">{collection.name}</div>
             </div>
             <Button
@@ -209,7 +213,7 @@ export default function CollectionSettingsModal({
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-6 space-y-6">
+          <div className="flex-1 p-6 space-y-2">
             {/* Link Setting */}
             <div className="flex items-center justify-between h-20">
               <div className="flex-1">
@@ -219,9 +223,13 @@ export default function CollectionSettingsModal({
                 </div>
               </div>
               <div className="ml-6 flex items-center space-x-3">
-                <div className={`text-sm font-mono ${
-                  visibility === 'not-shared' ? 'text-gray-400' : 'text-gray-700'
-                }`}>
+                <div
+                  className={`text-sm font-mono ${
+                    visibility === 'not-shared'
+                      ? 'text-gray-400'
+                      : 'text-gray-700'
+                  }`}
+                >
                   {generateCollectionLink(collection.id)}
                 </div>
                 <CopyButton
@@ -234,22 +242,27 @@ export default function CollectionSettingsModal({
               </div>
             </div>
 
-            <div className="text-sm text-gray-600 mt-1 flex justify-end px-2 italic">
-              { originalIsNotShared && visibility === 'not-shared' ? (
-                  <p className="text-sm text-gray-800">
-                    Set Visibility to <span className="font-bold">Confidential</span> to activate the link
-                  </p>
+            <div className="text-sm text-gray-600 flex justify-end px-2 italic">
+              {originalIsNotShared && visibility === 'not-shared' ? (
+                <p className="text-sm text-gray-800">
+                  Set Visibility to{' '}
+                  <span className="font-bold">Confidential</span> to activate
+                  the link
+                </p>
               ) : (
-                  <p className="text-sm text-gray-800">
-                      Use this link to share your collection {visibility === 'confidential' ? 'confidentially' : ''}!
-                  </p>
+                <p className="text-sm text-gray-800">
+                  You can use the link above to share your collection
+                  {visibility === 'confidential' ? ' confidentially' : ''}!
+                </p>
               )}
             </div>
 
             {/* Visibility Setting */}
             <div className="flex items-center justify-between h-20">
               <div className="flex-1">
-                <div className="font-semibold text-xl text-gray-900">Visibility</div>
+                <div className="font-semibold text-xl text-gray-900">
+                  Visibility
+                </div>
                 <div className="text-sm text-gray-600">
                   Control who can see and access this collection
                 </div>
@@ -257,9 +270,17 @@ export default function CollectionSettingsModal({
               <div className="ml-6">
                 <div className="flex rounded-lg bg-gray-100 p-1">
                   {[
-                    { value: 'not-shared', label: 'Not Shared', disabled: originalIsPublic || originalIsConfidential },
-                    { value: 'confidential', label: 'Confidential', disabled: originalIsPublic },
-                    { value: 'public', label: 'Public', disabled: false }
+                    {
+                      value: 'not-shared',
+                      label: 'Not Shared',
+                      disabled: originalIsPublic || originalIsConfidential,
+                    },
+                    {
+                      value: 'confidential',
+                      label: 'Confidential',
+                      disabled: originalIsPublic,
+                    },
+                    { value: 'public', label: 'Public', disabled: false },
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -293,39 +314,48 @@ export default function CollectionSettingsModal({
               </div>
             </div>
 
-            <div className="text-sm text-gray-600 mt-1 flex justify-end px-2 italic">
-              { originalIsPublic && (
-                  <p className="text-sm text-red-500">
-                      You can&apos;t restrict access to this collection or charge for access once it&apos;s <span className="font-bold">Public</span>
-                  </p>
+            <div className="text-sm text-gray-600 flex justify-end px-2 italic">
+              {originalIsPublic && (
+                <p className="text-sm text-red-500">
+                  You can&apos;t restrict access to this collection or charge
+                  for access once it&apos;s{' '}
+                  <span className="font-bold">Public</span>
+                </p>
               )}
-              { !originalIsPublic && visibility === 'not-shared' && (
-                  <p className="text-sm text-gray-800">
-                      Only confidentially shared collections can be sold
-                  </p>
+              {!originalIsPublic && visibility === 'not-shared' && (
+                <p className="text-sm text-gray-800">
+                  Only confidentially shared collections can be sold
+                </p>
               )}
-              { !originalIsPublic && visibility === 'confidential' && (
-                  <p className="text-sm text-gray-600">
-                      You&apos;ll start earning from this collection once you set a price! 👍
-                  </p>
+              {!originalIsPublic && visibility === 'confidential' && (
+                <p className="text-sm text-gray-600">
+                  You&apos;ll start earning from this collection once you set a
+                  price! 👍
+                </p>
               )}
             </div>
 
             {/* Pricing Setting */}
             <div
               className={`flex items-center justify-between h-20 transition-opacity ${
-                  visibility !== 'confidential' ? 'opacity-50 pointer-events-none select-none' : ''
+                visibility !== 'confidential'
+                  ? 'opacity-50 pointer-events-none select-none'
+                  : ''
               }`}
             >
               <div className="flex-1">
-                <div className="font-semibold text-xl text-gray-900">Sale Price</div>
+                <div className="font-semibold text-xl text-gray-900">
+                  Sale Price
+                </div>
                 <div className="text-sm text-gray-600">
                   Set the price for accessing this collection
                 </div>
               </div>
               <div className="ml-6 flex items-center space-x-3">
                 <div className="relative">
-                  <span className="mr-3 text-lg font-medium text-gray-700">${numericPricing}</span>
+                  <span className="mr-3 text-lg font-medium text-gray-700">
+                    ${numericPricing}
+                  </span>
                   <input
                     type="range"
                     min="0"
@@ -334,7 +364,9 @@ export default function CollectionSettingsModal({
                     onChange={(e) => setPricing(e.target.value)}
                     disabled={visibility !== 'confidential'}
                     className={`w-32 h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
-                      visibility !== 'confidential' ? 'opacity-50 cursor-not-allowed' : ''
+                      visibility !== 'confidential'
+                        ? 'opacity-50 cursor-not-allowed'
+                        : ''
                     }`}
                   />
                 </div>
@@ -343,45 +375,74 @@ export default function CollectionSettingsModal({
 
             {/* Pricing Profits Cards */}
             <div
-              className={`grid grid-cols-3 gap-4 mt-4 transition-opacity ${
-                  visibility !== 'confidential' ? 'opacity-50 pointer-events-none select-none' : ''
-              }`}>
+              className={`grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-4 mt-4 transition-opacity ${
+                visibility !== 'confidential'
+                  ? 'opacity-50 pointer-events-none select-none'
+                  : ''
+              }`}
+            >
               <div className="rounded-2xl border-2 border-solid border-gray-200/30 bg-white/10 px-4 py-3 flex items-center justify-center shadow-none transition-all duration-200">
                 <div className="text-center">
-                  <p className="text-xs font-medium text-gray-600">Buyer Pays</p>
-                  <p className="text-2xl font-bold text-black mt-1">${numericPricing.toFixed(2)}</p>
+                  <p className="text-xs font-medium text-gray-600">
+                    Buyer Pays
+                  </p>
+                  <p className="text-2xl font-bold text-black mt-1">
+                    ${numericPricing.toFixed(2)}
+                  </p>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <span className="text-2xl font-bold text-gray-400">−</span>
               </div>
 
               <div className="rounded-2xl border-2 border-solid border-gray-200/30 bg-white/10 px-4 py-3 flex items-center justify-center shadow-none transition-all duration-200">
                 <div className="text-center">
-                  <p className="text-xs font-medium text-gray-600">Safehill&apos;s Fee</p>
-                  <p className="text-2xl font-bold text-black mt-1">${platformFee.toFixed(2)}</p>
+                  <p className="text-xs font-medium text-gray-600">
+                    Safehill&apos;s Fee
+                  </p>
+                  <p className="text-2xl font-bold text-black mt-1">
+                    ${platformFee.toFixed(2)}
+                  </p>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <span className="text-2xl font-bold text-gray-400">=</span>
               </div>
 
               <div className="rounded-2xl border-2 border-solid border-purple-800 bg-purple-800/10 px-4 py-3 flex items-center justify-center shadow-none transition-all duration-200">
                 <div className="text-center">
                   <p className="text-xs font-medium text-gray-600">You Get</p>
-                  <p className="text-2xl font-bold text-purple-800 mt-1">${(numericPricing - platformFee).toFixed(2)}</p>
+                  <p className="text-2xl font-bold text-purple-800 mt-1">
+                    ${(numericPricing - platformFee).toFixed(2)}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Historical profits string */}
-            { historicalRevenue > 0 ? (
-              <div className="text-sm text-gray-600 mt-1 flex items-center justify-end px-2 italic">
-                { originalIsConfidential && (
+            {historicalRevenue > 0 ? (
+              <div className="text-sm text-gray-600 flex items-center justify-end px-2 italic">
+                {originalIsConfidential && (
                   <p className="text-sm text-gray-600">
-                    So far you&apos;ve made<span className="font-bold text-purple-800 px-1">${historicalRevenue.toFixed(2)}</span>🙌
+                    So far you&apos;ve made
+                    <span className="font-bold text-purple-800 px-1">
+                      ${historicalRevenue.toFixed(2)}
+                    </span>
+                    🙌
                   </p>
                 )}
-                { originalIsPublic && (
+                {originalIsPublic && (
                   <p className="text-sm text-gray-600">
-                    When you were sharing this collection confidentially, you made<span className="font-bold text-purple-800 px-1">${historicalRevenue.toFixed(2)}</span>
+                    When you were sharing this collection confidentially, you
+                    made
+                    <span className="font-bold text-purple-800 px-1">
+                      ${historicalRevenue.toFixed(2)}
+                    </span>
                   </p>
                 )}
-                { originalIsNotShared && (
+                {originalIsNotShared && (
                   <p className="text-sm text-gray-600">
                     Share this collection confidentially to start earning!
                   </p>
@@ -389,27 +450,34 @@ export default function CollectionSettingsModal({
               </div>
             ) : (
               <div className="text-sm text-gray-600 flex items-center justify-end px-2 italic">
-                { originalIsConfidential && (
+                {originalIsConfidential && (
                   <p className="text-sm text-gray-600">
                     You haven&apos;t earned anything from this collection yet
                   </p>
                 )}
-                { originalIsPublic && (
+                {originalIsPublic && (
                   <p className="text-sm text-gray-600">
-                    You haven&apos;t earned anything from this collection before you made it <span className="font-bold text-green-500">Public</span>
+                    You haven&apos;t earned anything from this collection before
+                    you made it{' '}
+                    <span className="font-bold text-green-500">Public</span>
                   </p>
                 )}
-                { originalIsNotShared && visibility === 'confidential' && numericPricing === 0 && (
-                  <p className="text-sm text-gray-600">
-                    Set a price and start earning!
-                  </p>
-                )}
-                { originalIsNotShared && visibility === 'confidential' && numericPricing > 0 && (
-                  <p className="text-sm text-gray-600">
-                    Share the link to this collection confidentially to start earning!
-                  </p>
-                )}
-                { originalIsNotShared && visibility !== 'confidential' && (
+                {originalIsNotShared &&
+                  visibility === 'confidential' &&
+                  numericPricing === 0 && (
+                    <p className="text-sm text-gray-600">
+                      Set a price and start earning!
+                    </p>
+                  )}
+                {originalIsNotShared &&
+                  visibility === 'confidential' &&
+                  numericPricing > 0 && (
+                    <p className="text-sm text-gray-600">
+                      Share the link to this collection confidentially to start
+                      earning!
+                    </p>
+                  )}
+                {originalIsNotShared && visibility !== 'confidential' && (
                   <p className="text-sm text-gray-600">
                     Only confidentially shared collections can be sold
                   </p>
@@ -456,9 +524,9 @@ To confirm, please type the full collection name:`}
         showModal={showConfidentialInfo}
         setShowModal={setShowConfidentialInfo}
         title="Confidential Sharing"
-        message={`Your collection will still be protected when shared confidentially.
+        message={`Sharing confidentially means your collection will still be protected. You give exclusive access to your collection to specific people via a link.
 
-Users won't be able to save or re-share your content, and you can earn royalties every time your content is sold.`}
+You can charge for access to your collection by setting a price. Anyone with access won't be able to save or re-share your content.`}
         onConfirm={handleConfidentialInfoConfirm}
         variant="info"
       />
@@ -470,7 +538,7 @@ Users won't be able to save or re-share your content, and you can earn royalties
         title="Unsaved Changes"
         message={`You have unsaved changes to your collection settings.
 
-Would you like to save your changes or discard them?`}
+Would you like to save the changes or discard them?`}
         confirmText="Save Changes"
         cancelText="Discard Changes"
         onConfirm={handleUnsavedChangesSave}

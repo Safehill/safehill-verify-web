@@ -1,11 +1,11 @@
 // import cv from '../../deps/opencv_version';
-import { useSyncExternalStore } from 'react';
-import { toast } from 'sonner';
 import {
   generateEmbeddingFromImageData,
   loadTinyCLIPModel,
   serializeEmbeddingToBase64,
 } from '@/lib/embeddings/tinyclip-embeddings';
+import { useSyncExternalStore } from 'react';
+import { toast } from 'sonner';
 
 export const EmbeddingsSingleton = {
   isLoaded: false,
@@ -34,17 +34,17 @@ export function useImageEmbedding() {
     !EmbeddingsSingleton.isLoaded &&
     !EmbeddingsSingleton.hasInitStarted
   ) {
-    console.log('Image Embeddings Model initializing');
+    // console.log('Image Embeddings Model initializing');
     EmbeddingsSingleton.hasInitStarted = true;
 
     loadTinyCLIPModel()
       .then(() => {
-        console.log('Image Embeddings Model initialization COMPLETE!');
+        // console.log('Image Embeddings Model initialization COMPLETE!');
         EmbeddingsSingleton.isLoaded = true;
         notifyAll();
       })
       .catch((reason: any) => {
-        console.error(reason);
+        // console.error(reason);
         toast.error('Initialization failed: ' + reason);
         EmbeddingsSingleton.isLoaded = false;
         notifyAll();
@@ -57,7 +57,7 @@ export function useImageEmbedding() {
     }
 
     const embedding = await generateEmbeddingFromImageData(imageData);
-    console.log('embedding', embedding);
+    // console.log('embedding', embedding);
     return serializeEmbeddingToBase64(embedding);
   };
 

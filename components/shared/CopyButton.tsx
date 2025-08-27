@@ -23,7 +23,7 @@ export default function CopyButton({
   variant = 'outline',
   className = '',
   tooltipText = 'Copy this link',
-  successText = 'Link copied to your clipboard'
+  successText = 'Link copied to your clipboard',
 }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -44,8 +44,8 @@ export default function CopyButton({
         setCopied(false);
         setShowTooltip(false);
       }, 2000);
-    } catch (error) {
-      console.error('Failed to copy text:', error);
+    } catch (_error) {
+      // console.error('Failed to copy text:', error);
     }
   };
 

@@ -63,7 +63,7 @@ export default function LoginPage() {
       return;
     }
 
-    console.log('Authentication successful');
+    // console.log('Authentication successful');
 
     // TODO: Set real expiration date
     const expirationDate = new Date();
@@ -82,7 +82,7 @@ export default function LoginPage() {
     setTimeout(() => {
       router.push('/authed');
     }, 500);
-  }, [authenticatedUser]);
+  }, [authenticatedUser, router, setAuthedSession]);
 
   // Update progress bar based on time remaining
   useEffect(() => {

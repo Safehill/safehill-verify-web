@@ -1,7 +1,12 @@
 'use client';
 
 import { Button } from '@/components/shared/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/shared/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/shared/card';
 import { useAuth } from '@/lib/auth/auth-context';
 import { AlertTriangle, Key, Shield, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -40,7 +45,7 @@ export default function DevLogin() {
 
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Create mock session data
       const mockSession = {
@@ -48,7 +53,7 @@ export default function DevLogin() {
         privateKey: {} as CryptoKey, // Mock key
         signature: {} as CryptoKey, // Mock signature
         user: MOCK_USER,
-        expiresAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours from now
+        expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
       };
 
       setAuthedSession(mockSession);
@@ -98,8 +103,8 @@ export default function DevLogin() {
               <div className="text-sm text-yellow-800">
                 <p className="font-medium">Security Notice:</p>
                 <p className="mt-1">
-                  This bypass is only available in development mode and uses mock data.
-                  Never use this in production.
+                  This bypass is only available in development mode and uses
+                  mock data. Never use this in production.
                 </p>
               </div>
             </div>

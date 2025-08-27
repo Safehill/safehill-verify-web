@@ -20,8 +20,8 @@ const ImageDetails: React.FC<ImageMetadataProps> = ({
   const authorIds = matches.map((match) => match.author);
   const {
     data: users,
-    isLoading: usersLoading,
-    error: usersFetchError,
+    isLoading: _usersLoading,
+    error: _usersFetchError,
   } = useUsers(authorIds);
 
   const resolveUser = (id: string) =>

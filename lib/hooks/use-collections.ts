@@ -1,4 +1,8 @@
-import { collectionsApi, type CollectionDetail, type Visibility } from '@/lib/api/collections';
+import {
+  collectionsApi,
+  type CollectionDetail,
+  type Visibility,
+} from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import { convertToAuthenticatedUser } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -119,14 +123,17 @@ export const useUpdateCollection = () => {
   return useMutation({
     mutationFn: ({
       id,
-      updates
+      updates,
     }: {
       id: string;
-      updates: { visibility?: Visibility; pricing?: number }
+      updates: { visibility?: Visibility; pricing?: number };
     }) => collectionsApi.updateCollection(id, updates, authenticatedUser!),
     onSuccess: (updatedCollection: CollectionDetail) => {
       // Update the collection in the cache
-      queryClient.setQueryData(collectionKeys.detail(updatedCollection.id), updatedCollection);
+      queryClient.setQueryData(
+        collectionKeys.detail(updatedCollection.id),
+        updatedCollection
+      );
 
       // Invalidate the collections list to refresh it
       queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });

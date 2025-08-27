@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import { WS_BASE_URL } from '@/lib/api/api';
 import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
 import type {
@@ -12,6 +11,7 @@ import {
   importPrivateKeySigning,
   initializePrivateKeyAgreement,
 } from '@/lib/crypto/keys';
+import { useCallback, useEffect, useState } from 'react';
 
 export type SessionWebSocketState = {
   session: AuthSessionInitializationMessage | null;
@@ -48,7 +48,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
     !SessionEncryption.symmetricKey &&
     !SessionEncryption.isInitializing
   ) {
-    console.log('Creating encryption key');
+    // console.log('Creating encryption key');
     SessionEncryption.isInitializing = true;
 
     generateSymmetricKey().then((key) => {
@@ -82,10 +82,10 @@ export function useSessionWebSocket(): SessionWebSocketState {
 
     const ws = new WebSocket(`${WS_BASE_URL}/web/sessions`);
     WebsocketSessionStatus.wsRef = ws;
-    console.log('Connecting to WS:', ws.url);
+    // console.log('Connecting to WS:', ws.url);
 
     ws.onopen = () => {
-      console.log('WS open');
+      // console.log('WS open');
     };
 
     ws.onmessage = async (event) => {
@@ -98,9 +98,9 @@ export function useSessionWebSocket(): SessionWebSocketState {
           break;
         case 'auth-credentials': {
           if (!SessionEncryption.symmetricKey) {
-            console.error(
-              "auth credentials received but symmetric key wasn't initialized. This isn't supposed to happen."
-            );
+            // console.error(
+            //   "auth credentials received but symmetric key wasn't initialized. This isn't supposed to happen."
+            // );
             return;
           }
 
@@ -133,8 +133,8 @@ export function useSessionWebSocket(): SessionWebSocketState {
       }
     };
 
-    ws.onerror = (e) => {
-      console.error('WS error', e);
+    ws.onerror = (_e) => {
+      // console.error('WS error', e);
       setError('Failed to connect to the server');
       WebsocketSessionStatus.isConnecting = false;
       setAuthenticatedUser(null);
@@ -142,7 +142,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
     };
 
     ws.onclose = () => {
-      console.log('WS close');
+      // console.log('WS close');
       if (!websocketSession) {
         setError('WebSocket closed before session information was received.');
       }
@@ -164,7 +164,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
     setAuthedSession(null);
 
     connect();
-  }, [null, WebsocketSessionStatus.isConnecting]);
+  }, [WebsocketSessionStatus.isConnecting]);
 
   return {
     session: websocketSession,
