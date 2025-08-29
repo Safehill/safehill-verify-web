@@ -2,13 +2,15 @@ import {
   collectionsApi,
   type CollectionDetail,
   type Visibility,
+  type AccessCheckResult,
+  type PaymentIntent,
 } from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import { convertToAuthenticatedUser } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Re-export types for convenience
-export type { CollectionDetail, Visibility };
+export type { CollectionDetail, Visibility, AccessCheckResult, PaymentIntent };
 
 // Query keys
 export const collectionKeys = {
@@ -19,6 +21,8 @@ export const collectionKeys = {
   detail: (id: string) => [...collectionKeys.details(), id] as const,
   users: () => [...collectionKeys.all, 'users'] as const,
   user: (id: string) => [...collectionKeys.users(), id] as const,
+  access: () => [...collectionKeys.all, 'access'] as const,
+  accessCheck: (id: string) => [...collectionKeys.access(), id] as const,
 };
 
 // Hook to get all collections
@@ -36,14 +40,14 @@ export const useCollections = () => {
 };
 
 // Hook to get a single collection by ID
-export const useCollection = (id: string) => {
+export const useCollection = (id: string, enabled: boolean = true) => {
   const { authedSession } = useAuth();
   const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useQuery({
     queryKey: collectionKeys.detail(id),
     queryFn: () => collectionsApi.getCollection(id, authenticatedUser!),
-    enabled: !!id && !!authenticatedUser, // Only run query if id exists and user is authenticated
+    enabled: enabled && !!id && !!authenticatedUser, // Only run query if enabled, id exists and user is authenticated
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -60,6 +64,21 @@ export const useSearchCollections = (query: string) => {
     enabled: query.length > 0 && !!authenticatedUser, // Only run query if there's a search query and user is authenticated
     staleTime: 2 * 60 * 1000, // 2 minutes for search results
     gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Hook to search all collections for adding to user's list
+export const useSearchAllCollections = (query: string) => {
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+
+  return useQuery({
+    queryKey: [...collectionKeys.all, 'search-all', query],
+    queryFn: () =>
+      collectionsApi.searchAllCollections(query, authenticatedUser!),
+    enabled: query.length > 0 && !!authenticatedUser,
+    staleTime: 1 * 60 * 1000, // 1 minute for search results
+    gcTime: 3 * 60 * 1000, // 3 minutes
   });
 };
 
@@ -136,6 +155,81 @@ export const useUpdateCollection = () => {
       );
 
       // Invalidate the collections list to refresh it
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+    },
+  });
+};
+
+// Hook to check access to a collection
+export const useCollectionAccess = (id: string) => {
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+
+  return useQuery({
+    queryKey: collectionKeys.accessCheck(id),
+    queryFn: () => collectionsApi.checkAccess(id, authenticatedUser!),
+    enabled: !!id && !!authenticatedUser,
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+// Hook to create payment intent
+export const useCreatePaymentIntent = () => {
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+
+  return useMutation({
+    mutationFn: ({ collectionId }: { collectionId: string }) =>
+      collectionsApi.createPaymentIntent(collectionId, authenticatedUser!),
+  });
+};
+
+// Hook to confirm payment
+export const useConfirmPayment = () => {
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (variables: {
+      collectionId: string;
+      paymentIntentId: string;
+    }) =>
+      collectionsApi.confirmPayment(
+        variables.collectionId,
+        variables.paymentIntentId,
+        authenticatedUser!
+      ),
+    onSuccess: (
+      result: { success: boolean; message?: string },
+      variables: { collectionId: string; paymentIntentId: string }
+    ) => {
+      if (result.success) {
+        // Invalidate access check and collection data
+        queryClient.invalidateQueries({
+          queryKey: collectionKeys.accessCheck(variables.collectionId),
+        });
+        queryClient.invalidateQueries({
+          queryKey: collectionKeys.detail(variables.collectionId),
+        });
+        queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+      }
+    },
+  });
+};
+
+// Hook to track collection access
+export const useTrackCollectionAccess = () => {
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ collectionId }: { collectionId: string }) =>
+      collectionsApi.trackCollectionAccess(collectionId, authenticatedUser!),
+    onSuccess: () => {
+      // Invalidate collections list to show the newly accessed collection
       queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
     },
   });

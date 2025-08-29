@@ -2,7 +2,7 @@
 
 import Popover from '@/components/shared/popover';
 import { useAuth } from '@/lib/auth/auth-context';
-import { getAvatarColorValue } from '@/lib/utils';
+import { getAvatarColorValue, getInitials } from '@/lib/utils';
 import { ChevronRight, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -14,24 +14,6 @@ interface BreadcrumbItem {
 
 interface DashboardTopBarProps {
   breadcrumbs: BreadcrumbItem[];
-}
-
-// Get initials from user name or identifier
-function getInitials(name?: string, identifier?: string): string {
-  if (name) {
-    return name
-      .split(' ')
-      .map((word) => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-
-  if (identifier) {
-    return identifier.slice(0, 2).toUpperCase();
-  }
-
-  return 'U';
 }
 
 export default function DashboardTopBar({ breadcrumbs }: DashboardTopBarProps) {
@@ -123,7 +105,7 @@ export default function DashboardTopBar({ breadcrumbs }: DashboardTopBarProps) {
             align="end"
           >
             <div className="flex items-center space-x-2 rounded-full p-1 hover:bg-gray-100 transition-colors cursor-pointer">
-              <div 
+              <div
                 className="h-8 w-8 rounded-full flex items-center justify-center text-white font-medium text-sm"
                 style={{ backgroundColor: avatarColorValue }}
               >

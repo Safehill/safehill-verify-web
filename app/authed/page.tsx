@@ -2,6 +2,7 @@
 
 import CollectionCard from '@/components/authed/CollectionCard';
 import DashboardTopBar from '@/components/authed/dashboard-top-bar';
+import AddCollectionModal from '@/components/shared/AddCollectionModal';
 import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import Popover from '@/components/shared/popover';
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState<'lastUpdated' | 'name'>('lastUpdated');
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [openSortPopover, setOpenSortPopover] = useState(false);
+  const [showAddCollectionModal, setShowAddCollectionModal] = useState(false);
 
   const { authedSession } = useAuth();
   const currentUserId = authedSession?.user.identifier;
@@ -92,11 +94,11 @@ export default function Dashboard() {
               </p>
             </div>
             <Button
-              className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg opacity-50 cursor-not-allowed"
-              disabled
+              className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
+              onClick={() => setShowAddCollectionModal(true)}
             >
               <Plus className="h-4 w-4" />
-              <span>New Collection</span>
+              <span>Add Collection</span>
             </Button>
           </div>
         </div>
@@ -408,11 +410,11 @@ export default function Dashboard() {
             filterPricing === 'all' ? (
               <div className="mt-6 flex justify-center">
                 <Button
-                  className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg opacity-50 cursor-not-allowed"
-                  disabled
+                  className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
+                  onClick={() => setShowAddCollectionModal(true)}
                 >
                   <Plus className="h-4 w-4" />
-                  <span>New Collection</span>
+                  <span>Add Collection</span>
                 </Button>
               </div>
             ) : (
@@ -434,6 +436,12 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Add Collection Modal */}
+      <AddCollectionModal
+        showModal={showAddCollectionModal}
+        setShowModal={setShowAddCollectionModal}
+      />
     </div>
   );
 }

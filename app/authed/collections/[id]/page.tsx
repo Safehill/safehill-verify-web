@@ -5,6 +5,9 @@ import AssetTableRow from '@/components/authed/AssetTableRow';
 import CollectionSettingsModal from '@/components/authed/CollectionSettingsModal';
 import DashboardTopBar from '@/components/authed/dashboard-top-bar';
 import FullScreenAssetGallery from '@/components/authed/FullScreenAssetGallery';
+import AccessDeniedView from '@/components/shared/AccessDeniedView';
+import PaywallModal from '@/components/shared/PaywallModal';
+import PaywallPage from '@/components/shared/PaywallPage';
 
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
@@ -12,8 +15,13 @@ import CopyButton from '@/components/shared/CopyButton';
 import SegmentedControl from '@/components/shared/segmented-control';
 import { generateCollectionLink } from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
-import { useCollection, useUser } from '@/lib/hooks/use-collections';
-import { timeAgo } from '@/lib/utils';
+import {
+  useCollection,
+  useUser,
+  useCollectionAccess,
+  useTrackCollectionAccess,
+} from '@/lib/hooks/use-collections';
+import { timeAgo, getAvatarColorValue, getInitials } from '@/lib/utils';
 import {
   ArrowLeft,
   ChevronDown,
@@ -28,26 +36,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
-import { getAvatarColorValue } from '@/lib/utils';
-
-// Get initials from user name or identifier (same as dashboard-top-bar.tsx)
-function getInitials(name?: string, identifier?: string): string {
-  if (name) {
-    return name
-      .split(' ')
-      .map((word) => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-
-  if (identifier) {
-    return identifier.slice(0, 2).toUpperCase();
-  }
-
-  return 'U';
-}
+import { useMemo, useState, useEffect } from 'react';
 
 type SortField = 'name' | 'size' | 'uploaded' | null;
 type SortDirection = 'asc' | 'desc';
@@ -63,10 +52,53 @@ export default function CollectionDetail() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showFullScreenGallery, setShowFullScreenGallery] = useState(false);
   const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
 
-  // Fetch collection data using React Query
-  const { data: collection, isLoading, error } = useCollection(collectionId);
+  // Check access first
+  const {
+    data: accessCheck,
+    isLoading: accessLoading,
+    error: accessError,
+  } = useCollectionAccess(collectionId);
+
+  // Fetch collection data using React Query (only if access is granted)
+  const {
+    data: collection,
+    isLoading: collectionLoading,
+    error: collectionError,
+  } = useCollection(collectionId, accessCheck?.status === 'granted');
   const { data: user } = useUser(collection?.createdBy || '');
+
+  // Track collection access
+  const trackCollectionAccess = useTrackCollectionAccess();
+
+  // Determine loading and error states
+  const isLoading =
+    accessLoading || (accessCheck?.status === 'granted' && collectionLoading);
+  const error = accessError || collectionError;
+
+  // Track when a collection is successfully loaded (for collections user doesn't own)
+  useEffect(() => {
+    if (collection && accessCheck?.status === 'granted') {
+      // Only track if user doesn't own this collection
+      const isOwner = collection.createdBy === currentUserId;
+      if (!isOwner) {
+        trackCollectionAccess.mutate({ collectionId });
+      }
+    }
+  }, [
+    collection,
+    accessCheck?.status,
+    currentUserId,
+    collectionId,
+    trackCollectionAccess,
+  ]);
+
+  // Handle payment success
+  const handlePaymentSuccess = () => {
+    setShowPaywall(false);
+    // The access check will be invalidated and refetched automatically
+  };
 
   // Sort assets based on current sort state
   const sortedAssets = useMemo(() => {
@@ -149,6 +181,35 @@ export default function CollectionDetail() {
     { label: collection?.name || 'Loading...' },
   ];
 
+  // Render different views based on access status
+  if (accessCheck?.status === 'denied') {
+    return (
+      <AccessDeniedView
+        message={accessCheck.message || 'Access denied'}
+        collectionName={accessCheck.collectionName}
+      />
+    );
+  }
+
+  if (accessCheck?.status === 'paywall') {
+    return (
+      <>
+        <PaywallPage
+          accessCheck={accessCheck}
+          onPurchaseClick={() => setShowPaywall(true)}
+        />
+
+        <PaywallModal
+          showModal={showPaywall}
+          setShowModal={setShowPaywall}
+          accessCheck={accessCheck}
+          collectionId={collectionId}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      </>
+    );
+  }
+
   // Show loading state
   if (isLoading) {
     return (
@@ -212,7 +273,7 @@ export default function CollectionDetail() {
             >
               <Link href="/authed">
                 <ArrowLeft className="h-4 w-4" />
-                <span>Back</span>
+                <span>All Collections</span>
               </Link>
             </Button>
             <div className="flex items-center space-x-3">
@@ -231,7 +292,7 @@ export default function CollectionDetail() {
           {/* Title and Description */}
           <div>
             <div className="flex items-start space-x-4 mb-4">
-              <div 
+              <div
                 className="h-12 w-12 rounded-full flex items-center justify-center text-white font-medium text-lg"
                 style={{ backgroundColor: avatarColorValue }}
               >
@@ -333,6 +394,17 @@ export default function CollectionDetail() {
             </div>
           </div>
 
+          {collection.visibility === 'confidential' && isOwned && (
+            <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+              <div className="text-center">
+                <p className="text-xs font-medium text-white/60">
+                  People with access
+                </p>
+                <p className="text-3xl font-bold text-white mt-2 h-10">0</p>
+              </div>
+            </div>
+          )}
+
           {/* Show pricing only if not not-shared */}
           {collection.visibility !== 'not-shared' && (
             <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
@@ -373,17 +445,6 @@ export default function CollectionDetail() {
                   Revenue Generated
                 </p>
                 <p className="text-3xl font-bold text-white mt-2 h-10">$0</p>
-              </div>
-            </div>
-          )}
-
-          {collection.visibility === 'confidential' && isOwned && (
-            <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
-              <div className="text-center">
-                <p className="text-xs font-medium text-white/60">
-                  Paying Users
-                </p>
-                <p className="text-3xl font-bold text-white mt-2 h-10">0</p>
               </div>
             </div>
           )}

@@ -8,8 +8,9 @@ import {
   CardTitle,
 } from '@/components/shared/card';
 import { useAuth } from '@/lib/auth/auth-context';
+import { getValidRedirectUrl } from '@/lib/utils';
 import { AlertTriangle, Key, Shield, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 // Mock user data for development
@@ -23,6 +24,7 @@ const MOCK_USER = {
 
 export default function DevLogin() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setAuthedSession } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +59,10 @@ export default function DevLogin() {
       };
 
       setAuthedSession(mockSession);
-      router.push('/authed');
+
+      // Redirect to preserved destination or dashboard
+      const redirectTo = getValidRedirectUrl(searchParams);
+      router.push(redirectTo);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Dev login error:', error);
@@ -121,7 +126,13 @@ export default function DevLogin() {
           <div className="text-center">
             <Button
               variant="outline"
-              onClick={() => router.push('/login')}
+              onClick={() => {
+                const redirectTo = searchParams.get('redirect');
+                const loginUrl = redirectTo
+                  ? `/login?redirect=${encodeURIComponent(redirectTo)}`
+                  : '/login';
+                router.push(loginUrl);
+              }}
               className="text-sm"
             >
               Go to Real Login

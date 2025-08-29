@@ -57,15 +57,13 @@ const Modal = ({
           onOpenAutoFocus={(e) => e.preventDefault()}
           onCloseAutoFocus={(e) => e.preventDefault()}
           className={cn(
-            'animate-scale-in fixed inset-0 z-40 m-auto max-h-fit w-full max-w-md overflow-hidden border border-gray-200 bg-white p-0 shadow-xl rounded-2xl',
+            'animate-scale-in fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 w-full max-w-md max-h-[90vh] overflow-hidden border border-gray-200 bg-white p-0 shadow-xl rounded-2xl',
             className
           )}
         >
-          {title && (
-            <Dialog.Title className="absolute left-[-10000px]">
-              {title}
-            </Dialog.Title>
-          )}
+          <Dialog.Title className="absolute left-[-10000px]">
+            {title || ''}
+          </Dialog.Title>
           {children}
         </Dialog.Content>
       </Dialog.Portal>

@@ -78,7 +78,7 @@ function AssetFingerprintRow({
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-2">
         <div className="rounded-full bg-purple-500/30 shadow-lg flex items-center justify-center h-8 w-8">
-          <div 
+          <div
             className="h-8 w-8 rounded-full flex items-center justify-center text-white text-2xl"
             style={{ backgroundColor: getAvatarColorValue(owner.identifier) }}
           >
@@ -102,7 +102,9 @@ export default function AssetFingerprintPopover({
   const [open, setOpen] = useState(false);
 
   // Notify parent component when open state changes
-  const handleOpenChange = (newOpen: boolean | ((prev: boolean) => boolean)) => {
+  const handleOpenChange = (
+    newOpen: boolean | ((prev: boolean) => boolean)
+  ) => {
     const isOpen = typeof newOpen === 'function' ? newOpen(open) : newOpen;
     setOpen(isOpen);
     onOpenChange?.(isOpen);

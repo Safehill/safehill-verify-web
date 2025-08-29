@@ -161,6 +161,36 @@ const mockCollections = [
       { id: '44', name: 'Shared Document', type: 'document' as const },
     ],
   },
+  {
+    id: '10',
+    name: 'Premium Photography Collection',
+    description:
+      'High-quality professional photography collection with exclusive content.',
+    assetCount: 25,
+    visibility: 'confidential' as Visibility,
+    pricing: 50,
+    lastUpdated: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    createdBy: 'user2',
+    previewAssets: [
+      { id: '45', name: 'Premium Image 1', type: 'image' as const },
+      { id: '46', name: 'Premium Image 2', type: 'image' as const },
+      { id: '47', name: 'Premium Video', type: 'video' as const },
+    ],
+  },
+  {
+    id: '11',
+    name: 'Public Premium Collection',
+    description: 'A public collection that requires payment to access.',
+    assetCount: 15,
+    visibility: 'public' as Visibility,
+    pricing: 25,
+    lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    createdBy: 'user3',
+    previewAssets: [
+      { id: '48', name: 'Public Premium 1', type: 'image' as const },
+      { id: '49', name: 'Public Premium 2', type: 'image' as const },
+    ],
+  },
 ];
 
 // Mock collection detail data
@@ -427,6 +457,66 @@ const mockCollectionDetails = {
       },
     ],
   },
+  '10': {
+    id: '10',
+    name: 'Premium Photography Collection',
+    description:
+      'High-quality professional photography collection with exclusive content.',
+    assetCount: 25,
+    visibility: 'confidential' as Visibility,
+    pricing: 50,
+    lastUpdated: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    createdBy: 'user2',
+    assets: [
+      {
+        id: '22',
+        name: 'Premium Image 1',
+        type: 'image',
+        size: '3.2 MB',
+        uploaded: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: '23',
+        name: 'Premium Image 2',
+        type: 'image',
+        size: '2.8 MB',
+        uploaded: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: '24',
+        name: 'Premium Video',
+        type: 'video',
+        size: '45.6 MB',
+        uploaded: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+    ],
+  },
+  '11': {
+    id: '11',
+    name: 'Public Premium Collection',
+    description: 'A public collection that requires payment to access.',
+    assetCount: 15,
+    visibility: 'public' as Visibility,
+    pricing: 25,
+    lastUpdated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    createdBy: 'user3',
+    assets: [
+      {
+        id: '25',
+        name: 'Public Premium 1',
+        type: 'image',
+        size: '2.1 MB',
+        uploaded: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: '26',
+        name: 'Public Premium 2',
+        type: 'image',
+        size: '1.7 MB',
+        uploaded: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+    ],
+  },
 };
 
 // Mock user data for testing
@@ -580,12 +670,30 @@ const mockImages = {
 };
 
 // Mock sharing data - tracks which collections are shared with which users
-const mockSharedCollections = {
+const mockSharedCollections: Record<string, string[]> = {
   'dev-user-123': ['9'], // Collection 9 is shared with dev-user-123
 };
 
 // Types
 export type Visibility = 'public' | 'confidential' | 'not-shared';
+
+export type AccessStatus = 'granted' | 'paywall' | 'denied' | 'loading';
+
+export interface AccessCheckResult {
+  status: AccessStatus;
+  message?: string;
+  price?: number;
+  collectionName?: string;
+  ownerName?: string;
+  visibility?: Visibility;
+  createdBy?: string;
+}
+
+export interface PaymentIntent {
+  clientSecret: string;
+  amount: number;
+  currency: string;
+}
 
 export interface Collection {
   id: string;
@@ -630,7 +738,131 @@ export const generateCollectionLink = (collectionId: string): string => {
 
 // API functions
 export const collectionsApi = {
-  // Get all collections for a specific user (owned + shared)
+  // Check access to a collection
+  checkAccess: async (
+    collectionId: string,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<AccessCheckResult> => {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const collection =
+      mockCollectionDetails[collectionId as keyof typeof mockCollectionDetails];
+    if (!collection) {
+      return {
+        status: 'denied',
+        message: 'Collection not found',
+      };
+    }
+
+    const userId = authenticatedUser.user.identifier;
+    const isOwner = collection.createdBy === userId;
+    const isShared = (
+      mockSharedCollections[userId as keyof typeof mockSharedCollections] || []
+    ).includes(collectionId);
+
+    // If user owns the collection, access is granted
+    if (isOwner) {
+      return { status: 'granted' };
+    }
+
+    // If collection is not-shared and user doesn't own it, access is denied
+    if (collection.visibility === 'not-shared') {
+      return {
+        status: 'denied',
+        message: 'This collection is private and not shared with you',
+      };
+    }
+
+    // If collection is public, access is always granted (regardless of pricing)
+    if (collection.visibility === 'public') {
+      return { status: 'granted' };
+    }
+
+    // If collection is shared with user, access is granted
+    if (isShared) {
+      return { status: 'granted' };
+    }
+
+    // For confidential collections, show paywall (regardless of pricing)
+    if (collection.visibility === 'confidential') {
+      const owner = mockUsers[collection.createdBy as keyof typeof mockUsers];
+      return {
+        status: 'paywall',
+        price: collection.pricing,
+        collectionName: collection.name,
+        ownerName: owner?.name || 'Unknown',
+        visibility: collection.visibility,
+        createdBy: collection.createdBy,
+        message:
+          collection.pricing > 0
+            ? `This collection requires payment to access`
+            : `This collection is confidential and requires permission to access`,
+      };
+    }
+
+    // Default: access denied
+    return {
+      status: 'denied',
+      message: 'Access denied',
+    };
+  },
+
+  // Create payment intent for collection purchase
+  createPaymentIntent: async (
+    collectionId: string,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<PaymentIntent> => {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const collection =
+      mockCollectionDetails[collectionId as keyof typeof mockCollectionDetails];
+    if (!collection) {
+      throw new Error('Collection not found');
+    }
+
+    if (collection.pricing <= 0) {
+      throw new Error('Collection is free to access');
+    }
+
+    // In a real implementation, this would create a Stripe payment intent
+    // For now, we'll return a mock payment intent
+    return {
+      clientSecret: `pi_mock_${collectionId}_${Date.now()}`,
+      amount: collection.pricing * 100, // Convert to cents
+      currency: 'usd',
+    };
+  },
+
+  // Confirm payment and grant access
+  confirmPayment: async (
+    collectionId: string,
+    paymentIntentId: string,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<{ success: boolean; message?: string }> => {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // In a real implementation, this would verify the payment with Stripe
+    // and grant access to the collection
+    const userId = authenticatedUser.user.identifier;
+
+    // Add the collection to the user's shared collections
+    if (!mockSharedCollections[userId]) {
+      mockSharedCollections[userId] = [];
+    }
+    if (!mockSharedCollections[userId].includes(collectionId)) {
+      mockSharedCollections[userId].push(collectionId);
+    }
+
+    return {
+      success: true,
+      message: 'Payment successful! You now have access to this collection.',
+    };
+  },
+
+  // Get all collections for a specific user (owned + shared + accessed public)
   getCollections: async (
     authenticatedUser: AuthenticatedUser
   ): Promise<Collection[]> => {
@@ -647,7 +879,7 @@ export const collectionsApi = {
       (collection) => collection.createdBy === userId
     );
 
-    // Get collections shared with the user
+    // Get collections shared with the user (includes accessed public collections)
     const sharedCollectionIds =
       mockSharedCollections[userId as keyof typeof mockSharedCollections] || [];
     const sharedCollections = mockCollections.filter((collection) =>
@@ -658,7 +890,7 @@ export const collectionsApi = {
     return [...ownedCollections, ...sharedCollections];
   },
 
-  // Get single collection by ID (only if owned by user or shared with user)
+  // Get single collection by ID (accessible to owners, shared users, or public collections)
   getCollection: async (
     id: string,
     authenticatedUser: AuthenticatedUser
@@ -681,6 +913,14 @@ export const collectionsApi = {
       mockSharedCollections[userId as keyof typeof mockSharedCollections] || []
     ).includes(id);
 
+    // Public collections are accessible to everyone
+    if (collection.visibility === 'public') {
+      // Track that user has accessed this collection
+      await collectionsApi.trackCollectionAccess(id, authenticatedUser);
+      return collection;
+    }
+
+    // For non-public collections, check ownership or sharing
     if (!isOwner && !isShared) {
       throw new Error(
         'Access denied - you do not have access to this collection'
@@ -688,6 +928,36 @@ export const collectionsApi = {
     }
 
     return collection;
+  },
+
+  // Track when a user accesses a collection (for collections they don't own)
+  trackCollectionAccess: async (
+    collectionId: string,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<void> => {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    const userId = authenticatedUser.user.identifier;
+    const collection =
+      mockCollectionDetails[collectionId as keyof typeof mockCollectionDetails];
+
+    if (!collection) {
+      return; // Collection doesn't exist
+    }
+
+    // Only track access for collections the user doesn't own
+    if (collection.createdBy === userId) {
+      return; // User owns this collection, no need to track
+    }
+
+    // Add the collection to the user's accessed collections
+    if (!mockSharedCollections[userId]) {
+      mockSharedCollections[userId] = [];
+    }
+    if (!mockSharedCollections[userId].includes(collectionId)) {
+      mockSharedCollections[userId].push(collectionId);
+    }
   },
 
   // Update collection (only if owned by user)
@@ -772,6 +1042,50 @@ export const collectionsApi = {
     return filtered;
   },
 
+  // Search all collections for adding to user's list (excludes user's own and private collections)
+  searchAllCollections: async (
+    query: string,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<Collection[]> => {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const userId = authenticatedUser.user.identifier;
+    const userOwnedIds = mockCollections
+      .filter((collection) => collection.createdBy === userId)
+      .map((collection) => collection.id);
+
+    const userSharedIds =
+      mockSharedCollections[userId as keyof typeof mockSharedCollections] || [];
+    const userAccessibleIds = [...userOwnedIds, ...userSharedIds];
+
+    // Filter collections that user doesn't already have access to AND are public only
+    // Confidential collections should only be accessible via exact ID/URL, not searchable by name
+    const availableCollections = mockCollections.filter((collection) => {
+      const isNotAccessible = !userAccessibleIds.includes(collection.id);
+      const isPublic = collection.visibility === 'public';
+
+      return isNotAccessible && isPublic;
+    });
+
+    // Extract collection ID from URL if it's a full URL
+    let searchTerm = query.trim();
+    if (query.includes('/collections/')) {
+      const match = query.match(/\/collections\/([^\/\?]+)/);
+      searchTerm = match ? match[1] : query;
+    }
+
+    const lowerQuery = searchTerm.toLowerCase();
+
+    const searchResults = availableCollections.filter(
+      (collection) =>
+        collection.id.toLowerCase().includes(lowerQuery) ||
+        collection.name.toLowerCase().includes(lowerQuery) ||
+        collection.description.toLowerCase().includes(lowerQuery)
+    );
+
+    return searchResults;
+  },
+
   // Get user info by ID
   getUser: async (userId: string) => {
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -782,12 +1096,7 @@ export const collectionsApi = {
   getImage: async (imageId: string): Promise<ImageData> => {
     await new Promise((resolve) => setTimeout(resolve, 150));
 
-    // console.log('getImage called with:', imageId);
-    // console.log('Available mock images:', Object.keys(mockImages));
-
     const image = mockImages[imageId as keyof typeof mockImages];
-
-    // console.log('Found image:', image);
 
     if (!image) {
       throw new Error(`Image with id ${imageId} not found`);

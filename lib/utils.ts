@@ -190,3 +190,71 @@ export function getAvatarColorValue(identifier: string): string {
   };
   return colorMap[USER_COLORS[colorIndex]] || '#6b7280';
 }
+
+/**
+ * Validates a redirect URL to prevent open redirects
+ * @param redirectUrl - The URL to validate
+ * @returns true if the URL is safe to redirect to
+ */
+export function isValidRedirectUrl(redirectUrl: string): boolean {
+  // Must start with /
+  if (!redirectUrl.startsWith('/')) {
+    return false;
+  }
+
+  // Must not contain protocol (prevents open redirects)
+  if (redirectUrl.includes('://')) {
+    return false;
+  }
+
+  // Must not contain script tags or other dangerous patterns
+  if (redirectUrl.includes('<script') || redirectUrl.includes('javascript:')) {
+    return false;
+  }
+
+  // Only allow internal paths
+  const allowedPaths = ['/authed', '/collections', '/verify'];
+  return allowedPaths.some((path) => redirectUrl.startsWith(path));
+}
+
+/**
+ * Safely extracts and validates a redirect URL from search parameters
+ * @param searchParams - URL search parameters
+ * @param fallback - Fallback URL if no valid redirect is found
+ * @returns The validated redirect URL or fallback
+ */
+export function getValidRedirectUrl(
+  searchParams: URLSearchParams,
+  fallback: string = '/authed'
+): string {
+  const redirectTo = searchParams.get('redirect');
+
+  if (!redirectTo) {
+    return fallback;
+  }
+
+  return isValidRedirectUrl(redirectTo) ? redirectTo : fallback;
+}
+
+/**
+ * Get initials from user name or identifier
+ * @param name - User's display name
+ * @param identifier - User's identifier (fallback if name is not available)
+ * @returns Up to 2 uppercase initials
+ */
+export function getInitials(name?: string, identifier?: string): string {
+  if (name) {
+    return name
+      .split(' ')
+      .map((word) => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  if (identifier) {
+    return identifier.slice(0, 2).toUpperCase();
+  }
+
+  return 'U';
+}

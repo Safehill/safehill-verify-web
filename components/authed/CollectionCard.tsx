@@ -1,10 +1,9 @@
 'use client';
 
-
 import { Badge } from '@/components/shared/badge';
 import type { Collection } from '@/lib/api/collections';
 import { useUser } from '@/lib/hooks/use-collections';
-import { cn, timeAgo, getAvatarColorValue } from '@/lib/utils';
+import { cn, timeAgo, getAvatarColorValue, getInitials } from '@/lib/utils';
 import { Calendar, Eye, ImageIcon, Lock } from 'lucide-react';
 import Link from 'next/link';
 
@@ -13,24 +12,6 @@ interface CollectionCardProps {
   href: string;
   onMouseEnter?: () => void;
   isOwned?: boolean;
-}
-
-// Get initials from user name or identifier (same as dashboard-top-bar.tsx)
-function getInitials(name?: string, identifier?: string): string {
-  if (name) {
-    return name
-      .split(' ')
-      .map((word) => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }
-
-  if (identifier) {
-    return identifier.slice(0, 2).toUpperCase();
-  }
-
-  return 'U';
 }
 
 export default function CollectionCard({
@@ -119,7 +100,7 @@ export default function CollectionCard({
                 </Badge>
               )}
               {/* Show pricing badge only if not not-shared and pricing > 0 */}
-              {collection.visibility !== 'not-shared' &&
+              {collection.visibility === 'confidential' &&
                 collection.pricing > 0 && (
                   <Badge
                     variant="outline"

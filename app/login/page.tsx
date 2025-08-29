@@ -10,8 +10,9 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { arrayBufferToBase64 } from '@/lib/crypto/base64';
 import { cryptoKeyToBase64, encryptWithKey } from '@/lib/crypto/keys';
 import { ArrowDown } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getValidRedirectUrl } from '@/lib/utils';
 
 // Session timeout in seconds (2 minutes)
 const CODE_VALIDITY_IN_SECONDS = 120;
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const { setAuthedSession } = useAuth();
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [qrPayload, setQrPayload] = useState<string | null>(null);
   const [showQRCode, setShowQRCode] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(CODE_VALIDITY_IN_SECONDS);
@@ -78,9 +80,10 @@ export default function LoginPage() {
       expiresAt: expirationDate.getTime(),
     });
 
-    // Redirect to dashboard
+    // Redirect to preserved destination or dashboard
     setTimeout(() => {
-      router.push('/authed');
+      const redirectTo = getValidRedirectUrl(searchParams);
+      router.push(redirectTo);
     }, 500);
   }, [authenticatedUser, router, setAuthedSession]);
 
@@ -149,7 +152,9 @@ export default function LoginPage() {
               <div className="space-y-8 pb-5">
                 <div className="flex flex-col items-center justify-center text-muted-foreground gap-5 text-sm bg-red-100 text-red-700 p-10">
                   Sorry, there was a problem connecting to the server
-                  <b>If you have an open session, please close it and try again.</b>
+                  <b>
+                    If you have an open session, please close it and try again.
+                  </b>
                   <br />
                   {webSocketError}
                 </div>
@@ -177,7 +182,15 @@ export default function LoginPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => router.push('/dev-login')}
+                      onClick={() => {
+                        const redirectTo = searchParams.get('redirect');
+                        const devLoginUrl = redirectTo
+                          ? `/dev-login?redirect=${encodeURIComponent(
+                              redirectTo
+                            )}`
+                          : '/dev-login';
+                        router.push(devLoginUrl);
+                      }}
                       className="text-xs bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
                     >
                       ⚠️ Development Login Bypass

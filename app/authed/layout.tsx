@@ -16,7 +16,10 @@ export default function DashboardLayout({
   // Protect all dashboard routes
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      // Redirect to login with current path as redirect parameter
+      const currentPath = window.location.pathname;
+      const loginUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+      router.push(loginUrl);
     }
   }, [isAuthenticated, router]);
 
