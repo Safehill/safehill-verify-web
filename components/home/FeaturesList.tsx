@@ -27,8 +27,8 @@ const FeaturesList = () => {
           We use fingerprints to track access to your content in Safehill.
           <br />
           <br />
-          We can then detect unauthorized use on the web even if the
-          content is altered or tampered with.
+          We can then detect unauthorized use on the web even if the content is
+          altered or tampered with.
         </>
       ),
     },
