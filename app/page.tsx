@@ -261,6 +261,8 @@ export default function Home() {
               <br />
               <br />
               Make them yours forever.
+              <br />
+              Earn royalties from it.
             </p>
             <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-20">
               <Link
