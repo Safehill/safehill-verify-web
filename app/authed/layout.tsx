@@ -5,7 +5,7 @@ import type React from 'react';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth/auth-context';
 
-export default function DashboardLayout({
+export default function AuthedSectionLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ export default function DashboardLayout({
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Protect all dashboard routes
+  // Protect all authed section routes
   useEffect(() => {
     if (!isAuthenticated) {
       // Redirect to login with current path as redirect parameter

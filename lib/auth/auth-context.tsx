@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Redirect to login if accessing protected route without authentication
   useEffect(() => {
-    if (pathname?.startsWith('/dashboard') && !isAuthenticated) {
+    if (pathname?.startsWith('/authed') && !isAuthenticated) {
       router.push('/login');
     }
   }, [pathname, isAuthenticated, router]);

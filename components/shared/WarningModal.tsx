@@ -119,7 +119,7 @@ export default function WarningModal({
                 <div className="mt-4 text-left pt-5">
                   <label
                     htmlFor="confirmation-input"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block text-xs font-medium text-gray-500 mb-2"
                   >
                     {confirmationLabel}
                   </label>
@@ -151,7 +151,7 @@ export default function WarningModal({
                 onClick={handleConfirm}
                 disabled={isConfirmDisabled}
                 className={`w-full sm:w-auto ${
-                  variant === 'warning'
+                  variant === 'info'
                     ? 'bg-yellow-600 hover:bg-yellow-700 text-white disabled:bg-gray-400 disabled:cursor-not-allowed'
                     : 'bg-purple-800 hover:bg-purple-600 text-white disabled:bg-gray-400 disabled:cursor-not-allowed'
                 }`}

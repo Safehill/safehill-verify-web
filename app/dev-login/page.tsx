@@ -60,7 +60,7 @@ export default function DevLogin() {
 
       setAuthedSession(mockSession);
 
-      // Redirect to preserved destination or dashboard
+      // Redirect to preserved destination or authed section home page
       const redirectTo = getValidRedirectUrl(searchParams);
       router.push(redirectTo);
     } catch (error) {

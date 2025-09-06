@@ -1,8 +1,10 @@
 'use client';
 
 import CollectionCard from '@/components/authed/CollectionCard';
-import DashboardTopBar from '@/components/authed/dashboard-top-bar';
+import AuthedSectionTopBar from '@/components/authed/AuthedSectionTopBar';
 import AddCollectionModal from '@/components/shared/AddCollectionModal';
+import AddCollectionDropdown from '@/components/shared/AddCollectionDropdown';
+import CreateCollectionModal from '@/components/shared/CreateCollectionModal';
 import { Button } from '@/components/shared/button';
 import { Input } from '@/components/shared/input';
 import Popover from '@/components/shared/popover';
@@ -12,10 +14,10 @@ import {
   usePrefetchCollection,
   useSearchCollections,
 } from '@/lib/hooks/use-collections';
-import { ArrowUpDown, Filter, Loader2, Plus, Search, X } from 'lucide-react';
+import { ArrowUpDown, Filter, Loader2, Search, X } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Dashboard() {
+export default function AuthedSectionLayout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterVisibility, setFilterVisibility] = useState<
     'all' | 'public' | 'confidential' | 'not-shared'
@@ -30,15 +32,29 @@ export default function Dashboard() {
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [openSortPopover, setOpenSortPopover] = useState(false);
   const [showAddCollectionModal, setShowAddCollectionModal] = useState(false);
+  const [showCreateCollectionModal, setShowCreateCollectionModal] =
+    useState(false);
 
-  const { authedSession } = useAuth();
+  const { authedSession, isAuthenticated } = useAuth();
   const currentUserId = authedSession?.user.identifier;
 
-  // React Query hooks
+  // React Query hooks - only run when authentication is confirmed
   const { data: collections = [], isLoading, error } = useCollections();
   const { data: searchResults, isLoading: isSearching } =
     useSearchCollections(searchQuery);
   const prefetchCollection = usePrefetchCollection();
+
+  // Show loading state while authentication is being established
+  if (!isAuthenticated || !authedSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white mx-auto mb-4" />
+          <p className="text-white/80">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Use search results if there's a search query, otherwise use all collections
   const allCollections = searchQuery ? searchResults || [] : collections;
@@ -77,9 +93,14 @@ export default function Dashboard() {
 
   const breadcrumbs = [{ label: 'Collections', href: '/authed' }];
 
+  const handleCollectionCreated = async (_collectionId: string) => {
+    // Navigation is now handled directly in the CreateCollectionModal
+    // This callback is kept for compatibility but not used
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
-      <DashboardTopBar breadcrumbs={breadcrumbs} />
+      <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
 
       <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
         {/* Header */}
@@ -93,13 +114,10 @@ export default function Dashboard() {
                 Manage and organize your digital assets
               </p>
             </div>
-            <Button
-              className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
-              onClick={() => setShowAddCollectionModal(true)}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Collection</span>
-            </Button>
+            <AddCollectionDropdown
+              onSelectCreate={() => setShowCreateCollectionModal(true)}
+              onSelectSearch={() => setShowAddCollectionModal(true)}
+            />
           </div>
         </div>
 
@@ -409,13 +427,10 @@ export default function Dashboard() {
             filterOwnership === 'all' &&
             filterPricing === 'all' ? (
               <div className="mt-6 flex justify-center">
-                <Button
-                  className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
-                  onClick={() => setShowAddCollectionModal(true)}
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Collection</span>
-                </Button>
+                <AddCollectionDropdown
+                  onSelectCreate={() => setShowCreateCollectionModal(true)}
+                  onSelectSearch={() => setShowAddCollectionModal(true)}
+                />
               </div>
             ) : (
               <div className="mt-6 flex justify-center">
@@ -441,6 +456,13 @@ export default function Dashboard() {
       <AddCollectionModal
         showModal={showAddCollectionModal}
         setShowModal={setShowAddCollectionModal}
+      />
+
+      {/* Create Collection Modal */}
+      <CreateCollectionModal
+        showModal={showCreateCollectionModal}
+        setShowModal={setShowCreateCollectionModal}
+        onCollectionCreated={handleCollectionCreated}
       />
     </div>
   );

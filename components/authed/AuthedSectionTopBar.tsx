@@ -12,11 +12,13 @@ interface BreadcrumbItem {
   href?: string;
 }
 
-interface DashboardTopBarProps {
+interface AuthedSectionTopBarProps {
   breadcrumbs: BreadcrumbItem[];
 }
 
-export default function DashboardTopBar({ breadcrumbs }: DashboardTopBarProps) {
+export default function AuthedSectionTopBar({
+  breadcrumbs,
+}: AuthedSectionTopBarProps) {
   const { authedSession, logout } = useAuth();
   const [openPopover, setOpenPopover] = useState(false);
 

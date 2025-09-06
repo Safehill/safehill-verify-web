@@ -45,7 +45,7 @@ export default function CopyButton({
         setShowTooltip(false);
       }, 2000);
     } catch (_error) {
-      // console.error('Failed to copy text:', error);
+      // console.error('Failed to copy text:', _error);
     }
   };
 

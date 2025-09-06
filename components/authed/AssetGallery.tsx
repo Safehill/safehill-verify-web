@@ -1,6 +1,6 @@
 'use client';
 
-import { useImage } from '@/lib/hooks/use-collections';
+import { useAsset } from '@/lib/hooks/use-assets';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -47,7 +47,7 @@ function AssetCard({
   asset: AssetGalleryProps['assets'][0];
   onClick?: () => void;
 }) {
-  const { data: imageData, isLoading, error } = useImage(asset.id);
+  const { data: imageData, isLoading, error } = useAsset(asset.id);
 
   // Debug logging
   // console.log('AssetCard:', { assetId: asset.id, imageData, isLoading, error });
@@ -73,15 +73,17 @@ function AssetCard({
       ) : imageData ? (
         <>
           <Image
-            src={imageData.thumbnailUrl}
-            alt={imageData.name}
+            src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
+            alt={imageData?.globalIdentifier || 'Asset'}
             width={150}
             height={150}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200" />
           <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <p className="text-white text-xs truncate">{imageData.name}</p>
+            <p className="text-white text-xs truncate">
+              {imageData?.globalIdentifier || 'Asset'}
+            </p>
             <p className="text-white/70 text-xs">
               {asset.type} • {asset.size}
             </p>

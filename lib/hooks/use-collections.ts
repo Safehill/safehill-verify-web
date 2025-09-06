@@ -1,16 +1,13 @@
-import {
-  collectionsApi,
-  type CollectionDetail,
-  type Visibility,
-  type AccessCheckResult,
-  type PaymentIntent,
-} from '@/lib/api/collections';
+import { collectionsApi } from '@/lib/api/collections';
+import type {
+  CollectionOutputDTO,
+  CollectionCreateDTO,
+  CollectionUpdateDTO,
+  PaymentConfirmationDTO,
+} from '@/lib/api/models/dto/Collection';
 import { useAuth } from '@/lib/auth/auth-context';
 import { convertToAuthenticatedUser } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
-// Re-export types for convenience
-export type { CollectionDetail, Visibility, AccessCheckResult, PaymentIntent };
 
 // Query keys
 export const collectionKeys = {
@@ -82,28 +79,6 @@ export const useSearchAllCollections = (query: string) => {
   });
 };
 
-// Hook to get user information
-export const useUser = (userId: string) => {
-  return useQuery({
-    queryKey: collectionKeys.user(userId),
-    queryFn: () => collectionsApi.getUser(userId),
-    enabled: !!userId,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 20 * 60 * 1000, // 20 minutes
-  });
-};
-
-// Hook to get image data
-export const useImage = (imageId: string) => {
-  return useQuery({
-    queryKey: ['image', imageId],
-    queryFn: () => collectionsApi.getImage(imageId),
-    enabled: !!imageId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-};
-
 // Hook to prefetch a collection (useful for navigation)
 export const usePrefetchCollection = () => {
   const queryClient = useQueryClient();
@@ -133,6 +108,49 @@ export const useInvalidateCollections = () => {
   };
 };
 
+// Hook to create a collection
+export const useCreateCollection = () => {
+  const queryClient = useQueryClient();
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+
+  return useMutation({
+    mutationFn: (collectionData: CollectionCreateDTO) =>
+      collectionsApi.createCollection(collectionData, authenticatedUser!),
+    onSuccess: (newCollection: CollectionOutputDTO) => {
+      // Add the new collection to the cache
+      queryClient.setQueryData(
+        collectionKeys.detail(newCollection.id),
+        newCollection
+      );
+
+      // Invalidate the collections list to refresh it
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+    },
+  });
+};
+
+// Hook to delete a collection
+export const useDeleteCollection = () => {
+  const queryClient = useQueryClient();
+  const { authedSession } = useAuth();
+  const authenticatedUser = convertToAuthenticatedUser(authedSession);
+
+  return useMutation({
+    mutationFn: ({ collectionId }: { collectionId: string }) =>
+      collectionsApi.deleteCollection(collectionId, authenticatedUser!),
+    onSuccess: (_, variables) => {
+      // Remove the collection from the cache
+      queryClient.removeQueries({
+        queryKey: collectionKeys.detail(variables.collectionId),
+      });
+
+      // Invalidate the collections list to refresh it
+      queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+    },
+  });
+};
+
 // Hook to update a collection
 export const useUpdateCollection = () => {
   const queryClient = useQueryClient();
@@ -145,9 +163,12 @@ export const useUpdateCollection = () => {
       updates,
     }: {
       id: string;
-      updates: { visibility?: Visibility; pricing?: number };
+      updates: {
+        visibility?: CollectionUpdateDTO['visibility'];
+        pricing?: CollectionUpdateDTO['pricing'];
+      };
     }) => collectionsApi.updateCollection(id, updates, authenticatedUser!),
-    onSuccess: (updatedCollection: CollectionDetail) => {
+    onSuccess: (updatedCollection: CollectionOutputDTO) => {
       // Update the collection in the cache
       queryClient.setQueryData(
         collectionKeys.detail(updatedCollection.id),
@@ -202,7 +223,7 @@ export const useConfirmPayment = () => {
         authenticatedUser!
       ),
     onSuccess: (
-      result: { success: boolean; message?: string },
+      result: PaymentConfirmationDTO,
       variables: { collectionId: string; paymentIntentId: string }
     ) => {
       if (result.success) {

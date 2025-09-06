@@ -3,23 +3,27 @@ import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
 import { getAvatarColorValue, getInitials } from '@/lib/utils';
 import { CreditCard, Eye, Lock } from 'lucide-react';
-import { AccessCheckResult } from '@/lib/api/collections';
+import type { AccessCheckResultDTO } from '@/lib/api/models/dto/Collection';
 
 interface PaywallPageProps {
-  accessCheck: AccessCheckResult;
+  accessCheck: AccessCheckResultDTO;
   onPurchaseClick: () => void;
+  collectionName?: string;
+  ownerName?: string;
 }
 
 export default function PaywallPage({
   accessCheck,
   onPurchaseClick,
+  collectionName = 'Collection',
+  ownerName = 'Unknown User',
 }: PaywallPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal flex items-center justify-center">
       <div className="text-center max-w-md mx-4">
         <div className="mb-6">
           <h1 className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text font-display text-3xl md:text-5xl font-bold text-transparent drop-shadow-sm [text-wrap:balance]">
-            {accessCheck.collectionName}
+            {collectionName}
           </h1>
 
           {/* Owner info with avatar */}
@@ -33,10 +37,10 @@ export default function PaywallPage({
                   ),
                 }}
               >
-                {getInitials(accessCheck.ownerName, accessCheck.createdBy)}
+                {getInitials(ownerName, accessCheck.createdBy)}
               </AvatarFallback>
             </Avatar>
-            <p className="text-white/80">by {accessCheck.ownerName}</p>
+            <p className="text-white/80">by {ownerName}</p>
           </div>
 
           {/* Visibility badge */}

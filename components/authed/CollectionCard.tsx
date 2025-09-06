@@ -1,14 +1,14 @@
 'use client';
 
 import { Badge } from '@/components/shared/badge';
-import type { Collection } from '@/lib/api/collections';
-import { useUser } from '@/lib/hooks/use-collections';
+import { useUser } from '@/lib/hooks/use-users';
 import { cn, timeAgo, getAvatarColorValue, getInitials } from '@/lib/utils';
 import { Calendar, Eye, ImageIcon, Lock } from 'lucide-react';
 import Link from 'next/link';
+import type { CollectionOutputDTO } from '@/lib/api/models/dto/Collection';
 
 interface CollectionCardProps {
-  collection: Collection;
+  collection: CollectionOutputDTO;
   href: string;
   onMouseEnter?: () => void;
   isOwned?: boolean;

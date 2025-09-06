@@ -3,7 +3,7 @@
 import AssetGallery from '@/components/authed/AssetGallery';
 import AssetTableRow from '@/components/authed/AssetTableRow';
 import CollectionSettingsModal from '@/components/authed/CollectionSettingsModal';
-import DashboardTopBar from '@/components/authed/dashboard-top-bar';
+import AuthedSectionTopBar from '@/components/authed/AuthedSectionTopBar';
 import FullScreenAssetGallery from '@/components/authed/FullScreenAssetGallery';
 import AccessDeniedView from '@/components/shared/AccessDeniedView';
 import PaywallModal from '@/components/shared/PaywallModal';
@@ -13,14 +13,14 @@ import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
 import CopyButton from '@/components/shared/CopyButton';
 import SegmentedControl from '@/components/shared/segmented-control';
-import { generateCollectionLink } from '@/lib/api/collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import {
   useCollection,
-  useUser,
   useCollectionAccess,
   useTrackCollectionAccess,
 } from '@/lib/hooks/use-collections';
+import { generateCollectionLink } from '@/lib/api/collections';
+import { useUser } from '@/lib/hooks/use-users';
 import { timeAgo, getAvatarColorValue, getInitials } from '@/lib/utils';
 import {
   ArrowLeft,
@@ -44,7 +44,7 @@ type SortDirection = 'asc' | 'desc';
 export default function CollectionDetail() {
   const params = useParams();
   const collectionId = params.id as string;
-  const { authedSession } = useAuth();
+  const { authedSession, isAuthenticated } = useAuth();
   const currentUserId = authedSession?.user.identifier;
   const [viewMode, setViewMode] = useState<'gallery' | 'table'>('gallery');
   const [sortField, setSortField] = useState<SortField>(null);
@@ -54,7 +54,7 @@ export default function CollectionDetail() {
   const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
 
-  // Check access first
+  // Check access first - always call hooks at the top
   const {
     data: accessCheck,
     isLoading: accessLoading,
@@ -71,11 +71,6 @@ export default function CollectionDetail() {
 
   // Track collection access
   const trackCollectionAccess = useTrackCollectionAccess();
-
-  // Determine loading and error states
-  const isLoading =
-    accessLoading || (accessCheck?.status === 'granted' && collectionLoading);
-  const error = accessError || collectionError;
 
   // Track when a collection is successfully loaded (for collections user doesn't own)
   useEffect(() => {
@@ -94,47 +89,83 @@ export default function CollectionDetail() {
     trackCollectionAccess,
   ]);
 
+  // Transform DTO assets to match component expectations
+  const transformedAssets = useMemo(() => {
+    if (!collection?.assets) {
+      return [];
+    }
+
+    return collection.assets.map((asset) => ({
+      id: asset.globalIdentifier,
+      name: asset.globalIdentifier,
+      type: 'image', // Default type since DTO doesn't have this
+      size: 'Unknown', // Default size since DTO doesn't have this
+      uploaded: asset.creationDate || 'Unknown',
+      ...asset, // Include original DTO properties
+    }));
+  }, [collection?.assets]);
+
+  // Sort assets based on current sort state
+  const sortedAssets = useMemo(() => {
+    if (!transformedAssets || !sortField) {
+      return transformedAssets || [];
+    }
+
+    return [...transformedAssets].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'name':
+          aValue = a.globalIdentifier.toLowerCase();
+          bValue = b.globalIdentifier.toLowerCase();
+          break;
+        case 'size':
+          // Since DTO doesn't have size, we'll sort by creation date instead
+          aValue = new Date(a.creationDate || '').getTime();
+          bValue = new Date(b.creationDate || '').getTime();
+          break;
+        case 'uploaded':
+          aValue = new Date(a.creationDate || '').getTime();
+          bValue = new Date(b.creationDate || '').getTime();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) {
+        return sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [transformedAssets, sortField, sortDirection]);
+
+  // Show loading state while authentication is being established
+  if (!isAuthenticated || !authedSession) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white mx-auto mb-4" />
+          <p className="text-white/80">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Determine loading and error states
+  const isLoading =
+    accessLoading || (accessCheck?.status === 'granted' && collectionLoading);
+  const error = accessError || collectionError;
+
   // Handle payment success
   const handlePaymentSuccess = () => {
     setShowPaywall(false);
     // The access check will be invalidated and refetched automatically
   };
 
-  // Sort assets based on current sort state
-  const sortedAssets = useMemo(() => {
-    if (!collection?.assets || !sortField) {
-      return collection?.assets || [];
-    }
-
-    return [...collection.assets].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortField) {
-        case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case 'size':
-          // Extract numeric size from string (e.g., "2.5 MB" -> 2.5)
-          aValue = parseFloat(a.size.split(' ')[0]);
-          bValue = parseFloat(b.size.split(' ')[0]);
-          break;
-        case 'uploaded':
-          aValue = new Date(a.uploaded).getTime();
-          bValue = new Date(b.uploaded).getTime();
-          break;
-        default:
-          return 0;
-      }
-
-      if (sortDirection === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-  }, [collection?.assets, sortField, sortDirection]);
 
   // Handle header click for sorting
   const handleHeaderClick = (field: SortField) => {
@@ -184,10 +215,7 @@ export default function CollectionDetail() {
   // Render different views based on access status
   if (accessCheck?.status === 'denied') {
     return (
-      <AccessDeniedView
-        message={accessCheck.message || 'Access denied'}
-        collectionName={accessCheck.collectionName}
-      />
+      <AccessDeniedView message={accessCheck.message || 'Access denied'} />
     );
   }
 
@@ -197,6 +225,8 @@ export default function CollectionDetail() {
         <PaywallPage
           accessCheck={accessCheck}
           onPurchaseClick={() => setShowPaywall(true)}
+          collectionName={collection?.name || 'Collection'}
+          ownerName={user?.name || 'Unknown User'}
         />
 
         <PaywallModal
@@ -204,6 +234,8 @@ export default function CollectionDetail() {
           setShowModal={setShowPaywall}
           accessCheck={accessCheck}
           collectionId={collectionId}
+          collectionName={collection?.name}
+          ownerName={user?.name}
           onPaymentSuccess={handlePaymentSuccess}
         />
       </>
@@ -214,7 +246,7 @@ export default function CollectionDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
-        <DashboardTopBar breadcrumbs={breadcrumbs} />
+        <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
         <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
@@ -229,7 +261,7 @@ export default function CollectionDetail() {
   if (error || !collection) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
-        <DashboardTopBar breadcrumbs={breadcrumbs} />
+        <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
         <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
           <div className="text-center py-12">
             <div className="mx-auto h-12 w-12 text-white/60">
@@ -260,7 +292,7 @@ export default function CollectionDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
-      <DashboardTopBar breadcrumbs={breadcrumbs} />
+      <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
 
       <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
         {/* Header */}
@@ -486,7 +518,7 @@ export default function CollectionDetail() {
           {collection.assets.length > 0 ? (
             viewMode === 'gallery' ? (
               <AssetGallery
-                assets={collection.assets}
+                assets={transformedAssets}
                 onAssetClick={handleAssetClick}
               />
             ) : (
@@ -547,7 +579,7 @@ export default function CollectionDetail() {
               </div>
             )
           ) : (
-            <div className="text-center py-8">
+            <div className="text-center py-8 flex flex-col items-center justify-center">
               <p className="text-white/80">No assets in this collection yet.</p>
               <Button className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800 mt-4">
                 <Plus className="h-4 w-4" />

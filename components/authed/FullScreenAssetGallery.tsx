@@ -3,7 +3,8 @@
 import AssetFingerprintPopover from '@/components/authed/AssetFingerprintPopover';
 import { Button } from '@/components/shared/button';
 import FingerprintIcon from '@/components/shared/FingerprintIcon';
-import { useCollection, useImage } from '@/lib/hooks/use-collections';
+import { useCollection } from '@/lib/hooks/use-collections';
+import { useAsset } from '@/lib/hooks/use-assets';
 import { getUserColor } from '@/lib/utils';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 import Image from 'next/image';
@@ -162,7 +163,7 @@ function AssetImageView({
   asset: Asset;
   collection?: any;
 }) {
-  const { data: imageData, isLoading, error } = useImage(asset.id);
+  const { data: imageData, isLoading, error } = useAsset(asset.id);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   if (isLoading) {
@@ -189,12 +190,11 @@ function AssetImageView({
   return (
     <div className="relative max-w-full max-h-full">
       <Image
-        src={imageData.thumbnailUrl}
-        alt={imageData.name}
-        width={1200}
-        height={800}
-        className="max-w-full max-h-full object-contain"
-        priority
+        src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
+        alt={imageData?.globalIdentifier || 'Asset'}
+        fill
+        className="object-contain"
+        sizes="100vw"
       />
 
       {/* Fingerprint Icon Overlaid on Image */}
@@ -218,7 +218,7 @@ function AssetImageView({
 }
 
 function AssetThumbnail({ asset }: { asset: Asset }) {
-  const { data: imageData, isLoading, error } = useImage(asset.id);
+  const { data: imageData, isLoading, error } = useAsset(asset.id);
 
   if (isLoading) {
     return (
@@ -238,8 +238,8 @@ function AssetThumbnail({ asset }: { asset: Asset }) {
 
   return (
     <Image
-      src={imageData.thumbnailUrl}
-      alt={imageData.name}
+      src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
+      alt={imageData?.globalIdentifier || 'Asset'}
       width={64}
       height={64}
       className="w-full h-full object-cover"

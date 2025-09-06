@@ -26,6 +26,7 @@ export default function LoginPage() {
   const [showQRCode, setShowQRCode] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(CODE_VALIDITY_IN_SECONDS);
   const [progress, setProgress] = useState(100);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   const {
     session: websocketSession,
@@ -61,7 +62,7 @@ export default function LoginPage() {
 
   // Authenticate when the user credentials are available
   useEffect(() => {
-    if (!authenticatedUser) {
+    if (!authenticatedUser || hasRedirected) {
       return;
     }
 
@@ -80,12 +81,19 @@ export default function LoginPage() {
       expiresAt: expirationDate.getTime(),
     });
 
-    // Redirect to preserved destination or dashboard
-    setTimeout(() => {
-      const redirectTo = getValidRedirectUrl(searchParams);
-      router.push(redirectTo);
-    }, 500);
-  }, [authenticatedUser, router, setAuthedSession]);
+    // Mark as redirected to prevent infinite loops
+    setHasRedirected(true);
+
+    // Redirect to preserved destination or authed section home page
+    const redirectTo = getValidRedirectUrl(searchParams);
+    router.push(redirectTo);
+  }, [
+    authenticatedUser,
+    router,
+    setAuthedSession,
+    searchParams,
+    hasRedirected,
+  ]);
 
   // Update progress bar based on time remaining
   useEffect(() => {

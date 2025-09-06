@@ -1,4 +1,4 @@
-import type { Visibility } from '@/lib/api/collections';
+import type { Visibility } from '../models/dto/Collection';
 
 // Mock data for collections
 export const mockCollections = [

@@ -1,6 +1,6 @@
 'use client';
 
-import { useImage } from '@/lib/hooks/use-collections';
+import { useAsset } from '@/lib/hooks/use-assets';
 import { timeAgo } from '@/lib/utils';
 import { Eye, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -23,7 +23,7 @@ export default function AssetTableRow({
   isLastRow = false,
   onClick,
 }: AssetTableRowProps) {
-  const { data: imageData, isLoading, error } = useImage(asset.id);
+  const { data: imageData, isLoading, error } = useAsset(asset.id);
 
   return (
     <tr
@@ -42,8 +42,8 @@ export default function AssetTableRow({
             <span className="text-white/60 text-xs">?</span>
           ) : imageData ? (
             <Image
-              src={imageData.thumbnailUrl}
-              alt={imageData.name}
+              src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
+              alt={imageData?.globalIdentifier || 'Asset'}
               width={48}
               height={48}
               className="w-full h-full object-cover"

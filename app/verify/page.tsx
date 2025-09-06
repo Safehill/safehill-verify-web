@@ -11,7 +11,7 @@ import FileUploader from '@/components/verification/FileUploader';
 import ProvidedImage from '@/components/verification/ProvidedImage';
 import VerifyResultsPage from '@/components/verification/VerifyResultsPage';
 import AxiosInstance from '@/lib/api/api';
-import type { AssetSimilarMatchRequestDTO } from '@/lib/api/models/dto/AssetFingerprint';
+import type { AssetSimilarMatchRequestDTO } from '@/lib/api/models/dto/Asset';
 import { useImageEmbedding } from '@/lib/hooks/use-image-embedding';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';

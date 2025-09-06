@@ -1,24 +1,24 @@
 'use client';
 
-import { Input } from '@/components/shared/input';
 import { Button } from '@/components/shared/button';
+import { Input } from '@/components/shared/input';
 import Modal from '@/components/shared/modal';
 import { useSearchAllCollections } from '@/lib/hooks/use-collections';
 import { useAuth } from '@/lib/auth/auth-context';
 import { convertToAuthenticatedUser } from '@/lib/utils';
 import {
   Search,
-  ExternalLink,
-  Lock,
   Eye,
+  Lock,
+  ExternalLink,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import type { Collection } from '@/lib/api/collections';
+import { useState, useEffect } from 'react';
+import type { CollectionOutputDTO } from '@/lib/api/models/dto/Collection';
 
-interface CollectionSearchResult extends Collection {
+interface CollectionSearchResult extends CollectionOutputDTO {
   ownerName?: string;
 }
 
@@ -94,7 +94,7 @@ export default function AddCollectionModal({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Close modal on escape key
+  // Close modal on escape key and focus input when modal opens
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -104,7 +104,21 @@ export default function AddCollectionModal({
 
     if (showModal) {
       document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
+
+      // Manually focus the search input after a short delay to ensure modal is fully rendered
+      const focusTimer = setTimeout(() => {
+        const searchInput = document.querySelector(
+          'input[placeholder="Enter collection ID, name, or URL..."]'
+        ) as HTMLInputElement;
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }, 100);
+
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        clearTimeout(focusTimer);
+      };
     }
   }, [showModal, setShowModal]);
 

@@ -4,7 +4,8 @@ import { Avatar, AvatarFallback } from '@/components/shared/avatar';
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
 import Modal from '@/components/shared/modal';
-import { collectionsApi, type AccessCheckResult } from '@/lib/api/collections';
+import { collectionsApi } from '@/lib/api/collections';
+import type { AccessCheckResultDTO } from '@/lib/api/models/dto/Collection';
 import { useAuth } from '@/lib/auth/auth-context';
 import {
   convertToAuthenticatedUser,
@@ -19,8 +20,10 @@ import { LucideShieldCheck } from 'lucide-react';
 interface PaywallModalProps {
   showModal: boolean;
   setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-  accessCheck: AccessCheckResult;
+  accessCheck: AccessCheckResultDTO;
   collectionId: string;
+  collectionName?: string;
+  ownerName?: string;
   onPaymentSuccess: () => void;
 }
 
@@ -29,6 +32,8 @@ export default function PaywallModal({
   setShowModal,
   accessCheck,
   collectionId,
+  collectionName,
+  ownerName,
   onPaymentSuccess,
 }: PaywallModalProps) {
   const { authedSession } = useAuth();
@@ -115,7 +120,7 @@ export default function PaywallModal({
         <div className="space-y-4">
           <div className="text-center">
             <h3 className="text-lg font-medium mb-2">
-              {accessCheck.collectionName}
+              {collectionName || 'Collection'}
             </h3>
 
             {/* Owner info with avatar */}
@@ -125,15 +130,15 @@ export default function PaywallModal({
                   className="text-xs"
                   style={{
                     backgroundColor: getAvatarColorValue(
-                      accessCheck.createdBy || 'unknown'
+                      ownerName || 'unknown'
                     ),
                   }}
                 >
-                  {getInitials(accessCheck.ownerName, accessCheck.createdBy)}
+                  {getInitials(ownerName || '', ownerName)}
                 </AvatarFallback>
               </Avatar>
               <p className="text-sm text-gray-600">
-                by {accessCheck.ownerName}
+                by {ownerName || 'Unknown'}
               </p>
             </div>
 
