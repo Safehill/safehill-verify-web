@@ -1,5 +1,6 @@
 import type { UserDTO } from '@/lib/api/models/dto/User';
 import { createUnauthenticatedRequest } from './api';
+import { toast } from 'sonner';
 
 // API functions for users
 export const userApi = {
@@ -18,9 +19,11 @@ export const userApi = {
         return response;
       }
 
-      return Promise.reject('Unavailable users');
+      throw new Error('Unavailable users');
     } catch (error) {
-      return Promise.reject(error);
+      console.error('Failed to fetch users:', error);
+      toast.error('Failed to load user information');
+      throw error;
     }
   },
 };

@@ -9,6 +9,7 @@ import type {
   PaymentConfirmationDTO,
 } from '@/lib/api/models/dto/Collection';
 import { createAuthenticatedRequest } from './api';
+import { toast } from 'sonner';
 
 // Utility function to generate collection link
 export const generateCollectionLink = (collectionId: string): string => {
@@ -97,8 +98,9 @@ export const collectionsApi = {
         authenticatedUser,
         {}
       );
-    } catch (_error) {
-      // console.error('Failed to fetch collections:', _error);
+    } catch (error) {
+      console.error('Failed to fetch collections:', error);
+      toast.error('Failed to load your collections');
       return [];
     }
   },
@@ -188,8 +190,9 @@ export const collectionsApi = {
         authenticatedUser,
         searchData
       );
-    } catch (_error) {
-      // console.error('Failed to search collections:', _error);
+    } catch (error) {
+      console.error('Failed to search collections:', error);
+      toast.error('Failed to search collections');
       return [];
     }
   },
@@ -211,8 +214,9 @@ export const collectionsApi = {
         authenticatedUser,
         searchData
       );
-    } catch (_error) {
-      // console.error('Failed to search all collections:', _error);
+    } catch (error) {
+      console.error('Failed to search all collections:', error);
+      toast.error('Failed to search collections');
       return [];
     }
   },

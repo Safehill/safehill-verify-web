@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/shared/button';
 import Popover from '@/components/shared/popover';
-import { Plus, ChevronDown, Search, FileText } from 'lucide-react';
+import { Plus, ChevronDown, Search, Box } from 'lucide-react';
 import { useState } from 'react';
 
 interface AddCollectionDropdownProps {
@@ -37,7 +37,7 @@ export default function AddCollectionDropdown({
               onClick={handleCreateClick}
               className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
             >
-              <FileText className="h-4 w-4 text-blue-600" />
+              <Box className="h-4 w-4 text-blue-600" />
               <div>
                 <div className="font-medium text-sm">Create Collection</div>
                 <div className="text-xs text-gray-500">

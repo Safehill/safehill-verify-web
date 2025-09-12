@@ -7,6 +7,7 @@ import { useCreateCollection } from '@/lib/hooks/use-collections';
 import { Loader2, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface CreateCollectionModalProps {
   showModal: boolean;
@@ -93,11 +94,11 @@ export default function CreateCollectionModal({
       setTimeout(() => {
         router.push(`/authed/collections/${newCollection.id}`);
         setShowModal(false);
-      }, 2000);
+      }, 1000);
     } catch (error) {
-      // console.error('Failed to create collection:', error);
+      console.error('Failed to create collection:', error);
       setIsSubmitting(false);
-      // You might want to show an error toast here
+      toast.error('Failed to create collection. Please try again.');
     }
   };
 
@@ -113,53 +114,54 @@ export default function CreateCollectionModal({
       setShowModal={handleCancel}
       className="max-w-[500px]"
     >
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            Cancel
-          </Button>
-          <div className="text-center">
-            <div className="text-xl font-semibold text-gray-900">
-              Create Collection
-            </div>
+      {showSuccess ? (
+        <div className="flex flex-col items-center justify-center h-full text-center p-8">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+            <Check className="h-8 w-8 text-green-600" />
           </div>
-          <Button
-            onClick={handleCreate}
-            disabled={!isFormValid || isSubmitting}
-            className="px-4 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Creating...
-              </>
-            ) : (
-              'Create'
-            )}
-          </Button>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Collection &quot;{createdCollectionName}&quot; was created
+            successfully
+          </h3>
+          <p className="text-sm text-gray-600">
+            Taking you to your new collection...
+          </p>
         </div>
-
-        {/* Content */}
-        <div className="flex-1 p-6">
-          {showSuccess ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <Check className="h-8 w-8 text-green-600" />
+      ) : (
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isSubmitting}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              Cancel
+            </Button>
+            <div className="text-center">
+              <div className="text-xl font-semibold text-gray-900">
+                Create Collection
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Collection &quot;{createdCollectionName}&quot; was created successfully
-              </h3>
-              <p className="text-sm text-gray-600">
-                Redirecting to your collection...
-              </p>
             </div>
-          ) : (
+            <Button
+              onClick={handleCreate}
+              disabled={!isFormValid || isSubmitting}
+              className="px-4 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Creating...
+                </>
+              ) : (
+                'Create'
+              )}
+            </Button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 p-6">
             <div className="space-y-6">
               <div>
                 <label
@@ -200,25 +202,23 @@ export default function CreateCollectionModal({
 
               <div className="text-sm text-gray-600">
                 <p>
-                  You&apos;ll be able to configure visibility, pricing, and other
-                  settings after creating the collection.
+                  You&apos;ll be able to configure visibility, pricing, and
+                  other settings after creating the collection.
                 </p>
               </div>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Footer */}
-        <div className="bg-gray-50 p-4 border-t border-gray-200 text-center">
-          <p className="text-sm text-gray-600">
-            {showSuccess
-              ? 'Taking you to your new collection...'
-              : isSubmitting
-              ? 'Creating your collection...'
-              : 'Fill in the details to continue'}
-          </p>
+          {/* Footer */}
+          <div className="bg-gray-50 p-4 border-t border-gray-200 text-center">
+            <p className="text-sm text-gray-600">
+              {isSubmitting
+                ? 'Creating your collection...'
+                : 'Fill in the details to continue'}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </Modal>
   );
 }

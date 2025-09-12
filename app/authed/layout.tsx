@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth/auth-context';
+import { Toaster } from 'sonner';
 
 export default function AuthedSectionLayout({
   children,
@@ -24,5 +25,10 @@ export default function AuthedSectionLayout({
   }, [isAuthenticated, router]);
 
   // Only render children if authenticated
-  return isAuthenticated ? <>{children}</> : null;
+  return isAuthenticated ? (
+    <>
+      {children}
+      <Toaster />
+    </>
+  ) : null;
 }

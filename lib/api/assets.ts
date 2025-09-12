@@ -11,6 +11,7 @@ import {
   createAuthenticatedRequest,
   createUnauthenticatedRequest,
 } from './api';
+import { toast } from 'sonner';
 
 // API functions for assets
 export const assetsApi = {
@@ -49,7 +50,8 @@ export const assetsApi = {
         {}
       );
     } catch (error) {
-      // console.error('Failed to fetch asset descriptors:', error);
+      console.error('Failed to fetch asset descriptors:', error);
+      toast.error('Failed to load asset descriptors');
       return [];
     }
   },
@@ -67,7 +69,8 @@ export const assetsApi = {
         request
       );
     } catch (error) {
-      // console.error('Failed to find similar assets:', error);
+      console.error('Failed to find similar assets:', error);
+      toast.error('Failed to find similar assets');
       return [];
     }
   },
@@ -86,7 +89,8 @@ export const assetsApi = {
         fingerprint
       );
     } catch (error) {
-      // console.error('Failed to update asset fingerprint:', error);
+      console.error('Failed to update asset fingerprint:', error);
+      toast.error('Failed to update asset fingerprint');
       throw error;
     }
   },

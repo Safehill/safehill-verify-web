@@ -12,6 +12,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import { generateCollectionLink } from '@/lib/api/collections';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface CollectionSettingsModalProps {
   showModal: boolean;
@@ -128,9 +129,9 @@ export default function CollectionSettingsModal({
         },
       });
       setShowModal(false);
-    } catch (_error) {
-      // console.error('Failed to update collection:', error);
-      // You might want to show an error toast here
+    } catch (error) {
+      console.error('Failed to update collection:', error);
+      toast.error('Failed to update collection settings. Please try again.');
     }
   };
 
@@ -167,9 +168,9 @@ export default function CollectionSettingsModal({
       });
       setShowModal(false);
       setShowUnsavedChangesWarning(false);
-    } catch (_error) {
-      // console.error('Failed to update collection:', error);
-      // You might want to show an error toast here
+    } catch (error) {
+      console.error('Failed to update collection:', error);
+      toast.error('Failed to update collection settings. Please try again.');
     }
   };
 
@@ -192,8 +193,8 @@ export default function CollectionSettingsModal({
         setShowModal(false);
         router.push('/authed');
       } catch (error) {
-        // console.error('Failed to delete collection:', error);
-        // You might want to show an error toast here
+        console.error('Failed to delete collection:', error);
+        toast.error('Failed to delete collection. Please try again.');
       }
     }
   };
@@ -435,8 +436,8 @@ export default function CollectionSettingsModal({
                             Ready to earn
                           </p>
                           <p className="text-sm text-green-700">
-                            You&apos;ll start earning from this collection once you
-                            set a price! 🎉
+                            You&apos;ll start earning from this collection once
+                            you set a price! 🎉
                           </p>
                         </div>
                       </div>

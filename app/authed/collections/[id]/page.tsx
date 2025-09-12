@@ -37,6 +37,7 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 type SortField = 'name' | 'size' | 'uploaded' | null;
 type SortDirection = 'asc' | 'desc';
@@ -72,13 +73,31 @@ export default function CollectionDetail() {
   // Track collection access
   const trackCollectionAccess = useTrackCollectionAccess();
 
+  // Handle React Query errors with toast notifications
+  useEffect(() => {
+    if (accessError) {
+      toast.error('Failed to check collection access. Please try again.');
+    }
+    if (collectionError) {
+      toast.error('Failed to load collection. Please try again.');
+    }
+  }, [accessError, collectionError]);
+
   // Track when a collection is successfully loaded (for collections user doesn't own)
   useEffect(() => {
     if (collection && accessCheck?.status === 'granted') {
       // Only track if user doesn't own this collection
       const isOwner = collection.createdBy === currentUserId;
       if (!isOwner) {
-        trackCollectionAccess.mutate({ collectionId });
+        trackCollectionAccess.mutate(
+          { collectionId },
+          {
+            onError: (error) => {
+              console.error('Failed to track collection access:', error);
+              // Don't show toast for tracking failures as it's not critical to user experience
+            },
+          }
+        );
       }
     }
   }, [
@@ -165,7 +184,6 @@ export default function CollectionDetail() {
     setShowPaywall(false);
     // The access check will be invalidated and refetched automatically
   };
-
 
   // Handle header click for sorting
   const handleHeaderClick = (field: SortField) => {

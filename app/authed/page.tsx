@@ -14,8 +14,16 @@ import {
   usePrefetchCollection,
   useSearchCollections,
 } from '@/lib/hooks/use-collections';
-import { ArrowUpDown, Filter, Loader2, Search, X } from 'lucide-react';
-import { useState } from 'react';
+import {
+  ArrowUpDown,
+  BoxIcon,
+  Filter,
+  Loader2,
+  Search,
+  X,
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function AuthedSectionLayout() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,6 +51,13 @@ export default function AuthedSectionLayout() {
   const { data: searchResults, isLoading: isSearching } =
     useSearchCollections(searchQuery);
   const prefetchCollection = usePrefetchCollection();
+
+  // Handle React Query errors with toast notifications
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load collections. Please refresh the page.');
+    }
+  }, [error]);
 
   // Show loading state while authentication is being established
   if (!isAuthenticated || !authedSession) {
@@ -126,7 +141,7 @@ export default function AuthedSectionLayout() {
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
             <Input
-              placeholder="Search collections..."
+              placeholder="Search your collections..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-white/10 border-white/20 text-white placeholder-white/60 focus:border-white/40"
@@ -409,10 +424,22 @@ export default function AuthedSectionLayout() {
         ) : (
           <div className="text-center py-12">
             <div className="mx-auto h-12 w-12 text-white/60">
-              <Search className="h-full w-full" />
+              {searchQuery ||
+              filterVisibility !== 'all' ||
+              filterOwnership !== 'all' ||
+              filterPricing !== 'all' ? (
+                <Search className="h-full w-full" />
+              ) : (
+                <BoxIcon className="h-full w-full" />
+              )}
             </div>
-            <h3 className="mt-2 text-sm font-medium text-white">
-              No collections found
+            <h3 className="mt-2 text-lg font-medium text-white mt-4">
+              {searchQuery ||
+              filterVisibility !== 'all' ||
+              filterOwnership !== 'all' ||
+              filterPricing !== 'all'
+                ? 'No collections found'
+                : 'Welcome to your collections dashboard'}
             </h3>
             <p className="mt-1 text-sm text-white/80">
               {searchQuery ||
@@ -420,7 +447,7 @@ export default function AuthedSectionLayout() {
               filterOwnership !== 'all' ||
               filterPricing !== 'all'
                 ? 'Try adjusting your search or filter criteria.'
-                : 'Get started by creating your first collection.'}
+                : 'Get started by adding your first collection.'}
             </p>
             {!searchQuery &&
             filterVisibility === 'all' &&
