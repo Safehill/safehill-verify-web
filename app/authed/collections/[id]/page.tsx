@@ -1,13 +1,18 @@
 'use client';
 
 import AssetGallery from '@/components/authed/AssetGallery';
-import AssetTableRow from '@/components/authed/AssetTableRow';
+import UploadedAssetTableRow from '@/components/authed/UploadedAssetTableRow';
+import UploadingAssetTableRow from '@/components/authed/UploadingAssetTableRow';
+import { isUploadingAsset, getAssetId, getAssetSortName, getAssetUploadTime, UploadedAsset, DisplayAsset } from '@/lib/types/asset';
 import CollectionSettingsModal from '@/components/authed/CollectionSettingsModal';
 import AuthedSectionTopBar from '@/components/authed/AuthedSectionTopBar';
 import FullScreenAssetGallery from '@/components/authed/FullScreenAssetGallery';
 import AccessDeniedView from '@/components/shared/AccessDeniedView';
 import PaywallModal from '@/components/shared/PaywallModal';
 import PaywallPage from '@/components/shared/PaywallPage';
+import AddAssetDropdown from '@/components/shared/AddAssetDropdown';
+import AddAssetModal from '@/components/shared/AddAssetModal';
+import { useUpload } from '@/lib/contexts/upload-context';
 
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
@@ -30,7 +35,6 @@ import {
   Grid,
   List,
   Loader2,
-  Plus,
   Settings,
   X,
 } from 'lucide-react';
@@ -54,6 +58,8 @@ export default function CollectionDetail() {
   const [showFullScreenGallery, setShowFullScreenGallery] = useState(false);
   const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showAddAssetModal, setShowAddAssetModal] = useState(false);
+  const { uploadFiles, uploads } = useUpload();
 
   // Check access first - always call hooks at the top
   const {
@@ -108,45 +114,69 @@ export default function CollectionDetail() {
     trackCollectionAccess,
   ]);
 
-  // Transform DTO assets to match component expectations
-  const transformedAssets = useMemo(() => {
+  // Transform DTO assets to match UploadedAsset interface
+  const transformedAssets = useMemo((): UploadedAsset[] => {
     if (!collection?.assets) {
       return [];
     }
 
     return collection.assets.map((asset) => ({
       id: asset.globalIdentifier,
+      globalIdentifier: asset.globalIdentifier,
       name: asset.globalIdentifier,
       type: 'image', // Default type since DTO doesn't have this
       size: 'Unknown', // Default size since DTO doesn't have this
       uploaded: asset.creationDate || 'Unknown',
-      ...asset, // Include original DTO properties
     }));
   }, [collection?.assets]);
 
+  // Get pending uploads for this collection
+  const pendingAssets = useMemo(() => {
+    const collectionUploads = uploads.filter(upload => 
+      upload.collectionName === collection?.name && 
+      (upload.status === 'uploading' || upload.status === 'error')
+    );
+    
+    return collectionUploads.map(upload => ({
+      uploadId: upload.id,
+      file: upload.file,
+      fileName: upload.fileName,
+      collectionName: upload.collectionName,
+      uploadProgress: upload.progress,
+      uploadStatus: upload.status as 'uploading' | 'error',
+      uploadError: upload.error,
+      thumbnailURL: URL.createObjectURL(upload.file), // Create preview from File object
+    }));
+  }, [uploads, collection?.name]);
+
+  // Combine real assets with pending uploads
+  const allAssets = useMemo((): DisplayAsset[] => {
+    return [...(transformedAssets || []), ...pendingAssets];
+  }, [transformedAssets, pendingAssets]);
+
   // Sort assets based on current sort state
-  const sortedAssets = useMemo(() => {
-    if (!transformedAssets || !sortField) {
-      return transformedAssets || [];
+  const sortedAssets = useMemo((): DisplayAsset[] => {
+    if (!allAssets || !sortField) {
+      return allAssets || [];
     }
 
-    return [...transformedAssets].sort((a, b) => {
+    return [...allAssets].sort((a, b) => {
       let aValue: any;
       let bValue: any;
 
       switch (sortField) {
         case 'name':
-          aValue = a.globalIdentifier.toLowerCase();
-          bValue = b.globalIdentifier.toLowerCase();
+          aValue = getAssetSortName(a);
+          bValue = getAssetSortName(b);
           break;
         case 'size':
-          // Since DTO doesn't have size, we'll sort by creation date instead
-          aValue = new Date(a.creationDate || '').getTime();
-          bValue = new Date(b.creationDate || '').getTime();
+          // Sort by upload time for both types
+          aValue = getAssetUploadTime(a);
+          bValue = getAssetUploadTime(b);
           break;
         case 'uploaded':
-          aValue = new Date(a.creationDate || '').getTime();
-          bValue = new Date(b.creationDate || '').getTime();
+          aValue = getAssetUploadTime(a);
+          bValue = getAssetUploadTime(b);
           break;
         default:
           return 0;
@@ -160,7 +190,7 @@ export default function CollectionDetail() {
       }
       return 0;
     });
-  }, [transformedAssets, sortField, sortDirection]);
+  }, [allAssets, sortField, sortDirection]);
 
   // Show loading state while authentication is being established
   if (!isAuthenticated || !authedSession) {
@@ -202,8 +232,43 @@ export default function CollectionDetail() {
 
   // Handle asset click to open full screen gallery
   const handleAssetClick = (assetIndex: number) => {
-    setSelectedAssetIndex(assetIndex);
+    const asset = sortedAssets[assetIndex];
+    // Don't allow clicking on uploading assets
+    if (isUploadingAsset(asset)) {
+      return;
+    }
+    
+    // Calculate the index in the uploaded-only array
+    const uploadedAssets = sortedAssets.filter(a => !isUploadingAsset(a));
+    const uploadedIndex = uploadedAssets.findIndex(a => getAssetId(a) === getAssetId(asset));
+    
+    setSelectedAssetIndex(uploadedIndex);
     setShowFullScreenGallery(true);
+  };
+
+  // Handle asset upload from modal
+  const handleAssetUpload = async (files: File[]) => {
+    if (!isOwned) {
+      toast.error('You can only upload assets to collections you own');
+      return;
+    }
+
+    // Use the upload context to handle background uploads with progress tracking
+    await uploadFiles(files, collection?.name, () => {
+      // Callback when all uploads complete
+      // TODO: Refresh the collection data after upload
+      // queryClient.invalidateQueries({ queryKey: collectionKeys.detail(collectionId) });
+    });
+  };
+
+  // Handle dropdown actions
+  const handleUploadAssets = () => {
+    setShowAddAssetModal(true);
+  };
+
+  const handleFromOtherCollection = () => {
+    // TODO: Implement copy from other collection functionality
+    toast.info('Copy from other collection coming soon!');
   };
 
   // Get sort icon for header
@@ -521,22 +586,22 @@ export default function CollectionDetail() {
                 value={viewMode}
                 onChange={(value) => setViewMode(value as 'gallery' | 'table')}
               />
-              <Button
-                className="flex gap-2 px-4 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
-                disabled
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add Asset</span>
-              </Button>
+              {isOwned && (
+                <AddAssetDropdown
+                  onSelectUpload={handleUploadAssets}
+                  onSelectFromCollection={handleFromOtherCollection}
+                />
+              )}
             </div>
           </div>
           {/* Line Separator */}
           <div className={`border-t border-white/10`}></div>
 
-          {collection.assets.length > 0 ? (
+
+          {allAssets.length > 0 ? (
             viewMode === 'gallery' ? (
               <AssetGallery
-                assets={transformedAssets}
+                assets={sortedAssets}
                 onAssetClick={handleAssetClick}
               />
             ) : (
@@ -584,13 +649,22 @@ export default function CollectionDetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/20">
-                    {sortedAssets.map((asset: any, index: number) => (
-                      <AssetTableRow
-                        key={asset.id}
-                        asset={asset}
-                        isLastRow={index === sortedAssets.length - 1}
-                        onClick={() => handleAssetClick(index)}
-                      />
+                    {sortedAssets.map((asset, index: number) => (
+                      isUploadingAsset(asset) ? (
+                        <UploadingAssetTableRow
+                          key={getAssetId(asset)}
+                          asset={asset}
+                          isLastRow={index === sortedAssets.length - 1}
+                          onClick={() => handleAssetClick(index)}
+                        />
+                      ) : (
+                        <UploadedAssetTableRow
+                          key={getAssetId(asset)}
+                          asset={asset}
+                          isLastRow={index === sortedAssets.length - 1}
+                          onClick={() => handleAssetClick(index)}
+                        />
+                      )
                     ))}
                   </tbody>
                 </table>
@@ -598,11 +672,17 @@ export default function CollectionDetail() {
             )
           ) : (
             <div className="text-center py-8 flex flex-col items-center justify-center">
-              <p className="text-white/80">No assets in this collection yet.</p>
-              <Button className="flex gap-2 px-6 py-2 bg-cyan-100/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800 mt-4">
-                <Plus className="h-4 w-4" />
-                <span>Add First Asset</span>
-              </Button>
+              <p className="text-white/80">No assets in this collection yet</p>
+              <p className="text-white/60 text-sm mt-2">Get started by adding your first assets</p>
+              {isOwned && (
+                <div className="mt-4">
+                  <AddAssetDropdown
+                    onSelectUpload={handleUploadAssets}
+                    onSelectFromCollection={handleFromOtherCollection}
+                    className="px-6 py-2"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -615,9 +695,18 @@ export default function CollectionDetail() {
         collection={collection}
       />
 
+      {/* Add Asset Modal */}
+      <AddAssetModal
+        showModal={showAddAssetModal}
+        setShowModal={setShowAddAssetModal}
+        onAssetsSubmit={handleAssetUpload}
+        collection={collection}
+        isLoading={false}
+      />
+
       {/* Full Screen Asset Gallery */}
       <FullScreenAssetGallery
-        assets={sortedAssets}
+        assets={sortedAssets.filter(asset => !isUploadingAsset(asset)) as any[]}
         initialAssetIndex={selectedAssetIndex}
         isOpen={showFullScreenGallery}
         onClose={() => setShowFullScreenGallery(false)}

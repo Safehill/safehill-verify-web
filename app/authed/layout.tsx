@@ -5,6 +5,8 @@ import type React from 'react';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { Toaster } from 'sonner';
+import { UploadProvider } from '@/lib/contexts/upload-context';
+import UploadProgressToaster from '@/components/shared/UploadProgressToaster';
 
 export default function AuthedSectionLayout({
   children,
@@ -26,9 +28,10 @@ export default function AuthedSectionLayout({
 
   // Only render children if authenticated
   return isAuthenticated ? (
-    <>
+    <UploadProvider>
       {children}
       <Toaster />
-    </>
+      <UploadProgressToaster />
+    </UploadProvider>
   ) : null;
 }

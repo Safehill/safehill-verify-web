@@ -5,24 +5,19 @@ import { timeAgo } from '@/lib/utils';
 import { Eye, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '../shared/button';
+import { UploadedAsset } from '@/lib/types/asset';
 
-interface AssetTableRowProps {
-  asset: {
-    id: string;
-    name: string;
-    type: string;
-    size: string;
-    uploaded: string;
-  };
+interface UploadedAssetTableRowProps {
+  asset: UploadedAsset;
   isLastRow?: boolean;
   onClick?: () => void;
 }
 
-export default function AssetTableRow({
+export default function UploadedAssetTableRow({
   asset,
   isLastRow = false,
   onClick,
-}: AssetTableRowProps) {
+}: UploadedAssetTableRowProps) {
   const { data: imageData, isLoading, error } = useAsset(asset.id);
 
   return (
@@ -66,9 +61,7 @@ export default function AssetTableRow({
       </td>
       <td className="px-4 py-3 text-right">
         <div className="flex items-center justify-end space-x-2">
-          {/* Placeholder for more actions */}
           <Button className="flex gap-2 px-2 py-2 bg-white/10 text-white text-sm rounded-lg hover:bg-white/20">
-            {/* Replace with icon for quick look */}
             <Eye />
           </Button>
         </div>

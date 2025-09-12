@@ -202,8 +202,8 @@ export default function CreateCollectionModal({
 
               <div className="text-sm text-gray-600">
                 <p>
-                  You&apos;ll be able to configure visibility, pricing, and
-                  other settings after creating the collection.
+                  Once the collection is created, you&apos;ll be able to configure visibility, pricing,
+                  and add your content.
                 </p>
               </div>
             </div>

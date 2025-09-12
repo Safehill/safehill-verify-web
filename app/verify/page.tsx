@@ -7,7 +7,7 @@ import type {
   FingerprintMatchDTO,
   ImageMatch,
 } from '@/components/verification/FileDetailsProps';
-import FileUploader from '@/components/verification/FileUploader';
+import VerificationFileUploader from '@/components/verification/VerificationFileUploader';
 import ProvidedImage from '@/components/verification/ProvidedImage';
 import VerifyResultsPage from '@/components/verification/VerifyResultsPage';
 import AxiosInstance from '@/lib/api/api';
@@ -181,7 +181,7 @@ export default function VerifyPage() {
   } else {
     return (
       <>
-        <FileUploader
+        <VerificationFileUploader
           isLoading={isLoading}
           setIsLoading={setIsLoading}
           onSubmit={handleFileProvided}
