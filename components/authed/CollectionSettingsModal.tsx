@@ -232,7 +232,9 @@ export default function CollectionSettingsModal({
               <div className="text-2xl font-semibold text-gray-900">
                 Collection Settings
               </div>
-              <div className="text-sm text-gray-600">for <b>{collection.name}</b></div>
+              <div className="text-sm text-gray-600">
+                for <b>{collection.name}</b>
+              </div>
             </div>
             <Button
               onClick={handleSave}

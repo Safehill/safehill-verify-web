@@ -94,4 +94,61 @@ export const assetsApi = {
       throw error;
     }
   },
+
+  // Mark an asset version as uploaded after S3 upload completes
+  markAssetUploaded: async (
+    globalIdentifier: string,
+    versionName: string,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<void> => {
+    console.debug('assetsApi.markAssetUploaded called', {
+      globalIdentifier,
+      versionName,
+    });
+
+    try {
+      await createAuthenticatedRequest<void>(
+        'post',
+        `/assets/${globalIdentifier}/versions/${versionName}/uploaded`,
+        authenticatedUser,
+        {}
+      );
+
+      console.debug('assetsApi.markAssetUploaded successful', {
+        globalIdentifier,
+        versionName,
+      });
+    } catch (error) {
+      console.error('assetsApi.markAssetUploaded failed', {
+        globalIdentifier,
+        versionName,
+        error,
+      });
+      throw new Error(
+        `Failed to mark asset as uploaded: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
+  },
+
+  // Mock implementation for testing
+  markAssetUploadedMock: async (
+    globalIdentifier: string,
+    versionName: string,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<void> => {
+    console.debug('assetsApi.markAssetUploadedMock called', {
+      globalIdentifier,
+      versionName,
+    });
+
+    // Mock implementation with timeout
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    console.debug('assetsApi.markAssetUploadedMock successful', {
+      globalIdentifier,
+      versionName,
+    });
+  },
 };

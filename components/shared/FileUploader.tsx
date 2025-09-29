@@ -78,13 +78,16 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         <h3 className="text-lg font-medium mb-1">{title}</h3>
         <p className="text-sm text-muted-foreground mb-2">{subtitle}</p>
         <p className="text-xs text-muted-foreground">
-          Supports {acceptedFileTypes.replace(/\./g, '').toUpperCase()} files up to {maxFileSize}
+          Supports {acceptedFileTypes.replace(/\./g, '').toUpperCase()} files up
+          to {maxFileSize}
         </p>
         <div className="mt-3 h-5">
           {isLoading && (
             <>
               <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-muted-foreground border-r-transparent"></div>
-              <span className="ml-2 text-sm text-muted-foreground">Processing...</span>
+              <span className="ml-2 text-sm text-muted-foreground">
+                Processing...
+              </span>
             </>
           )}
         </div>

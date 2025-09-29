@@ -20,12 +20,12 @@ export interface AssetVersionOutputDTO {
 export interface AssetInputDTO {
   globalIdentifier: string;
   localIdentifier?: string;
-  creationDate: string;
-  versions: AssetVersionInputDTO[];
   fingerprint?: string;
-  embeddings?: string;
   perceptualHash?: string;
+  embeddings?: string;
+  creationDate: string;
   groupId?: string;
+  versions: AssetVersionInputDTO[];
   force?: boolean;
 }
 

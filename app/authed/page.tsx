@@ -14,14 +14,7 @@ import {
   usePrefetchCollection,
   useSearchCollections,
 } from '@/lib/hooks/use-collections';
-import {
-  ArrowUpDown,
-  BoxIcon,
-  Filter,
-  Loader2,
-  Search,
-  X,
-} from 'lucide-react';
+import { ArrowUpDown, BoxIcon, Filter, Loader2, Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 

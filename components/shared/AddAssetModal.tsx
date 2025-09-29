@@ -77,16 +77,18 @@ export default function AddAssetModal({
     }
 
     // Add files to staging area, avoiding duplicates by name
-    const existingFileNames = stagedFiles.map(f => f.name);
-    const uniqueNewFiles = newFiles.filter(f => !existingFileNames.includes(f.name));
-    
+    const existingFileNames = stagedFiles.map((f) => f.name);
+    const uniqueNewFiles = newFiles.filter(
+      (f) => !existingFileNames.includes(f.name)
+    );
+
     if (uniqueNewFiles.length > 0) {
-      setStagedFiles(prev => [...prev, ...uniqueNewFiles]);
+      setStagedFiles((prev) => [...prev, ...uniqueNewFiles]);
     }
   };
 
   const handleRemoveFile = (fileToRemove: File) => {
-    setStagedFiles(prev => prev.filter(f => f.name !== fileToRemove.name));
+    setStagedFiles((prev) => prev.filter((f) => f.name !== fileToRemove.name));
   };
 
   const handleUpload = (files: File[]) => {
@@ -136,7 +138,10 @@ export default function AddAssetModal({
             ) : (
               <>
                 <span className="sm:hidden">Upload {stagedFiles.length}</span>
-                <span className="hidden sm:inline">Upload {stagedFiles.length} Asset{stagedFiles.length === 1 ? '' : 's'}</span>
+                <span className="hidden sm:inline">
+                  Upload {stagedFiles.length} Asset
+                  {stagedFiles.length === 1 ? '' : 's'}
+                </span>
               </>
             )}
           </Button>
@@ -162,7 +167,8 @@ export default function AddAssetModal({
           {stagedFiles.length > 0 ? (
             <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 overflow-y-auto">
               <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">
-                Ready for Upload ({stagedFiles.length} file{stagedFiles.length === 1 ? '' : 's'})
+                Ready for Upload ({stagedFiles.length} file
+                {stagedFiles.length === 1 ? '' : 's'})
               </h3>
               <FileTable
                 files={stagedFiles}
@@ -175,7 +181,9 @@ export default function AddAssetModal({
           ) : (
             <div className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6 flex items-center justify-center">
               <div className="text-center text-gray-500">
-                <p className="text-sm sm:text-base">Files you drag and drop or select above will be staged here</p>
+                <p className="text-sm sm:text-base">
+                  Files you drag and drop or select above will be staged here
+                </p>
               </div>
             </div>
           )}
@@ -185,7 +193,9 @@ export default function AddAssetModal({
         <div className="bg-gray-50 p-4 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-600">
             {stagedFiles.length > 0
-              ? `${stagedFiles.length} asset${stagedFiles.length === 1 ? '' : 's'} ready to upload`
+              ? `${stagedFiles.length} asset${
+                  stagedFiles.length === 1 ? '' : 's'
+                } ready to upload`
               : 'Select the assets to upload and add to this collection'}
           </p>
         </div>

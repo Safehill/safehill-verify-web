@@ -7,6 +7,8 @@ import type {
   AccessCheckResultDTO,
   PaymentIntentDTO,
   PaymentConfirmationDTO,
+  CollectionAssetAddRequestDTO,
+  CollectionAssetAddResultDTO,
 } from '@/lib/api/models/dto/Collection';
 import { createAuthenticatedRequest } from './api';
 import { toast } from 'sonner';
@@ -219,5 +221,99 @@ export const collectionsApi = {
       toast.error('Failed to search collections');
       return [];
     }
+  },
+
+  // Add assets to collection
+  addAssetsToCollection: async (
+    collectionId: string,
+    request: CollectionAssetAddRequestDTO,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<CollectionAssetAddResultDTO> => {
+    console.debug('collectionsApi.addAssetsToCollection called', {
+      collectionId,
+      assetCount: request.assets.length,
+      hasServerDecryptionDetails: !!request.serverDecryptionDetails,
+      serverDecryptionDetailsCount:
+        request.serverDecryptionDetails?.length || 0,
+    });
+
+    try {
+      const result =
+        await createAuthenticatedRequest<CollectionAssetAddResultDTO>(
+          'post',
+          `/collections/add-assets/${collectionId}`,
+          authenticatedUser,
+          request
+        );
+
+      console.debug('collectionsApi.addAssetsToCollection successful', {
+        success: result.success,
+        addedCount: result.addedCount,
+        skippedCount: result.skippedCount,
+        hasAssets: !!result.assets,
+        assetsCount: result.assets?.length || 0,
+      });
+
+      return result;
+    } catch (error) {
+      console.error('collectionsApi.addAssetsToCollection failed', error);
+      throw new Error(
+        `Failed to add assets to collection: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
+  },
+
+  // Mock implementation for testing
+  addAssetsToCollectionMock: async (
+    collectionId: string,
+    request: CollectionAssetAddRequestDTO,
+    authenticatedUser: AuthenticatedUser
+  ): Promise<CollectionAssetAddResultDTO> => {
+    console.debug('collectionsApi.addAssetsToCollectionMock called', {
+      collectionId,
+      assetCount: request.assets.length,
+      hasServerDecryptionDetails: !!request.serverDecryptionDetails,
+      serverDecryptionDetailsCount:
+        request.serverDecryptionDetails?.length || 0,
+    });
+
+    // Mock implementation with timeout
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const mockAssets = request.assets.map((asset) => ({
+      globalIdentifier: asset.globalIdentifier,
+      localIdentifier: asset.localIdentifier,
+      createdBy: authenticatedUser.user.identifier,
+      creationDate: asset.creationDate,
+      versions: asset.versions.map((version) => ({
+        versionName: version.versionName,
+        ephemeralPublicKey: version.ephemeralPublicKey,
+        publicSignature: version.publicSignature,
+        encryptedSecret: version.senderEncryptedSecret,
+        senderPublicSignature: 'mock_sender_signature',
+        presignedURL: `https://mock-s3-bucket.s3.amazonaws.com/${asset.globalIdentifier}/${version.versionName}?mock=true`,
+        presignedURLExpiresInMinutes: 15,
+      })),
+    }));
+
+    const result: CollectionAssetAddResultDTO = {
+      success: true,
+      message: 'Assets added successfully (mocked)',
+      addedCount: request.assets.length,
+      skippedCount: 0,
+      assets: mockAssets,
+    };
+
+    console.debug('collectionsApi.addAssetsToCollectionMock successful', {
+      success: result.success,
+      addedCount: result.addedCount,
+      skippedCount: result.skippedCount,
+      hasAssets: !!result.assets,
+      assetsCount: result.assets?.length || 0,
+    });
+
+    return result;
   },
 };

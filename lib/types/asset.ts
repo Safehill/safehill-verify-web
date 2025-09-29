@@ -42,7 +42,9 @@ export function getAssetName(asset: DisplayAsset): string {
 }
 
 export function getAssetSortName(asset: DisplayAsset): string {
-  return isUploadingAsset(asset) ? asset.fileName.toLowerCase() : asset.globalIdentifier.toLowerCase();
+  return isUploadingAsset(asset)
+    ? asset.fileName.toLowerCase()
+    : asset.globalIdentifier.toLowerCase();
 }
 
 export function getAssetUploadTime(asset: DisplayAsset): number {

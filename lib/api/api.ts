@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// Global mock flag for testing
+export const USE_MOCK_API = true;
+
 // Use server-side or client-side environment variable
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||

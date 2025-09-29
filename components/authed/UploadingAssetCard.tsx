@@ -49,9 +49,7 @@ export default function UploadingAssetCard({
         )}
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-        <p className="text-white text-xs truncate">
-          {asset.fileName}
-        </p>
+        <p className="text-white text-xs truncate">{asset.fileName}</p>
         <p className="text-white/70 text-xs">
           {asset.file.type} • {(asset.file.size / 1024 / 1024).toFixed(1)} MB
         </p>

@@ -80,8 +80,7 @@ const FileTable: React.FC<FileTableProps> = ({
               <div>
                 <p className="font-medium">{file.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {typeOf(file)} •{' '}
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  {typeOf(file)} • {(file.size / (1024 * 1024)).toFixed(2)} MB
                 </p>
               </div>
             </div>
@@ -111,7 +110,8 @@ const FileTable: React.FC<FileTableProps> = ({
             {isLoading ? (
               <>
                 <div className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent mr-2"></div>
-                {submitLabel}ing {files.length} file{files.length === 1 ? '' : 's'}...
+                {submitLabel}ing {files.length} file
+                {files.length === 1 ? '' : 's'}...
               </>
             ) : (
               <>

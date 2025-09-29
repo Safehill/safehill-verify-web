@@ -1,4 +1,8 @@
-import type { AssetOutputDTO } from './Asset';
+import type {
+  AssetOutputDTO,
+  AssetInputDTO,
+  AssetVersionInputDTO,
+} from './Asset';
 
 export type Visibility = 'public' | 'confidential' | 'not-shared';
 
@@ -55,4 +59,23 @@ export interface PaymentIntentDTO {
 export interface PaymentConfirmationDTO {
   success: boolean;
   message?: string;
+}
+
+export interface CollectionAssetAddRequestDTO {
+  assets: AssetInputDTO[];
+  serverDecryptionDetails?: CollectionAssetDecryptionDTO[];
+}
+
+export interface CollectionAssetAddResultDTO {
+  success: boolean;
+  message: string;
+  addedCount: number;
+  skippedCount: number;
+  assets?: AssetOutputDTO[];
+  errors?: string[];
+}
+
+export interface CollectionAssetDecryptionDTO {
+  assetGlobalIdentifier: string;
+  versionDecryptionDetails: AssetVersionInputDTO[];
 }

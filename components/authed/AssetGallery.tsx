@@ -23,7 +23,7 @@ export default function AssetGallery({
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-5">
-      {assets.map((asset, index) => (
+      {assets.map((asset, index) =>
         isUploadingAsset(asset) ? (
           <UploadingAssetCard
             key={getAssetId(asset)}
@@ -37,7 +37,7 @@ export default function AssetGallery({
             onClick={() => onAssetClick?.(index)}
           />
         )
-      ))}
+      )}
     </div>
   );
 }

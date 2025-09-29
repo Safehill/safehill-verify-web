@@ -25,7 +25,7 @@ const VerificationFileUploader: React.FC<FileUploaderProps> = ({
   };
 
   const handleRemoveFile = (fileToRemove: File) => {
-    setStagedFiles(prev => prev.filter(f => f.name !== fileToRemove.name));
+    setStagedFiles((prev) => prev.filter((f) => f.name !== fileToRemove.name));
   };
 
   return (

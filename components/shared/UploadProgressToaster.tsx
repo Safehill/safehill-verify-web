@@ -2,7 +2,14 @@
 
 import { Button } from '@/components/shared/button';
 import { Progress } from '@/components/shared/progress';
-import { X, Upload, CheckCircle, AlertCircle, Minimize2, Maximize2 } from 'lucide-react';
+import {
+  X,
+  Upload,
+  CheckCircle,
+  AlertCircle,
+  Minimize2,
+  Maximize2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useUpload } from '@/lib/contexts/upload-context';
 
@@ -19,16 +26,18 @@ export default function UploadProgressToaster({
     return null;
   }
 
-  const activeUploads = uploads.filter(u => u.status === 'uploading');
-  const completedUploads = uploads.filter(u => u.status === 'completed');
-  const errorUploads = uploads.filter(u => u.status === 'error');
+  const activeUploads = uploads.filter((u) => u.status === 'uploading');
+  const completedUploads = uploads.filter((u) => u.status === 'completed');
+  const errorUploads = uploads.filter((u) => u.status === 'error');
 
-  const totalProgress = uploads.length > 0 
-    ? uploads.reduce((sum, upload) => sum + upload.progress, 0) / uploads.length
-    : 0;
+  const totalProgress =
+    uploads.length > 0
+      ? uploads.reduce((sum, upload) => sum + upload.progress, 0) /
+        uploads.length
+      : 0;
 
   return (
-    <div 
+    <div
       className={`fixed bottom-4 right-4 z-50 w-96 bg-white border border-gray-200 rounded-lg shadow-lg ${className}`}
     >
       {/* Header */}
@@ -91,7 +100,7 @@ export default function UploadProgressToaster({
           <div className="max-h-64 overflow-y-auto">
             {uploads.map((upload) => (
               <div
-                key={upload.id}
+                key={upload.globalIdentifier}
                 className="flex items-center gap-3 p-3 border-b border-gray-100 last:border-b-0"
               >
                 {/* Status Icon */}
@@ -117,14 +126,14 @@ export default function UploadProgressToaster({
                       to {upload.collectionName}
                     </div>
                   )}
-                  
+
                   {/* Progress Bar */}
                   {upload.status === 'uploading' && (
                     <div className="mt-1">
                       <Progress value={upload.progress} className="h-1" />
                     </div>
                   )}
-                  
+
                   {/* Error Message */}
                   {upload.status === 'error' && upload.error && (
                     <div className="text-xs text-red-600 mt-1 truncate">
@@ -138,7 +147,7 @@ export default function UploadProgressToaster({
                   variant="outline"
                   size="icon"
                   className="h-6 w-6 flex-shrink-0"
-                  onClick={() => removeUpload(upload.id)}
+                  onClick={() => removeUpload(upload.globalIdentifier)}
                 >
                   <X className="h-3 w-3" />
                 </Button>
@@ -149,7 +158,10 @@ export default function UploadProgressToaster({
           {/* Summary */}
           <div className="p-3 bg-gray-50 rounded-b-lg text-xs text-gray-600">
             {activeUploads.length > 0 && (
-              <div>Uploading {activeUploads.length} file{activeUploads.length === 1 ? '' : 's'}...</div>
+              <div>
+                Uploading {activeUploads.length} file
+                {activeUploads.length === 1 ? '' : 's'}...
+              </div>
             )}
             {completedUploads.length > 0 && (
               <div className="text-green-600">
@@ -157,9 +169,7 @@ export default function UploadProgressToaster({
               </div>
             )}
             {errorUploads.length > 0 && (
-              <div className="text-red-600">
-                {errorUploads.length} failed
-              </div>
+              <div className="text-red-600">{errorUploads.length} failed</div>
             )}
           </div>
         </>

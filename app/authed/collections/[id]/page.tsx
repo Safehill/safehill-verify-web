@@ -3,7 +3,14 @@
 import AssetGallery from '@/components/authed/AssetGallery';
 import UploadedAssetTableRow from '@/components/authed/UploadedAssetTableRow';
 import UploadingAssetTableRow from '@/components/authed/UploadingAssetTableRow';
-import { isUploadingAsset, getAssetId, getAssetSortName, getAssetUploadTime, UploadedAsset, DisplayAsset } from '@/lib/types/asset';
+import {
+  isUploadingAsset,
+  getAssetId,
+  getAssetSortName,
+  getAssetUploadTime,
+  UploadedAsset,
+  DisplayAsset,
+} from '@/lib/types/asset';
 import CollectionSettingsModal from '@/components/authed/CollectionSettingsModal';
 import AuthedSectionTopBar from '@/components/authed/AuthedSectionTopBar';
 import FullScreenAssetGallery from '@/components/authed/FullScreenAssetGallery';
@@ -132,13 +139,14 @@ export default function CollectionDetail() {
 
   // Get pending uploads for this collection
   const pendingAssets = useMemo(() => {
-    const collectionUploads = uploads.filter(upload => 
-      upload.collectionName === collection?.name && 
-      (upload.status === 'uploading' || upload.status === 'error')
+    const collectionUploads = uploads.filter(
+      (upload) =>
+        upload.collectionName === collection?.name &&
+        (upload.status === 'uploading' || upload.status === 'error')
     );
-    
-    return collectionUploads.map(upload => ({
-      uploadId: upload.id,
+
+    return collectionUploads.map((upload) => ({
+      uploadId: upload.globalIdentifier,
       file: upload.file,
       fileName: upload.fileName,
       collectionName: upload.collectionName,
@@ -237,11 +245,13 @@ export default function CollectionDetail() {
     if (isUploadingAsset(asset)) {
       return;
     }
-    
+
     // Calculate the index in the uploaded-only array
-    const uploadedAssets = sortedAssets.filter(a => !isUploadingAsset(a));
-    const uploadedIndex = uploadedAssets.findIndex(a => getAssetId(a) === getAssetId(asset));
-    
+    const uploadedAssets = sortedAssets.filter((a) => !isUploadingAsset(a));
+    const uploadedIndex = uploadedAssets.findIndex(
+      (a) => getAssetId(a) === getAssetId(asset)
+    );
+
     setSelectedAssetIndex(uploadedIndex);
     setShowFullScreenGallery(true);
   };
@@ -253,8 +263,13 @@ export default function CollectionDetail() {
       return;
     }
 
-    // Use the upload context to handle background uploads with progress tracking
-    await uploadFiles(files, collection?.name, () => {
+    if (!collection) {
+      toast.error('Collection not available for upload');
+      return;
+    }
+
+    // Use the upload context with the new upload system
+    await uploadFiles(files, collection, () => {
       // Callback when all uploads complete
       // TODO: Refresh the collection data after upload
       // queryClient.invalidateQueries({ queryKey: collectionKeys.detail(collectionId) });
@@ -597,7 +612,6 @@ export default function CollectionDetail() {
           {/* Line Separator */}
           <div className={`border-t border-white/10`}></div>
 
-
           {allAssets.length > 0 ? (
             viewMode === 'gallery' ? (
               <AssetGallery
@@ -649,7 +663,7 @@ export default function CollectionDetail() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/20">
-                    {sortedAssets.map((asset, index: number) => (
+                    {sortedAssets.map((asset, index: number) =>
                       isUploadingAsset(asset) ? (
                         <UploadingAssetTableRow
                           key={getAssetId(asset)}
@@ -665,7 +679,7 @@ export default function CollectionDetail() {
                           onClick={() => handleAssetClick(index)}
                         />
                       )
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -673,7 +687,9 @@ export default function CollectionDetail() {
           ) : (
             <div className="text-center py-8 flex flex-col items-center justify-center">
               <p className="text-white/80">No assets in this collection yet</p>
-              <p className="text-white/60 text-sm mt-2">Get started by adding your first assets</p>
+              <p className="text-white/60 text-sm mt-2">
+                Get started by adding your first assets
+              </p>
               {isOwned && (
                 <div className="mt-4">
                   <AddAssetDropdown
@@ -706,7 +722,9 @@ export default function CollectionDetail() {
 
       {/* Full Screen Asset Gallery */}
       <FullScreenAssetGallery
-        assets={sortedAssets.filter(asset => !isUploadingAsset(asset)) as any[]}
+        assets={
+          sortedAssets.filter((asset) => !isUploadingAsset(asset)) as any[]
+        }
         initialAssetIndex={selectedAssetIndex}
         isOpen={showFullScreenGallery}
         onClose={() => setShowFullScreenGallery(false)}
