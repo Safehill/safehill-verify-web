@@ -6,7 +6,6 @@ import { Button } from '@/components/shared/button';
 import { Card } from '@/components/shared/card';
 import { API_BASE_URL } from '@/lib/api/api';
 import { useSessionWebSocket } from '@/lib/api/socket';
-import { useAuth } from '@/lib/auth/auth-context';
 import { arrayBufferToBase64 } from '@/lib/crypto/base64';
 import { cryptoKeyToBase64, encryptWithKey } from '@/lib/crypto/keys';
 import { ArrowDown } from 'lucide-react';
@@ -18,8 +17,6 @@ import { getValidRedirectUrl } from '@/lib/utils';
 const CODE_VALIDITY_IN_SECONDS = 120;
 
 export default function LoginPage() {
-  const { setAuthedSession } = useAuth();
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const [qrPayload, setQrPayload] = useState<string | null>(null);
@@ -31,15 +28,15 @@ export default function LoginPage() {
   const {
     session: websocketSession,
     symmetricKey,
-    authenticatedUser,
-    setAuthenticatedUser,
+    authedSession,
+    setAuthedSession,
     error: webSocketError,
     retry,
   } = useSessionWebSocket();
 
   // Countdown timer for session expiration
   useEffect(() => {
-    if (!qrPayload || !!authenticatedUser) {
+    if (!qrPayload || !!authedSession) {
       return;
     }
 
@@ -58,11 +55,11 @@ export default function LoginPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [qrPayload, authenticatedUser]);
+  }, [qrPayload, authedSession]);
 
   // Authenticate when the user credentials are available
   useEffect(() => {
-    if (!authenticatedUser || hasRedirected) {
+    if (!authedSession || hasRedirected) {
       return;
     }
 
@@ -74,10 +71,10 @@ export default function LoginPage() {
 
     // Store authentication credentials in memory via context
     setAuthedSession({
-      bearerToken: authenticatedUser.authToken,
-      privateKey: authenticatedUser.privateKey,
-      signature: authenticatedUser.privateSignature,
-      user: authenticatedUser.user,
+      authToken: authedSession.authToken,
+      privateKey: authedSession.privateKey,
+      privateSignature: authedSession.privateSignature,
+      user: authedSession.user,
       expiresAt: expirationDate.getTime(),
     });
 
@@ -87,13 +84,7 @@ export default function LoginPage() {
     // Redirect to preserved destination or authed section home page
     const redirectTo = getValidRedirectUrl(searchParams);
     router.push(redirectTo);
-  }, [
-    authenticatedUser,
-    router,
-    setAuthedSession,
-    searchParams,
-    hasRedirected,
-  ]);
+  }, [authedSession, router, setAuthedSession, searchParams, hasRedirected]);
 
   // Update progress bar based on time remaining
   useEffect(() => {
@@ -102,7 +93,7 @@ export default function LoginPage() {
 
   // Start again
   const initialize = () => {
-    setAuthenticatedUser(null);
+    setAuthedSession(null);
     setQrPayload(null);
     setShowQRCode(false);
   };
@@ -144,7 +135,7 @@ export default function LoginPage() {
                   qrCodePayload={qrPayload}
                   timeRemaining={timeRemaining}
                   progress={progress}
-                  authenticatedUser={authenticatedUser}
+                  authedSession={authedSession}
                   generateQRCode={generateQRCode}
                   onBack={initialize}
                 />

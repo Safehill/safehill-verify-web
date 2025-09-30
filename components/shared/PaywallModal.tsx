@@ -7,11 +7,7 @@ import Modal from '@/components/shared/modal';
 import { collectionsApi } from '@/lib/api/collections';
 import type { AccessCheckResultDTO } from '@/lib/api/models/dto/Collection';
 import { useAuth } from '@/lib/auth/auth-context';
-import {
-  convertToAuthenticatedUser,
-  getAvatarColorValue,
-  getInitials,
-} from '@/lib/utils';
+import { getAvatarColorValue, getInitials } from '@/lib/utils';
 import { stripeService } from '@/lib/stripe/stripe-service';
 import { CreditCard, Eye, Lock, Shield } from 'lucide-react';
 import { useState } from 'react';
@@ -37,7 +33,6 @@ export default function PaywallModal({
   onPaymentSuccess,
 }: PaywallModalProps) {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,7 +41,7 @@ export default function PaywallModal({
   }
 
   const handlePurchase = async () => {
-    if (!authenticatedUser) {
+    if (!authedSession) {
       setError('Authentication required');
       return;
     }
@@ -68,7 +63,7 @@ export default function PaywallModal({
       // Create payment intent in our backend
       const paymentIntent = await collectionsApi.createPaymentIntent(
         collectionId,
-        authenticatedUser
+        authedSession
       );
 
       console.log('Payment intent created:', paymentIntent);
@@ -89,7 +84,7 @@ export default function PaywallModal({
       const result = await collectionsApi.confirmPayment(
         collectionId,
         paymentIntent.clientSecret,
-        authenticatedUser
+        authedSession
       );
 
       if (result.success) {

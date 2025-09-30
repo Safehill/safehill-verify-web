@@ -15,7 +15,6 @@ import {
 import { AssetEncryption } from '@/lib/crypto/asset-encryption';
 import type { CollectionOutputDTO } from '@/lib/api/models/dto/Collection';
 import { useAuth } from '@/lib/auth/auth-context';
-import { convertToAuthenticatedUser } from '@/lib/utils';
 
 export interface UploadItem {
   globalIdentifier: string;
@@ -33,7 +32,11 @@ interface UploadContextType {
   uploadFiles: (
     files: File[],
     collection: CollectionOutputDTO,
-    onComplete?: () => void
+    onComplete?: (error: Error | null) => void,
+    onFinishedProcessingItem?: (
+      globalIdentifier: string,
+      error: Error | null
+    ) => void
   ) => Promise<void>;
   removeUpload: (id: string) => void;
   clearCompleted: () => void;
@@ -146,7 +149,11 @@ export function UploadProvider({ children }: UploadProviderProps) {
     async (
       files: File[],
       collection: CollectionOutputDTO,
-      onComplete?: () => void
+      onComplete?: (error: Error | null) => void,
+      onFinishedProcessingItem?: (
+        globalIdentifier: string,
+        error: Error | null
+      ) => void
     ) => {
       console.debug('UploadContext.uploadFiles called', {
         fileCount: files.length,
@@ -160,8 +167,6 @@ export function UploadProvider({ children }: UploadProviderProps) {
         toast.error('Authentication required for upload');
         return;
       }
-
-      const authenticatedUser = convertToAuthenticatedUser(authedSession)!;
 
       // Generate globalIdentifiers upfront and create upload items
       const uploadItems = files.map((file) => {
@@ -200,7 +205,7 @@ export function UploadProvider({ children }: UploadProviderProps) {
         const results = await uploadService.uploadFiles(
           files,
           collection,
-          authenticatedUser,
+          authedSession,
           (file: File) => {
             // Return the pre-generated globalIdentifier for this file
             const matchingItem = filesWithIds.find(
@@ -210,7 +215,8 @@ export function UploadProvider({ children }: UploadProviderProps) {
               matchingItem?.globalIdentifier ||
               AssetEncryption.generateGlobalIdentifier()
             );
-          }
+          },
+          onFinishedProcessingItem
         );
 
         console.debug('UploadContext.uploadFiles upload service completed', {
@@ -239,11 +245,19 @@ export function UploadProvider({ children }: UploadProviderProps) {
           console.debug(
             'UploadContext.uploadFiles calling onComplete callback'
           );
-          onComplete();
+          onComplete(
+            errorCount > 0 ? new Error(`${errorCount} uploads failed`) : null
+          );
         }
       } catch (error) {
         console.error('UploadContext.uploadFiles failed', error);
         toast.error('Upload failed. Please try again.');
+
+        if (onComplete) {
+          onComplete(
+            error instanceof Error ? error : new Error('Upload failed')
+          );
+        }
       }
     },
     [authedSession, addUpload, updateVersionProgress]

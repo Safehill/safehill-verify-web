@@ -188,13 +188,14 @@ function AssetImageView({
     : 'text-gray-500';
 
   return (
-    <div className="relative max-w-full max-h-full">
+    <div className="relative w-full h-full">
       <Image
         src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
         alt={imageData?.globalIdentifier || 'Asset'}
         fill
         className="object-contain"
         sizes="100vw"
+        unoptimized
       />
 
       {/* Fingerprint Icon Overlaid on Image */}

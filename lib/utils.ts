@@ -1,4 +1,3 @@
-import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
 import { type ClassValue, clsx } from 'clsx';
 import ms from 'ms';
 import { twMerge } from 'tailwind-merge';
@@ -92,22 +91,6 @@ export const formattedDate = (date: Date, includeHour: boolean = false) => {
     hour: includeHour ? 'numeric' : undefined,
     minute: includeHour ? 'numeric' : undefined,
   });
-};
-
-// Convert AuthedSession to AuthenticatedUser format
-export const convertToAuthenticatedUser = (
-  authedSession: any
-): AuthenticatedUser | null => {
-  if (!authedSession) {
-    return null;
-  }
-
-  return {
-    authToken: authedSession.bearerToken,
-    privateKey: authedSession.privateKey,
-    privateSignature: authedSession.signature,
-    user: authedSession.user,
-  };
 };
 
 const COLORS = [

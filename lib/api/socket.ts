@@ -1,5 +1,5 @@
 import { WS_BASE_URL } from '@/lib/api/api';
-import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
+import type { AuthedSession } from '@/lib/auth/auth-context';
 import type {
   AuthCredentialsMessage,
   AuthSessionInitializationMessage,
@@ -16,8 +16,8 @@ import { useCallback, useEffect, useState } from 'react';
 export type SessionWebSocketState = {
   session: AuthSessionInitializationMessage | null;
   symmetricKey: CryptoKey | null;
-  authenticatedUser: AuthenticatedUser | null;
-  setAuthenticatedUser: (authenticatedUser: AuthenticatedUser | null) => void;
+  authedSession: AuthedSession | null;
+  setAuthedSession: (authedSession: AuthedSession | null) => void;
   error: string | null;
   isConnecting: boolean;
   retry: () => void;
@@ -36,8 +36,8 @@ export const WebsocketSessionStatus = {
 export function useSessionWebSocket(): SessionWebSocketState {
   const [websocketSession, setWebsocketSession] =
     useState<AuthSessionInitializationMessage | null>(null);
-  const [authenticatedUser, setAuthenticatedUser] =
-    useState<AuthenticatedUser | null>(null);
+  const [localAuthedSession, setLocalLocalAuthedSession] =
+    useState<AuthedSession | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { setAuthedSession } = useAuth();
@@ -77,7 +77,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
     }
     WebsocketSessionStatus.isConnecting = true;
     setError(null);
-    setAuthenticatedUser(null);
+    setLocalLocalAuthedSession(null);
     setWebsocketSession(null);
 
     const ws = new WebSocket(`${WS_BASE_URL}/web/sessions`);
@@ -121,13 +121,13 @@ export function useSessionWebSocket(): SessionWebSocketState {
           const privateSignature = await importPrivateKeySigning(
             privateSignatureData
           );
-          const authenticatedUser = {
+          const newSession = {
             authToken: credentialsMessage.authToken,
             privateKey: privateKey,
             privateSignature: privateSignature,
             user: credentialsMessage.user,
-          } as AuthenticatedUser;
-          setAuthenticatedUser(authenticatedUser);
+          } as AuthedSession;
+          setLocalLocalAuthedSession(newSession);
           break;
         }
       }
@@ -137,7 +137,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
       // console.error('WS error', e);
       setError('Failed to connect to the server');
       WebsocketSessionStatus.isConnecting = false;
-      setAuthenticatedUser(null);
+      setLocalLocalAuthedSession(null);
       setWebsocketSession(null);
     };
 
@@ -147,7 +147,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
         setError('WebSocket closed before session information was received.');
       }
       WebsocketSessionStatus.isConnecting = true;
-      setAuthenticatedUser(null);
+      setLocalLocalAuthedSession(null);
       setWebsocketSession(null);
     };
   }, [websocketSession]);
@@ -161,16 +161,16 @@ export function useSessionWebSocket(): SessionWebSocketState {
       return;
     }
 
-    setAuthedSession(null);
+    setLocalLocalAuthedSession(null);
 
     connect();
-  }, [WebsocketSessionStatus.isConnecting]);
+  }, [connect, websocketSession]);
 
   return {
     session: websocketSession,
     symmetricKey: SessionEncryption.symmetricKey,
-    authenticatedUser,
-    setAuthenticatedUser,
+    authedSession: localAuthedSession,
+    setAuthedSession,
     error,
     isConnecting: WebsocketSessionStatus.isConnecting,
     retry: connect,

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Global mock flag for testing
-export const USE_MOCK_API = true;
+// Global mock flag for S3 uploads only
+export const USE_MOCK_UPLOAD = true;
 
 // Use server-side or client-side environment variable
 export const API_BASE_URL =
@@ -77,12 +77,12 @@ export const createUnauthenticatedRequest = <T>(
 export const createAuthenticatedRequest = <T>(
   method: 'get' | 'post' | 'put' | 'delete' | 'patch',
   url: string,
-  authenticatedUser: { authToken: string },
+  authedSession: { authToken: string },
   data?: any,
   config?: any
 ): Promise<T> => {
   const headers = {
-    Authorization: `Bearer ${authenticatedUser.authToken}`,
+    Authorization: `Bearer ${authedSession.authToken}`,
     ...config?.headers,
   };
 
@@ -90,16 +90,6 @@ export const createAuthenticatedRequest = <T>(
     ...config,
     headers,
   };
-
-  // Debug logging
-  // console.debug('createAuthenticatedRequest debug:', {
-  //   method,
-  //   url,
-  //   hasAuthToken: !!authenticatedUser.authToken,
-  //   authTokenLength: authenticatedUser.authToken?.length || 0,
-  //   authTokenPrefix: authenticatedUser.authToken?.substring(0, 10) + '...',
-  //   headers: headers,
-  // });
 
   switch (method) {
     case 'get':

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
 import type {
   CollectionOutputDTO,
   CollectionAssetAddRequestDTO,
@@ -12,7 +11,9 @@ import {
 } from '@/lib/crypto/asset-encryption';
 import { collectionsApi } from '@/lib/api/collections';
 import { assetsApi } from '@/lib/api/assets';
-import { USE_MOCK_API } from '@/lib/api/api';
+import { USE_MOCK_UPLOAD } from '@/lib/api/api';
+import { getServerEncryptionKeys } from '@/lib/hooks/useServerEncryptionKeys';
+import { AuthedSession } from '@/lib/auth/auth-context';
 
 export interface UploadProgress {
   stage:
@@ -57,14 +58,18 @@ export class AssetUploadService {
   async uploadFiles(
     files: File[],
     collection: CollectionOutputDTO,
-    authenticatedUser: AuthenticatedUser,
-    getGlobalIdentifier: (file: File) => string
+    authedSession: AuthedSession,
+    getGlobalIdentifier: (file: File) => string,
+    onFinishedProcessingItem?: (
+      globalIdentifier: string,
+      error: Error | null
+    ) => void
   ): Promise<UploadResult[]> {
     console.debug('AssetUploadService.uploadFiles started', {
       fileCount: files.length,
       collectionId: collection.id,
       collectionName: collection.name,
-      userId: authenticatedUser.user.identifier,
+      userId: authedSession.user.identifier,
     });
 
     const globalIdentifiers = files.map((file) => getGlobalIdentifier(file));
@@ -79,7 +84,7 @@ export class AssetUploadService {
       const encryptedAssets = await this.encryptAllFiles(
         files,
         globalIdentifiers,
-        authenticatedUser
+        authedSession
       );
 
       // Stage 2: Create all assets on server in one batch
@@ -89,7 +94,7 @@ export class AssetUploadService {
       const creationResult = await this.createAssetsOnServer(
         encryptedAssets,
         collection.id,
-        authenticatedUser,
+        authedSession,
         globalIdentifiers
       );
 
@@ -100,7 +105,8 @@ export class AssetUploadService {
       return await this.uploadAndConfirm(
         encryptedAssets,
         creationResult,
-        authenticatedUser
+        authedSession,
+        onFinishedProcessingItem
       );
     } catch (error) {
       console.error('AssetUploadService.uploadFiles failed', error);
@@ -130,7 +136,7 @@ export class AssetUploadService {
   private async encryptAllFiles(
     files: File[],
     globalIdentifiers: string[],
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<
     {
       file: File;
@@ -142,9 +148,21 @@ export class AssetUploadService {
       fileCount: files.length,
     });
 
-    // TODO: Get real user and server public keys
-    const userPublicKey = 'user_public_key_stub';
-    const serverPublicKey = 'server_public_key_stub';
+    // Get server encryption keys (public key, signature, protocol salt)
+    console.debug(
+      'AssetUploadService.encryptAllFiles fetching server encryption keys'
+    );
+    const serverKeys = await getServerEncryptionKeys();
+    const serverPublicKey = serverKeys.publicKey;
+    const serverPublicSignature = serverKeys.publicSignature;
+    const protocolSalt = serverKeys.encryptionProtocolSalt;
+
+    console.debug('AssetUploadService.encryptAllFiles server keys received', {
+      publicKeyLength: serverPublicKey?.length || 0,
+      publicSignatureLength: serverPublicSignature?.length || 0,
+      protocolSaltLength: protocolSalt?.length || 0,
+      publicKeyPreview: serverPublicKey?.substring(0, 20) + '...',
+    });
 
     const encryptedAssets = [];
 
@@ -166,8 +184,11 @@ export class AssetUploadService {
 
       const encryptedVersions = await AssetEncryption.encryptAsset(
         file,
-        userPublicKey,
-        serverPublicKey
+        authedSession.privateKey,
+        authedSession.privateSignature,
+        serverPublicKey,
+        serverPublicSignature,
+        protocolSalt
       );
 
       encryptedAssets.push({
@@ -189,7 +210,7 @@ export class AssetUploadService {
       encryptedVersions: EncryptedAssetVersion[];
     }[],
     collectionId: string,
-    authenticatedUser: AuthenticatedUser,
+    authedSession: AuthedSession,
     globalIdentifiers: string[]
   ): Promise<CollectionAssetAddResultDTO> {
     console.debug('AssetUploadService.createAssetsOnServer started', {
@@ -236,17 +257,11 @@ export class AssetUploadService {
     });
 
     try {
-      const result = USE_MOCK_API
-        ? await collectionsApi.addAssetsToCollectionMock(
-            collectionId,
-            request,
-            authenticatedUser
-          )
-        : await collectionsApi.addAssetsToCollection(
-            collectionId,
-            request,
-            authenticatedUser
-          );
+      const result = await collectionsApi.addAssetsToCollection(
+        collectionId,
+        request,
+        authedSession
+      );
       console.debug(
         'AssetUploadService.createAssetsOnServer API call successful',
         {
@@ -272,7 +287,11 @@ export class AssetUploadService {
       encryptedVersions: EncryptedAssetVersion[];
     }[],
     creationResult: CollectionAssetAddResultDTO,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession,
+    onFinishedProcessingItem?: (
+      globalIdentifier: string,
+      error: Error | null
+    ) => void
   ): Promise<UploadResult[]> {
     console.debug('AssetUploadService.uploadAndConfirm started', {
       assetCount: encryptedAssets.length,
@@ -314,7 +333,12 @@ export class AssetUploadService {
         const globalIndex = i + batchIndex;
         const createdAsset = creationResult.assets![globalIndex];
 
-        return this.uploadSingleAsset(asset, createdAsset, authenticatedUser);
+        return this.uploadSingleAsset(
+          asset,
+          createdAsset,
+          authedSession,
+          onFinishedProcessingItem
+        );
       });
 
       const batchResults = await Promise.all(batchPromises);
@@ -343,7 +367,11 @@ export class AssetUploadService {
       encryptedVersions: EncryptedAssetVersion[];
     },
     createdAsset: any,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession,
+    onFinishedProcessingItem?: (
+      globalIdentifier: string,
+      error: Error | null
+    ) => void
   ): Promise<UploadResult> {
     try {
       const versions = asset.encryptedVersions;
@@ -373,7 +401,7 @@ export class AssetUploadService {
           message: `Uploading ${version.versionName} version...`,
         });
 
-        if (USE_MOCK_API) {
+        if (USE_MOCK_UPLOAD) {
           await this.mockUploadVersionToS3(
             version.encryptedData,
             presignedUrl,
@@ -394,19 +422,11 @@ export class AssetUploadService {
         }
 
         // Mark this version as uploaded
-        if (USE_MOCK_API) {
-          await assetsApi.markAssetUploadedMock(
-            asset.globalIdentifier,
-            version.versionName,
-            authenticatedUser
-          );
-        } else {
-          await assetsApi.markAssetUploaded(
-            asset.globalIdentifier,
-            version.versionName,
-            authenticatedUser
-          );
-        }
+        await assetsApi.markAssetUploaded(
+          asset.globalIdentifier,
+          version.versionName,
+          authedSession
+        );
       }
 
       // All versions uploaded - mark as completed
@@ -416,6 +436,9 @@ export class AssetUploadService {
         message: 'All versions uploaded successfully',
       });
 
+      // Notify that this item finished successfully
+      onFinishedProcessingItem?.(asset.globalIdentifier, null);
+
       return {
         success: true,
         globalIdentifier: asset.globalIdentifier,
@@ -423,11 +446,17 @@ export class AssetUploadService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Upload failed';
+      const errorObject =
+        error instanceof Error ? error : new Error(errorMessage);
+
       this.updateProgress(asset.globalIdentifier, {
         stage: 'error',
         progress: 0,
         error: errorMessage,
       });
+
+      // Notify that this item finished with an error
+      onFinishedProcessingItem?.(asset.globalIdentifier, errorObject);
 
       return {
         success: false,

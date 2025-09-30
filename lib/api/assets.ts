@@ -1,4 +1,4 @@
-import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
+import type { AuthedSession } from '@/lib/auth/auth-context';
 import type {
   AssetOutputDTO,
   AssetSearchCriteriaDTO,
@@ -7,32 +7,45 @@ import type {
   AssetSimilarMatchRequestDTO,
   AssetFingerprintDTO,
 } from '@/lib/api/models/dto/Asset';
-import {
-  createAuthenticatedRequest,
-  createUnauthenticatedRequest,
-} from './api';
+import { createAuthenticatedRequest, USE_MOCK_UPLOAD } from './api';
 import { toast } from 'sonner';
 
 // API functions for assets
 export const assetsApi = {
-  // Get asset by ID
-  getAsset: async (imageId: string): Promise<AssetOutputDTO> => {
+  // Get asset by global identifier
+  getAsset: async (
+    globalIdentifier: string,
+    authedSession: AuthedSession
+  ): Promise<AssetOutputDTO> => {
     try {
       const searchData: AssetSearchCriteriaDTO = {
-        globalIdentifiers: [imageId],
+        globalIdentifiers: [globalIdentifier],
       };
 
-      const response = await createUnauthenticatedRequest<AssetOutputDTO[]>(
+      const response = await createAuthenticatedRequest<AssetOutputDTO[]>(
         'post',
         '/assets/retrieve',
+        authedSession,
         searchData
       );
 
       if (response && response.length > 0) {
-        return response[0];
+        const asset = response[0];
+
+        // Replace presigned URLs with picsum URLs when in mock mode
+        if (USE_MOCK_UPLOAD && asset.versions) {
+          asset.versions = asset.versions.map((version) => ({
+            ...version,
+            presignedURL: `https://picsum.photos/seed/${globalIdentifier}-${version.versionName}/800/600`,
+          }));
+        }
+
+        return asset;
       }
 
-      throw new Error(`Asset with id ${imageId} not found`);
+      throw new Error(
+        `Asset with global identifier ${globalIdentifier} not found`
+      );
     } catch (error) {
       throw new Error(`Failed to fetch asset: ${error}`);
     }
@@ -40,13 +53,13 @@ export const assetsApi = {
 
   // Get asset descriptors
   getAssetDescriptors: async (
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<AssetDescriptorDTO[]> => {
     try {
       return await createAuthenticatedRequest<AssetDescriptorDTO[]>(
         'post',
         '/assets/descriptors/retrieve',
-        authenticatedUser,
+        authedSession,
         {}
       );
     } catch (error) {
@@ -59,13 +72,13 @@ export const assetsApi = {
   // Find similar assets
   findSimilarAssets: async (
     request: AssetSimilarMatchRequestDTO,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<AssetSimilarMatchDTO[]> => {
     try {
       return await createAuthenticatedRequest<AssetSimilarMatchDTO[]>(
         'post',
         '/fingerprint/retrieve-similar',
-        authenticatedUser,
+        authedSession,
         request
       );
     } catch (error) {
@@ -79,13 +92,13 @@ export const assetsApi = {
   updateAssetFingerprint: async (
     globalIdentifier: string,
     fingerprint: AssetFingerprintDTO,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<void> => {
     try {
       await createAuthenticatedRequest<void>(
         'post',
         `/fingerprint/update/ref/${globalIdentifier}`,
-        authenticatedUser,
+        authedSession,
         fingerprint
       );
     } catch (error) {
@@ -99,7 +112,7 @@ export const assetsApi = {
   markAssetUploaded: async (
     globalIdentifier: string,
     versionName: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<void> => {
     console.debug('assetsApi.markAssetUploaded called', {
       globalIdentifier,
@@ -110,7 +123,7 @@ export const assetsApi = {
       await createAuthenticatedRequest<void>(
         'post',
         `/assets/${globalIdentifier}/versions/${versionName}/uploaded`,
-        authenticatedUser,
+        authedSession,
         {}
       );
 
@@ -136,7 +149,7 @@ export const assetsApi = {
   markAssetUploadedMock: async (
     globalIdentifier: string,
     versionName: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<void> => {
     console.debug('assetsApi.markAssetUploadedMock called', {
       globalIdentifier,

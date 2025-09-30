@@ -5,7 +5,6 @@ import { Input } from '@/components/shared/input';
 import Modal from '@/components/shared/modal';
 import { useSearchAllCollections } from '@/lib/hooks/use-collections';
 import { useAuth } from '@/lib/auth/auth-context';
-import { convertToAuthenticatedUser } from '@/lib/utils';
 import {
   Search,
   Eye,
@@ -56,7 +55,6 @@ export default function AddCollectionModal({
   setShowModal,
 }: AddCollectionModalProps) {
   const { authedSession } = useAuth();
-  const _authenticatedUser = convertToAuthenticatedUser(authedSession);
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');

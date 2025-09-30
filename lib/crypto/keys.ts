@@ -114,3 +114,63 @@ export async function base64ToCryptoKey(base64: string): Promise<CryptoKey> {
     'decrypt',
   ]);
 }
+
+/**
+ * Derives the public key from an ECDH/ECDSA private key
+ * This is equivalent to SafehillPublicKey.derivePublicKeyFrom() in the Kotlin implementation
+ *
+ * The Kotlin implementation uses EC point math: Q = G * s
+ * where s is the private scalar and G is the generator point
+ *
+ * @param privateKey - The ECDH/ECDSA private key (CryptoKey)
+ * @returns The corresponding public key as base64-encoded string (raw format)
+ */
+export async function derivePublicKeyFromPrivate(
+  privateKey: CryptoKey
+): Promise<string> {
+  // Export the private key in JWK format to get access to the key parameters
+  const jwk = await crypto.subtle.exportKey('jwk', privateKey);
+
+  if (!jwk.d || !jwk.crv) {
+    throw new Error('Invalid private key: missing required parameters');
+  }
+
+  // The JWK format for EC keys includes both the private parameter (d)
+  // and the public point coordinates (x, y) when exported from a private key
+  if (jwk.x && jwk.y) {
+    // Public key coordinates are available in the JWK
+    // Create a public key JWK
+    const publicKeyJwk = {
+      kty: jwk.kty,
+      crv: jwk.crv,
+      x: jwk.x,
+      y: jwk.y,
+      ext: true,
+    };
+
+    // Determine the algorithm based on the original key
+    const keyAlgorithm =
+      privateKey.algorithm.name === 'ECDSA'
+        ? { name: 'ECDSA', namedCurve: 'P-256' }
+        : { name: 'ECDH', namedCurve: 'P-256' };
+
+    // Import as public key
+    const publicKey = await crypto.subtle.importKey(
+      'jwk',
+      publicKeyJwk,
+      keyAlgorithm,
+      true,
+      []
+    );
+
+    // Export the public key in raw format (uncompressed point: 0x04 || x || y)
+    const publicKeyBuffer = await crypto.subtle.exportKey('raw', publicKey);
+    return arrayBufferToBase64(publicKeyBuffer);
+  }
+
+  // If public key coordinates are not in the JWK, we need to compute them
+  // This requires EC point multiplication (Q = G * d) which isn't available in Web Crypto API
+  throw new Error(
+    'Public key coordinates not available in private key JWK. EC point math required.'
+  );
+}

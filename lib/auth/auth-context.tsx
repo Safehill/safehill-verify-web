@@ -13,9 +13,9 @@ import {
 
 // Define types for our authentication data
 export type AuthedSession = {
-  bearerToken: string;
+  authToken: string;
   privateKey: CryptoKey;
-  signature: CryptoKey;
+  privateSignature: CryptoKey;
   user: UserDTO;
   expiresAt: number;
 };

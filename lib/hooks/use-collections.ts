@@ -6,7 +6,6 @@ import type {
   PaymentConfirmationDTO,
 } from '@/lib/api/models/dto/Collection';
 import { useAuth } from '@/lib/auth/auth-context';
-import { convertToAuthenticatedUser } from '@/lib/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Query keys
@@ -25,12 +24,11 @@ export const collectionKeys = {
 // Hook to get all collections
 export const useCollections = () => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useQuery({
     queryKey: collectionKeys.lists(),
-    queryFn: () => collectionsApi.getCollections(authenticatedUser!),
-    enabled: !!authenticatedUser, // Only run query if user is authenticated
+    queryFn: () => collectionsApi.getCollections(authedSession!),
+    enabled: !!authedSession, // Only run query if user is authenticated
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
   });
@@ -39,12 +37,11 @@ export const useCollections = () => {
 // Hook to get a single collection by ID
 export const useCollection = (id: string, enabled: boolean = true) => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useQuery({
     queryKey: collectionKeys.detail(id),
-    queryFn: () => collectionsApi.getCollection(id, authenticatedUser!),
-    enabled: enabled && !!id && !!authenticatedUser, // Only run query if enabled, id exists and user is authenticated
+    queryFn: () => collectionsApi.getCollection(id, authedSession!),
+    enabled: enabled && !!id && !!authedSession, // Only run query if enabled, id exists and user is authenticated
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -53,12 +50,11 @@ export const useCollection = (id: string, enabled: boolean = true) => {
 // Hook to search collections
 export const useSearchCollections = (query: string) => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useQuery({
     queryKey: collectionKeys.list(query),
-    queryFn: () => collectionsApi.searchCollections(query, authenticatedUser!),
-    enabled: query.length > 0 && !!authenticatedUser, // Only run query if there's a search query and user is authenticated
+    queryFn: () => collectionsApi.searchCollections(query, authedSession!),
+    enabled: query.length > 0 && !!authedSession, // Only run query if there's a search query and user is authenticated
     staleTime: 2 * 60 * 1000, // 2 minutes for search results
     gcTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -67,13 +63,11 @@ export const useSearchCollections = (query: string) => {
 // Hook to search all collections for adding to user's list
 export const useSearchAllCollections = (query: string) => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useQuery({
     queryKey: [...collectionKeys.all, 'search-all', query],
-    queryFn: () =>
-      collectionsApi.searchAllCollections(query, authenticatedUser!),
-    enabled: query.length > 0 && !!authenticatedUser,
+    queryFn: () => collectionsApi.searchAllCollections(query, authedSession!),
+    enabled: query.length > 0 && !!authedSession,
     staleTime: 1 * 60 * 1000, // 1 minute for search results
     gcTime: 3 * 60 * 1000, // 3 minutes
   });
@@ -83,16 +77,15 @@ export const useSearchAllCollections = (query: string) => {
 export const usePrefetchCollection = () => {
   const queryClient = useQueryClient();
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return (id: string) => {
-    if (!authenticatedUser) {
+    if (!authedSession) {
       return;
     }
 
     queryClient.prefetchQuery({
       queryKey: collectionKeys.detail(id),
-      queryFn: () => collectionsApi.getCollection(id, authenticatedUser),
+      queryFn: () => collectionsApi.getCollection(id, authedSession),
       staleTime: 5 * 60 * 1000,
       gcTime: 10 * 60 * 1000,
     });
@@ -112,11 +105,10 @@ export const useInvalidateCollections = () => {
 export const useCreateCollection = () => {
   const queryClient = useQueryClient();
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useMutation({
     mutationFn: (collectionData: CollectionCreateDTO) =>
-      collectionsApi.createCollection(collectionData, authenticatedUser!),
+      collectionsApi.createCollection(collectionData, authedSession!),
     onSuccess: (newCollection: CollectionOutputDTO) => {
       // Add the new collection to the cache
       queryClient.setQueryData(
@@ -134,11 +126,10 @@ export const useCreateCollection = () => {
 export const useDeleteCollection = () => {
   const queryClient = useQueryClient();
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useMutation({
     mutationFn: ({ collectionId }: { collectionId: string }) =>
-      collectionsApi.deleteCollection(collectionId, authenticatedUser!),
+      collectionsApi.deleteCollection(collectionId, authedSession!),
     onSuccess: (_, variables) => {
       // Remove the collection from the cache
       queryClient.removeQueries({
@@ -155,7 +146,6 @@ export const useDeleteCollection = () => {
 export const useUpdateCollection = () => {
   const queryClient = useQueryClient();
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useMutation({
     mutationFn: ({
@@ -167,7 +157,7 @@ export const useUpdateCollection = () => {
         visibility?: CollectionUpdateDTO['visibility'];
         pricing?: CollectionUpdateDTO['pricing'];
       };
-    }) => collectionsApi.updateCollection(id, updates, authenticatedUser!),
+    }) => collectionsApi.updateCollection(id, updates, authedSession!),
     onSuccess: (updatedCollection: CollectionOutputDTO) => {
       // Update the collection in the cache
       queryClient.setQueryData(
@@ -184,12 +174,11 @@ export const useUpdateCollection = () => {
 // Hook to check access to a collection
 export const useCollectionAccess = (id: string) => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useQuery({
     queryKey: collectionKeys.accessCheck(id),
-    queryFn: () => collectionsApi.checkAccess(id, authenticatedUser!),
-    enabled: !!id && !!authenticatedUser,
+    queryFn: () => collectionsApi.checkAccess(id, authedSession!),
+    enabled: !!id && !!authedSession,
     staleTime: 1 * 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -198,18 +187,16 @@ export const useCollectionAccess = (id: string) => {
 // Hook to create payment intent
 export const useCreatePaymentIntent = () => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
 
   return useMutation({
     mutationFn: ({ collectionId }: { collectionId: string }) =>
-      collectionsApi.createPaymentIntent(collectionId, authenticatedUser!),
+      collectionsApi.createPaymentIntent(collectionId, authedSession!),
   });
 };
 
 // Hook to confirm payment
 export const useConfirmPayment = () => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -220,7 +207,7 @@ export const useConfirmPayment = () => {
       collectionsApi.confirmPayment(
         variables.collectionId,
         variables.paymentIntentId,
-        authenticatedUser!
+        authedSession!
       ),
     onSuccess: (
       result: PaymentConfirmationDTO,
@@ -243,12 +230,11 @@ export const useConfirmPayment = () => {
 // Hook to track collection access
 export const useTrackCollectionAccess = () => {
   const { authedSession } = useAuth();
-  const authenticatedUser = convertToAuthenticatedUser(authedSession);
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ collectionId }: { collectionId: string }) =>
-      collectionsApi.trackCollectionAccess(collectionId, authenticatedUser!),
+      collectionsApi.trackCollectionAccess(collectionId, authedSession!),
     onSuccess: () => {
       // Invalidate collections list to show the newly accessed collection
       queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });

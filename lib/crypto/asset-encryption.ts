@@ -1,4 +1,5 @@
-import { generateSymmetricKey, cryptoKeyToBase64 } from './keys';
+import { generateSymmetricKey, derivePublicKeyFromPrivate } from './keys';
+import { createShareablePayload } from './encryption';
 import type { AssetVersionInputDTO } from '@/lib/api/models/dto/Asset';
 
 export interface EncryptedAssetVersion {
@@ -15,18 +16,30 @@ export class AssetEncryption {
   /**
    * Encrypt a file for collection storage
    * Always encrypts - conditional logic will be added later
+   *
+   * @param file - The file to encrypt
+   * @param userPrivateKey - User's private key (CryptoKey) for ECDH key agreement
+   * @param userSignaturePrivateKey - User's signature private key (CryptoKey) for signing
+   * @param serverPublicKey - Server's public key (base64 string) for server-side decryption
+   * @param serverPublicSignature - Server's public signature (base64 string)
+   * @param protocolSalt - Protocol salt from server (base64 string)
    */
   static async encryptAsset(
     file: File,
-    userPublicKey: string,
-    serverPublicKey: string
+    userPrivateKey: CryptoKey,
+    userSignaturePrivateKey: CryptoKey,
+    serverPublicKey: string,
+    serverPublicSignature: string,
+    protocolSalt: string
   ): Promise<EncryptedAssetVersion[]> {
     console.debug('AssetEncryption.encryptAsset called', {
       fileName: file.name,
       fileSize: file.size,
-      userPublicKey: userPublicKey.substring(0, 20) + '...',
-      serverPublicKey: serverPublicKey.substring(0, 20) + '...',
     });
+
+    // Derive user's public key from private key for self-encryption
+    const userPublicKey = await derivePublicKeyFromPrivate(userPrivateKey);
+    console.debug('AssetEncryption.encryptAsset user public key derived');
 
     const fileData = await this.readFileAsArrayBuffer(file);
     console.debug(
@@ -50,13 +63,15 @@ export class AssetEncryption {
       symmetricKey,
       versionName,
       userPublicKey,
-      'self'
+      userSignaturePrivateKey,
+      protocolSalt
     );
     const serverEncryption = await this.createEncryptionDetails(
       symmetricKey,
       versionName,
       serverPublicKey,
-      'server'
+      userSignaturePrivateKey,
+      protocolSalt
     );
 
     console.debug('AssetEncryption.encryptAsset encryption details created', {
@@ -114,19 +129,28 @@ export class AssetEncryption {
     symmetricKey: CryptoKey,
     versionName: string,
     targetPublicKey: string,
-    keyPrefix: string
+    senderSignaturePrivateKey: CryptoKey,
+    protocolSalt: string
   ): Promise<AssetVersionInputDTO> {
-    const symmetricKeyBase64 = await cryptoKeyToBase64(symmetricKey);
+    // Export the symmetric key to raw bytes
+    const symmetricKeyBytes = await crypto.subtle.exportKey(
+      'raw',
+      symmetricKey
+    );
 
-    // TODO: Implement ECDH encryption with target's public key
+    // Create shareable payload using ECDH encryption with protocol salt
+    const payload = await createShareablePayload(
+      new Uint8Array(symmetricKeyBytes),
+      targetPublicKey,
+      senderSignaturePrivateKey,
+      protocolSalt
+    );
+
     return {
       versionName,
-      senderEncryptedSecret: `${keyPrefix}_encrypted_${symmetricKeyBase64.substring(
-        0,
-        20
-      )}`,
-      ephemeralPublicKey: `${keyPrefix}_ephemeral_key`,
-      publicSignature: `${keyPrefix}_signature`,
+      senderEncryptedSecret: payload.ciphertext,
+      ephemeralPublicKey: payload.ephemeralPublicKey,
+      publicSignature: payload.signature,
     };
   }
 }

@@ -13,7 +13,11 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ['lh3.googleusercontent.com', 'picsum.photos'],
+    domains: [
+      'lh3.googleusercontent.com',
+      'picsum.photos',
+      'localhost.localstack.cloud',
+    ],
   },
   async redirects() {
     return [

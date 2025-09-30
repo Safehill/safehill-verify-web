@@ -26,8 +26,10 @@ import { Button } from '@/components/shared/button';
 import CopyButton from '@/components/shared/CopyButton';
 import SegmentedControl from '@/components/shared/segmented-control';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useCollection,
+  collectionKeys,
   useCollectionAccess,
   useTrackCollectionAccess,
 } from '@/lib/hooks/use-collections';
@@ -67,6 +69,7 @@ export default function CollectionDetail() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showAddAssetModal, setShowAddAssetModal] = useState(false);
   const { uploadFiles, uploads } = useUpload();
+  const queryClient = useQueryClient();
 
   // Check access first - always call hooks at the top
   const {
@@ -269,11 +272,29 @@ export default function CollectionDetail() {
     }
 
     // Use the upload context with the new upload system
-    await uploadFiles(files, collection, () => {
-      // Callback when all uploads complete
-      // TODO: Refresh the collection data after upload
-      // queryClient.invalidateQueries({ queryKey: collectionKeys.detail(collectionId) });
-    });
+    await uploadFiles(
+      files,
+      collection,
+      (error: Error | null) => {
+        // Callback when all uploads complete
+        if (error) {
+          console.debug('Uploads completed with errors', error);
+        } else {
+          console.debug('All uploads completed successfully');
+        }
+      },
+      (globalIdentifier: string, error: Error | null) => {
+        // Callback when each individual asset completes (success or failure)
+        console.debug('Asset upload finished', {
+          globalIdentifier,
+          error: error?.message,
+        });
+        // Invalidate collection cache so the new asset appears immediately
+        queryClient.invalidateQueries({
+          queryKey: collectionKeys.detail(collectionId),
+        });
+      }
+    );
   };
 
   // Handle dropdown actions

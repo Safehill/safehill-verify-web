@@ -1,4 +1,4 @@
-import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
+import type { AuthedSession } from '@/lib/auth/auth-context';
 import type {
   CollectionOutputDTO,
   CollectionCreateDTO,
@@ -24,13 +24,13 @@ export const collectionsApi = {
   // Create a new collection
   createCollection: async (
     collectionData: CollectionCreateDTO,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionOutputDTO> => {
     try {
       return await createAuthenticatedRequest<CollectionOutputDTO>(
         'post',
         '/collections/create',
-        authenticatedUser,
+        authedSession,
         collectionData
       );
     } catch (_error) {
@@ -41,13 +41,13 @@ export const collectionsApi = {
   // Check access to a collection
   checkAccess: async (
     collectionId: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<AccessCheckResultDTO> => {
     try {
       return await createAuthenticatedRequest<AccessCheckResultDTO>(
         'get',
         `/collections/check-access/${collectionId}`,
-        authenticatedUser
+        authedSession
       );
     } catch (_error) {
       throw new Error('Access denied');
@@ -57,13 +57,13 @@ export const collectionsApi = {
   // Create payment intent for collection purchase
   createPaymentIntent: async (
     collectionId: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<PaymentIntentDTO> => {
     try {
       return await createAuthenticatedRequest<PaymentIntentDTO>(
         'post',
         `/collections/payment-intent/${collectionId}`,
-        authenticatedUser,
+        authedSession,
         {}
       );
     } catch (_error) {
@@ -75,13 +75,13 @@ export const collectionsApi = {
   confirmPayment: async (
     collectionId: string,
     paymentIntentId: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<PaymentConfirmationDTO> => {
     try {
       return await createAuthenticatedRequest<PaymentConfirmationDTO>(
         'post',
         `/collections/confirm-payment/${collectionId}`,
-        authenticatedUser,
+        authedSession,
         {}
       );
     } catch (_error) {
@@ -91,13 +91,13 @@ export const collectionsApi = {
 
   // Get all collections for a specific user (owned + shared + accessed public)
   getCollections: async (
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionOutputDTO[]> => {
     try {
       return await createAuthenticatedRequest<CollectionOutputDTO[]>(
         'post',
         '/collections/retrieve',
-        authenticatedUser,
+        authedSession,
         {}
       );
     } catch (error) {
@@ -110,13 +110,13 @@ export const collectionsApi = {
   // Get single collection by ID (accessible to owners, shared users, or public collections)
   getCollection: async (
     id: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionOutputDTO> => {
     try {
       return await createAuthenticatedRequest<CollectionOutputDTO>(
         'post',
         `/collections/retrieve/${id}`,
-        authenticatedUser,
+        authedSession,
         {}
       );
     } catch (_error) {
@@ -127,13 +127,13 @@ export const collectionsApi = {
   // Track when a user accesses a collection (for collections they don't own)
   trackCollectionAccess: async (
     collectionId: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<void> => {
     try {
       await createAuthenticatedRequest<void>(
         'post',
         `/collections/track-access/${collectionId}`,
-        authenticatedUser,
+        authedSession,
         {}
       );
     } catch (_error) {
@@ -145,13 +145,13 @@ export const collectionsApi = {
   updateCollection: async (
     id: string,
     updates: CollectionUpdateDTO,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionOutputDTO> => {
     try {
       return await createAuthenticatedRequest<CollectionOutputDTO>(
         'post',
         `/collections/update/${id}`,
-        authenticatedUser,
+        authedSession,
         updates
       );
     } catch (_error) {
@@ -162,13 +162,13 @@ export const collectionsApi = {
   // Delete collection (only if owned by user)
   deleteCollection: async (
     id: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<void> => {
     try {
       await createAuthenticatedRequest<void>(
         'delete',
         `/collections/delete/${id}`,
-        authenticatedUser
+        authedSession
       );
     } catch (_error) {
       throw new Error(`Failed to delete collection: ${_error}`);
@@ -178,7 +178,7 @@ export const collectionsApi = {
   // Search collections (only user's own collections + shared collections)
   searchCollections: async (
     query: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionOutputDTO[]> => {
     try {
       const searchData: CollectionSearchDTO = {
@@ -189,7 +189,7 @@ export const collectionsApi = {
       return await createAuthenticatedRequest<CollectionOutputDTO[]>(
         'post',
         '/collections/search',
-        authenticatedUser,
+        authedSession,
         searchData
       );
     } catch (error) {
@@ -202,7 +202,7 @@ export const collectionsApi = {
   // Search all collections for adding to user's list (excludes user's own and private collections)
   searchAllCollections: async (
     query: string,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionOutputDTO[]> => {
     try {
       const searchData: CollectionSearchDTO = {
@@ -213,7 +213,7 @@ export const collectionsApi = {
       return await createAuthenticatedRequest<CollectionOutputDTO[]>(
         'post',
         '/collections/search',
-        authenticatedUser,
+        authedSession,
         searchData
       );
     } catch (error) {
@@ -227,7 +227,7 @@ export const collectionsApi = {
   addAssetsToCollection: async (
     collectionId: string,
     request: CollectionAssetAddRequestDTO,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionAssetAddResultDTO> => {
     console.debug('collectionsApi.addAssetsToCollection called', {
       collectionId,
@@ -242,7 +242,7 @@ export const collectionsApi = {
         await createAuthenticatedRequest<CollectionAssetAddResultDTO>(
           'post',
           `/collections/add-assets/${collectionId}`,
-          authenticatedUser,
+          authedSession,
           request
         );
 
@@ -269,7 +269,7 @@ export const collectionsApi = {
   addAssetsToCollectionMock: async (
     collectionId: string,
     request: CollectionAssetAddRequestDTO,
-    authenticatedUser: AuthenticatedUser
+    authedSession: AuthedSession
   ): Promise<CollectionAssetAddResultDTO> => {
     console.debug('collectionsApi.addAssetsToCollectionMock called', {
       collectionId,
@@ -285,7 +285,7 @@ export const collectionsApi = {
     const mockAssets = request.assets.map((asset) => ({
       globalIdentifier: asset.globalIdentifier,
       localIdentifier: asset.localIdentifier,
-      createdBy: authenticatedUser.user.identifier,
+      createdBy: authedSession.user.identifier,
       creationDate: asset.creationDate,
       versions: asset.versions.map((version) => ({
         versionName: version.versionName,

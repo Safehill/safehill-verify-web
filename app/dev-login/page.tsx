@@ -51,9 +51,9 @@ export default function DevLogin() {
 
       // Create mock session data
       const mockSession = {
-        bearerToken: 'dev-bearer-token-' + Date.now(),
+        authToken: 'dev-bearer-token-' + Date.now(),
         privateKey: {} as CryptoKey, // Mock key
-        signature: {} as CryptoKey, // Mock signature
+        privateSignature: {} as CryptoKey, // Mock signature
         user: MOCK_USER,
         expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
       };
