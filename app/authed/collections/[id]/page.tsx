@@ -29,9 +29,10 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useCollection,
-  collectionKeys,
   useCollectionAccess,
   useTrackCollectionAccess,
+  useDeleteCollection,
+  collectionKeys,
 } from '@/lib/hooks/use-collections';
 import { generateCollectionLink } from '@/lib/api/collections';
 import { useUser } from '@/lib/hooks/use-users';
@@ -45,12 +46,14 @@ import {
   List,
   Loader2,
   Settings,
+  Trash2,
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import WarningModal from '@/components/shared/WarningModal';
 
 type SortField = 'name' | 'size' | 'uploaded' | null;
 type SortDirection = 'asc' | 'desc';
@@ -58,6 +61,7 @@ type SortDirection = 'asc' | 'desc';
 export default function CollectionDetail() {
   const params = useParams();
   const collectionId = params.id as string;
+  const router = useRouter();
   const { authedSession, isAuthenticated } = useAuth();
   const currentUserId = authedSession?.user.identifier;
   const [viewMode, setViewMode] = useState<'gallery' | 'table'>('gallery');
@@ -68,8 +72,10 @@ export default function CollectionDetail() {
   const [selectedAssetIndex, setSelectedAssetIndex] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showAddAssetModal, setShowAddAssetModal] = useState(false);
+  const [showRemoveWarning, setShowRemoveWarning] = useState(false);
   const { uploadFiles, uploads } = useUpload();
   const queryClient = useQueryClient();
+  const deleteCollectionMutation = useDeleteCollection();
 
   // Check access first - always call hooks at the top
   const {
@@ -136,7 +142,7 @@ export default function CollectionDetail() {
       name: asset.globalIdentifier,
       type: 'image', // Default type since DTO doesn't have this
       size: 'Unknown', // Default size since DTO doesn't have this
-      uploaded: asset.creationDate || 'Unknown',
+      uploaded: asset.uploadedAt || 'Unknown',
     }));
   }, [collection?.assets]);
 
@@ -307,6 +313,21 @@ export default function CollectionDetail() {
     toast.info('Copy from other collection coming soon!');
   };
 
+  // Handle soft-delete collection (for non-owned collections)
+  const handleRemoveCollection = async () => {
+    try {
+      await deleteCollectionMutation.mutateAsync({
+        collectionId: collection!.id,
+        isOwned: false,
+      });
+      router.push('/authed');
+      toast.success('Collection removed from your dashboard');
+    } catch (error) {
+      console.error('Failed to remove collection:', error);
+      toast.error('Failed to remove collection. Please try again.');
+    }
+  };
+
   // Get sort icon for header
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) {
@@ -428,13 +449,21 @@ export default function CollectionDetail() {
               </Link>
             </Button>
             <div className="flex items-center space-x-3">
-              {isOwned && (
+              {isOwned ? (
                 <Button
                   className="flex gap-2 px-4 py-2 bg-purple-300/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
                   onClick={() => setShowSettingsModal(true)}
                 >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
+                </Button>
+              ) : (
+                <Button
+                  className="flex gap-2 px-4 py-2 bg-red-400/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-red-200"
+                  onClick={() => setShowRemoveWarning(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span>Remove this Collection</span>
                 </Button>
               )}
             </div>
@@ -727,8 +756,9 @@ export default function CollectionDetail() {
 
       {/* Settings Modal */}
       <CollectionSettingsModal
+        key={`${collection.id}-${collection.visibility}-${collection.pricing}`}
         showModal={showSettingsModal}
-        setShowModal={setShowSettingsModal}
+        setShowModalAction={setShowSettingsModal}
         collection={collection}
       />
 
@@ -750,6 +780,20 @@ export default function CollectionDetail() {
         isOpen={showFullScreenGallery}
         onClose={() => setShowFullScreenGallery(false)}
         collectionId={collectionId}
+      />
+
+      {/* Remove Collection Warning Modal */}
+      <WarningModal
+        showModal={showRemoveWarning}
+        setShowModal={setShowRemoveWarning}
+        title="Remove Collection"
+        message={`Are you sure you want to remove this collection from your dashboard?
+
+<b>This will only remove it from your view.</b> The collection will still be available to other users and the owner.`}
+        confirmText="Remove Collection"
+        cancelText="Cancel"
+        onConfirm={handleRemoveCollection}
+        variant="warning"
       />
     </div>
   );

@@ -17,6 +17,13 @@ export interface AssetVersionOutputDTO {
   timeUploaded?: string;
 }
 
+export interface PublicAssetVersionOutputDTO {
+  versionName: string;
+  presignedURL: string;
+  presignedURLExpiresInMinutes: number;
+  timeUploaded?: string;
+}
+
 export interface AssetInputDTO {
   globalIdentifier: string;
   localIdentifier?: string;

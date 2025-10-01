@@ -9,6 +9,8 @@ import type {
   PaymentConfirmationDTO,
   CollectionAssetAddRequestDTO,
   CollectionAssetAddResultDTO,
+  CollectionChangeVisibilityDTO,
+  CollectionChangeVisibilityResultDTO,
 } from '@/lib/api/models/dto/Collection';
 import { createAuthenticatedRequest } from './api';
 import { toast } from 'sonner';
@@ -159,19 +161,35 @@ export const collectionsApi = {
     }
   },
 
-  // Delete collection (only if owned by user)
-  deleteCollection: async (
+  // Archive collection (only if owned by user)
+  archiveCollection: async (
     id: string,
     authedSession: AuthedSession
   ): Promise<void> => {
     try {
       await createAuthenticatedRequest<void>(
-        'delete',
-        `/collections/delete/${id}`,
+        'post',
+        `/collections/archive/${id}`,
         authedSession
       );
     } catch (_error) {
-      throw new Error(`Failed to delete collection: ${_error}`);
+      throw new Error(`Failed to archive collection: ${_error}`);
+    }
+  },
+
+  // Soft-remove collection (only if not owned by user)
+  softRemoveCollection: async (
+    id: string,
+    authedSession: AuthedSession
+  ): Promise<void> => {
+    try {
+      await createAuthenticatedRequest<void>(
+        'post',
+        `/collections/soft-remove/${id}`,
+        authedSession
+      );
+    } catch (_error) {
+      throw new Error(`Failed to remove collection: ${_error}`);
     }
   },
 
@@ -265,55 +283,42 @@ export const collectionsApi = {
     }
   },
 
-  // Mock implementation for testing
-  addAssetsToCollectionMock: async (
-    collectionId: string,
-    request: CollectionAssetAddRequestDTO,
+  // Change collection visibility
+  changeCollectionVisibility: async (
+    id: string,
+    request: CollectionChangeVisibilityDTO,
     authedSession: AuthedSession
-  ): Promise<CollectionAssetAddResultDTO> => {
-    console.debug('collectionsApi.addAssetsToCollectionMock called', {
-      collectionId,
-      assetCount: request.assets.length,
-      hasServerDecryptionDetails: !!request.serverDecryptionDetails,
-      serverDecryptionDetailsCount:
-        request.serverDecryptionDetails?.length || 0,
+  ): Promise<CollectionChangeVisibilityResultDTO> => {
+    console.debug('collectionsApi.changeCollectionVisibility called', {
+      collectionId: id,
+      newVisibility: request.visibility,
+      assetDecryptionDetailsCount: request.assetDecryptionDetails.length,
     });
 
-    // Mock implementation with timeout
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const result =
+        await createAuthenticatedRequest<CollectionChangeVisibilityResultDTO>(
+          'post',
+          `/collections/change-visibility/${id}`,
+          authedSession,
+          request
+        );
 
-    const mockAssets = request.assets.map((asset) => ({
-      globalIdentifier: asset.globalIdentifier,
-      localIdentifier: asset.localIdentifier,
-      createdBy: authedSession.user.identifier,
-      creationDate: asset.creationDate,
-      versions: asset.versions.map((version) => ({
-        versionName: version.versionName,
-        ephemeralPublicKey: version.ephemeralPublicKey,
-        publicSignature: version.publicSignature,
-        encryptedSecret: version.senderEncryptedSecret,
-        senderPublicSignature: 'mock_sender_signature',
-        presignedURL: `https://mock-s3-bucket.s3.amazonaws.com/${asset.globalIdentifier}/${version.versionName}?mock=true`,
-        presignedURLExpiresInMinutes: 15,
-      })),
-    }));
+      console.debug('collectionsApi.changeCollectionVisibility successful', {
+        collectionId: result.collectionId,
+        newVisibility: result.newVisibility,
+        totalAssets: result.totalAssets,
+        processedVersions: result.processedVersions,
+      });
 
-    const result: CollectionAssetAddResultDTO = {
-      success: true,
-      message: 'Assets added successfully (mocked)',
-      addedCount: request.assets.length,
-      skippedCount: 0,
-      assets: mockAssets,
-    };
-
-    console.debug('collectionsApi.addAssetsToCollectionMock successful', {
-      success: result.success,
-      addedCount: result.addedCount,
-      skippedCount: result.skippedCount,
-      hasAssets: !!result.assets,
-      assetsCount: result.assets?.length || 0,
-    });
-
-    return result;
+      return result;
+    } catch (error) {
+      console.error('collectionsApi.changeCollectionVisibility failed', error);
+      throw new Error(
+        `Failed to change collection visibility: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
   },
 };

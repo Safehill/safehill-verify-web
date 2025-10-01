@@ -4,6 +4,8 @@ import type {
   CollectionCreateDTO,
   CollectionUpdateDTO,
   PaymentConfirmationDTO,
+  CollectionChangeVisibilityDTO,
+  CollectionChangeVisibilityResultDTO,
 } from '@/lib/api/models/dto/Collection';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -122,14 +124,28 @@ export const useCreateCollection = () => {
   });
 };
 
-// Hook to delete a collection
+// Hook to archive or remove a collection (based on ownership)
 export const useDeleteCollection = () => {
   const queryClient = useQueryClient();
   const { authedSession } = useAuth();
 
   return useMutation({
-    mutationFn: ({ collectionId }: { collectionId: string }) =>
-      collectionsApi.deleteCollection(collectionId, authedSession!),
+    mutationFn: ({
+      collectionId,
+      isOwned,
+    }: {
+      collectionId: string;
+      isOwned: boolean;
+    }) => {
+      if (isOwned) {
+        return collectionsApi.archiveCollection(collectionId, authedSession!);
+      } else {
+        return collectionsApi.softRemoveCollection(
+          collectionId,
+          authedSession!
+        );
+      }
+    },
     onSuccess: (_, variables) => {
       // Remove the collection from the cache
       queryClient.removeQueries({
@@ -153,10 +169,7 @@ export const useUpdateCollection = () => {
       updates,
     }: {
       id: string;
-      updates: {
-        visibility?: CollectionUpdateDTO['visibility'];
-        pricing?: CollectionUpdateDTO['pricing'];
-      };
+      updates: CollectionUpdateDTO;
     }) => collectionsApi.updateCollection(id, updates, authedSession!),
     onSuccess: (updatedCollection: CollectionOutputDTO) => {
       // Update the collection in the cache
@@ -238,6 +251,36 @@ export const useTrackCollectionAccess = () => {
     onSuccess: () => {
       // Invalidate collections list to show the newly accessed collection
       queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
+    },
+  });
+};
+
+// Hook to change collection visibility
+export const useChangeCollectionVisibility = () => {
+  const queryClient = useQueryClient();
+  const { authedSession } = useAuth();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      request,
+    }: {
+      id: string;
+      request: CollectionChangeVisibilityDTO;
+    }) => collectionsApi.changeCollectionVisibility(id, request, authedSession!),
+    onSuccess: async (
+      result: CollectionChangeVisibilityResultDTO,
+      variables: { id: string; request: CollectionChangeVisibilityDTO }
+    ) => {
+      // onSuccess only fires if the API returned a 2xx status code
+      // Invalidate queries to refresh the UI with updated data
+      await queryClient.invalidateQueries({
+        queryKey: collectionKeys.detail(variables.id),
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: collectionKeys.lists(),
+      });
     },
   });
 };

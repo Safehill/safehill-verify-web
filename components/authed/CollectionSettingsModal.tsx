@@ -7,34 +7,36 @@ import WarningModal from '@/components/shared/WarningModal';
 import {
   useUpdateCollection,
   useDeleteCollection,
+  useChangeCollectionVisibility,
 } from '@/lib/hooks/use-collections';
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import { generateCollectionLink } from '@/lib/api/collections';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { VisibilityChangeService } from '@/lib/services/visibility-change-service';
+import { useServerEncryptionKeys } from '@/lib/hooks/useServerEncryptionKeys';
+import { useAuth } from '@/lib/auth/auth-context';
+
+import type {
+  CollectionOutputDTO,
+  Visibility,
+} from '@/lib/api/models/dto/Collection';
 
 interface CollectionSettingsModalProps {
   showModal: boolean;
-  setShowModal: Dispatch<SetStateAction<boolean>>;
-  collection: {
-    id: string;
-    name: string;
-    description: string;
-    visibility: string;
-    pricing: number;
-    assetCount: number;
-    lastUpdated: string;
-    createdBy: string;
-  };
+  setShowModalAction: Dispatch<SetStateAction<boolean>>;
+  collection: CollectionOutputDTO;
 }
 
 export default function CollectionSettingsModal({
   showModal,
-  setShowModal,
+  setShowModalAction,
   collection,
 }: CollectionSettingsModalProps) {
   // Local state for form values (not persisted until save)
+  const [name, setName] = useState(collection.name);
+  const [description, setDescription] = useState(collection.description);
   const [visibility, setVisibility] = useState(collection.visibility);
   const [pricing, setPricing] = useState(collection.pricing.toString());
 
@@ -43,21 +45,28 @@ export default function CollectionSettingsModal({
   const [showConfidentialInfo, setShowConfidentialInfo] = useState(false);
   const [showUnsavedChangesWarning, setShowUnsavedChangesWarning] =
     useState(false);
-  const [pendingVisibilityChange, setPendingVisibilityChange] = useState<
-    string | null
-  >(null);
+  const [pendingVisibilityChange, setPendingVisibilityChange] =
+    useState<Visibility | null>(null);
   const [publicConfirmationText, setPublicConfirmationText] = useState('');
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [showArchiveWarning, setShowArchiveWarning] = useState(false);
+  const [archiveConfirmationText, setArchiveConfirmationText] = useState('');
 
   // API mutations
   const updateCollectionMutation = useUpdateCollection();
   const deleteCollectionMutation = useDeleteCollection();
+  const changeVisibilityMutation = useChangeCollectionVisibility();
   const router = useRouter();
+
+  // Auth and encryption keys
+  const { authedSession } = useAuth();
+  const { data: serverKeys, isLoading: isLoadingServerKeys } =
+    useServerEncryptionKeys();
 
   // Reset form values when collection changes or modal opens
   useEffect(() => {
     if (showModal) {
+      setName(collection.name);
+      setDescription(collection.description);
       setVisibility(collection.visibility);
       setPricing(collection.pricing.toString());
     }
@@ -75,7 +84,7 @@ export default function CollectionSettingsModal({
   const historicalRevenue = 0;
 
   // Handle visibility change with warnings
-  const handleVisibilityChange = (newVisibility: string) => {
+  const handleVisibilityChange = (newVisibility: Visibility) => {
     if (newVisibility === 'public' && visibility !== 'public') {
       setPendingVisibilityChange(newVisibility);
       setShowPublicWarning(true);
@@ -120,15 +129,69 @@ export default function CollectionSettingsModal({
 
   // Handle save
   const handleSave = async () => {
+    if (!authedSession || !serverKeys) {
+      toast.error('Missing authentication or server keys');
+      return;
+    }
+
     try {
-      await updateCollectionMutation.mutateAsync({
-        id: collection.id,
-        updates: {
-          visibility: visibility as any,
-          pricing: numericPricing,
-        },
-      });
-      setShowModal(false);
+      const nameChanged = name !== collection.name;
+      const descriptionChanged = description !== collection.description;
+      const visibilityChanged = visibility !== collection.visibility;
+      const pricingChanged = numericPricing !== collection.pricing;
+
+      // Step 1: Change visibility if needed (must happen first)
+      if (visibilityChanged) {
+        const visibilityChangeRequest =
+          await VisibilityChangeService.prepareVisibilityChange(
+            collection,
+            visibility as any,
+            authedSession.privateKey,
+            authedSession.privateSignature,
+            serverKeys.publicKey,
+            serverKeys.encryptionProtocolSalt
+          );
+
+        await changeVisibilityMutation.mutateAsync({
+          id: collection.id,
+          request: visibilityChangeRequest,
+        });
+      }
+
+      // Step 2: Update name, description, and/or pricing if needed (after visibility change)
+      if (nameChanged || descriptionChanged || pricingChanged) {
+        console.debug('Updating collection details', {
+          nameChanged,
+          descriptionChanged,
+          pricingChanged,
+        });
+
+        const updates: {
+          name?: string;
+          description?: string;
+          pricing?: number;
+        } = {};
+
+        if (nameChanged) {
+          updates.name = name;
+        }
+        if (descriptionChanged) {
+          updates.description = description;
+        }
+        if (pricingChanged) {
+          updates.pricing = numericPricing;
+        }
+
+        await updateCollectionMutation.mutateAsync({
+          id: collection.id,
+          updates,
+        });
+
+        console.debug('Collection details updated successfully');
+      }
+
+      setShowModalAction(false);
+      toast.success('Collection settings updated successfully');
     } catch (error) {
       console.error('Failed to update collection:', error);
       toast.error('Failed to update collection settings. Please try again.');
@@ -141,9 +204,11 @@ export default function CollectionSettingsModal({
       setShowUnsavedChangesWarning(true);
     } else {
       // Reset to original values
+      setName(collection.name);
+      setDescription(collection.description);
       setVisibility(collection.visibility);
       setPricing(collection.pricing.toString());
-      setShowModal(false);
+      setShowModalAction(false);
     }
   };
 
@@ -152,61 +217,56 @@ export default function CollectionSettingsModal({
     if (hasChanges) {
       setShowUnsavedChangesWarning(true);
     } else {
-      setShowModal(false);
+      setShowModalAction(false);
     }
   };
 
   // Handle unsaved changes warning - save
   const handleUnsavedChangesSave = async () => {
-    try {
-      await updateCollectionMutation.mutateAsync({
-        id: collection.id,
-        updates: {
-          visibility: visibility as any,
-          pricing: numericPricing,
-        },
-      });
-      setShowModal(false);
-      setShowUnsavedChangesWarning(false);
-    } catch (error) {
-      console.error('Failed to update collection:', error);
-      toast.error('Failed to update collection settings. Please try again.');
-    }
+    // Just call the main handleSave function
+    setShowUnsavedChangesWarning(false);
+    await handleSave();
   };
 
   // Handle unsaved changes warning - discard
   const handleUnsavedChangesDiscard = () => {
     // Reset to original values
+    setName(collection.name);
+    setDescription(collection.description);
     setVisibility(collection.visibility);
     setPricing(collection.pricing.toString());
-    setShowModal(false);
+    setShowModalAction(false);
     setShowUnsavedChangesWarning(false);
   };
 
-  // Handle delete collection
-  const handleDeleteCollection = async () => {
-    if (deleteConfirmationText === collection.name) {
+  // Handle archive collection (settings modal only shown for owned collections)
+  const handleArchiveCollection = async () => {
+    if (archiveConfirmationText === collection.name) {
       try {
         await deleteCollectionMutation.mutateAsync({
           collectionId: collection.id,
+          isOwned: true,
         });
-        setShowModal(false);
+        setShowModalAction(false);
         router.push('/authed');
+        toast.success('Collection archived successfully');
       } catch (error) {
-        console.error('Failed to delete collection:', error);
-        toast.error('Failed to delete collection. Please try again.');
+        console.error('Failed to archive collection:', error);
+        toast.error('Failed to archive collection. Please try again.');
       }
     }
   };
 
-  // Handle delete warning cancel
-  const handleDeleteWarningCancel = () => {
-    setShowDeleteWarning(false);
-    setDeleteConfirmationText('');
+  // Handle archive warning cancel
+  const handleArchiveWarningCancel = () => {
+    setShowArchiveWarning(false);
+    setArchiveConfirmationText('');
   };
 
   // Check if there are unsaved changes
   const hasChanges =
+    name !== collection.name ||
+    description !== collection.description ||
     visibility !== collection.visibility ||
     numericPricing !== collection.pricing;
 
@@ -238,16 +298,66 @@ export default function CollectionSettingsModal({
             </div>
             <Button
               onClick={handleSave}
-              disabled={!hasChanges || updateCollectionMutation.isPending}
+              disabled={
+                !hasChanges ||
+                updateCollectionMutation.isPending ||
+                changeVisibilityMutation.isPending ||
+                isLoadingServerKeys
+              }
               className="px-4 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {updateCollectionMutation.isPending ? 'Saving...' : 'Save'}
+              {updateCollectionMutation.isPending ||
+              changeVisibilityMutation.isPending
+                ? 'Saving...'
+                : 'Save'}
             </Button>
           </div>
 
           {/* Content - Scrollable */}
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-12 p-8">
+              {/* Name Setting */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                <div className="lg:col-span-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    Collection Name
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    The display name for your collection
+                  </p>
+                </div>
+                <div className="lg:col-span-2">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all"
+                    placeholder="Enter collection name"
+                  />
+                </div>
+              </div>
+
+              {/* Description Setting */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                <div className="lg:col-span-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    Description
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    A brief description of your collection
+                  </p>
+                </div>
+                <div className="lg:col-span-2">
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all resize-none"
+                    placeholder="Enter collection description"
+                  />
+                </div>
+              </div>
+
               {/* Link Setting */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 <div className="lg:col-span-1">
@@ -341,19 +451,25 @@ export default function CollectionSettingsModal({
                 </div>
                 <div className="lg:col-span-2">
                   <div className="flex rounded-lg bg-gray-100 p-1">
-                    {[
-                      {
-                        value: 'not-shared',
-                        label: 'Not Shared',
-                        disabled: originalIsPublic || originalIsConfidential,
-                      },
-                      {
-                        value: 'confidential',
-                        label: 'Confidential',
-                        disabled: originalIsPublic,
-                      },
-                      { value: 'public', label: 'Public', disabled: false },
-                    ].map((option) => (
+                    {(
+                      [
+                        {
+                          value: 'not-shared' as const,
+                          label: 'Not Shared',
+                          disabled: originalIsPublic || originalIsConfidential,
+                        },
+                        {
+                          value: 'confidential' as const,
+                          label: 'Confidential',
+                          disabled: originalIsPublic,
+                        },
+                        {
+                          value: 'public' as const,
+                          label: 'Public',
+                          disabled: false,
+                        },
+                      ] as const
+                    ).map((option) => (
                       <button
                         key={option.value}
                         onClick={() => {
@@ -542,7 +658,46 @@ export default function CollectionSettingsModal({
                     : ''
                 }`}
               >
-                <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-6">
+                {/* Desktop layout - horizontal */}
+                <div className="hidden md:grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-6">
+                  <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                    <p className="text-sm font-medium text-gray-600 mb-2">
+                      Buyer Pays
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      ${numericPricing.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-center">
+                    <span className="text-2xl font-bold text-gray-400">−</span>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
+                    <p className="text-sm font-medium text-gray-600 mb-2">
+                      Safehill&apos;s Fee
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      ${platformFee.toFixed(2)}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-center">
+                    <span className="text-2xl font-bold text-gray-400">=</span>
+                  </div>
+
+                  <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 text-center shadow-sm">
+                    <p className="text-sm font-medium text-purple-600 mb-2">
+                      You Get
+                    </p>
+                    <p className="text-3xl font-bold text-purple-800">
+                      ${(numericPricing - platformFee).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mobile layout - vertical */}
+                <div className="md:hidden flex flex-col gap-4">
                   <div className="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
                     <p className="text-sm font-medium text-gray-600 mb-2">
                       Buyer Pays
@@ -593,18 +748,18 @@ export default function CollectionSettingsModal({
                       Danger Zone
                     </h3>
                     <p className="text-sm text-red-700 mb-4">
-                      Once you delete a collection, there is no going back. This
-                      will permanently remove the collection.
+                      Once you archive a collection, it will be hidden from your
+                      dashboard and all users who have access.
                       <br />
-                      Access to the assets will not be revoked when deleting the
+                      Access to the assets will not be revoked when archiving the
                       collection.
                     </p>
                     <Button
                       variant="outline"
-                      onClick={() => setShowDeleteWarning(true)}
+                      onClick={() => setShowArchiveWarning(true)}
                       className="px-4 py-2 border-red-300 text-red-600 hover:bg-red-100 hover:border-red-400"
                     >
-                      Delete Collection
+                      Archive Collection
                     </Button>
                   </div>
                 </div>
@@ -676,28 +831,28 @@ Would you like to save the changes or discard them?`}
         variant="warning"
       />
 
-      {/* Delete Collection Warning Modal */}
+      {/* Archive Collection Warning Modal */}
       <WarningModal
-        showModal={showDeleteWarning}
-        setShowModal={setShowDeleteWarning}
-        title="Delete Collection"
-        message={`Are you absolutely sure you want to delete this collection?
+        showModal={showArchiveWarning}
+        setShowModal={setShowArchiveWarning}
+        title="Archive Collection"
+        message={`Are you absolutely sure you want to archive this collection?
 
-<b>This action cannot be undone.</b> This will permanently delete the collection for you and all users who have access to it.
+<b>This action will hide the collection from your dashboard and all users who have access to it.</b>
 
-It will not delete the assets in it.
+Access to the assets will not be revoked when archiving the collection.
 
 To confirm, please type the full collection name:`}
-        confirmText="Delete Collection"
+        confirmText="Archive Collection"
         cancelText="Cancel"
-        onConfirm={handleDeleteCollection}
-        onCancel={handleDeleteWarningCancel}
+        onConfirm={handleArchiveCollection}
+        onCancel={handleArchiveWarningCancel}
         variant="warning"
         requireConfirmation={true}
-        confirmationValue={deleteConfirmationText}
+        confirmationValue={archiveConfirmationText}
         confirmationPlaceholder={collection.name}
         confirmationLabel="Type the collection name below"
-        onConfirmationChange={setDeleteConfirmationText}
+        onConfirmationChange={setArchiveConfirmationText}
       />
     </>
   );

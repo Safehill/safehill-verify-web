@@ -240,3 +240,122 @@ async function encryptWithDerivedKey(
 
   return result.buffer;
 }
+
+/**
+ * Decrypts a shareable payload using ECDH key agreement
+ * This is the reverse operation of createShareablePayload
+ *
+ * @param payload - The shareable payload to decrypt
+ * @param receiverPrivateKey - Receiver's private key (CryptoKey)
+ * @param senderPublicSignature - Sender's public signature key (base64 encoded, raw format)
+ * @param protocolSalt - Salt for HKDF key derivation (base64 encoded string from server)
+ * @returns Decrypted data as Uint8Array
+ */
+export async function decryptShareablePayload(
+  payload: ShareablePayload,
+  receiverPrivateKey: CryptoKey,
+  senderPublicSignature: string,
+  protocolSalt: string
+): Promise<Uint8Array> {
+  console.debug('decryptShareablePayload started');
+
+  // Import ephemeral public key from the payload
+  const ephemeralPublicKeyBuffer = base64ToArrayBuffer(
+    payload.ephemeralPublicKey
+  );
+  const ephemeralPublicKeyCrypto = await crypto.subtle.importKey(
+    'raw',
+    ephemeralPublicKeyBuffer,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    false,
+    []
+  );
+
+  // Import sender's public signature
+  const senderPublicSignatureBuffer = base64ToArrayBuffer(
+    senderPublicSignature
+  );
+
+  // Derive receiver's public key from their private key
+  const receiverPublicKey = await derivePublicKeyFromPrivate(
+    receiverPrivateKey
+  );
+  const receiverPublicKeyBuffer = base64ToArrayBuffer(receiverPublicKey);
+
+  // Generate shared secret using ECDH
+  const sharedSecret = await crypto.subtle.deriveBits(
+    { name: 'ECDH', public: ephemeralPublicKeyCrypto },
+    receiverPrivateKey,
+    256
+  );
+
+  // Shared info: ephemeralPublicKey + receiverPublicKey + senderPublicSignature
+  const sharedInfo = new Uint8Array(
+    ephemeralPublicKeyBuffer.byteLength +
+      receiverPublicKeyBuffer.byteLength +
+      senderPublicSignatureBuffer.byteLength
+  );
+  sharedInfo.set(new Uint8Array(ephemeralPublicKeyBuffer), 0);
+  sharedInfo.set(
+    new Uint8Array(receiverPublicKeyBuffer),
+    ephemeralPublicKeyBuffer.byteLength
+  );
+  sharedInfo.set(
+    new Uint8Array(senderPublicSignatureBuffer),
+    ephemeralPublicKeyBuffer.byteLength + receiverPublicKeyBuffer.byteLength
+  );
+
+  // Decode protocol salt from base64
+  const protocolSaltBytes = new Uint8Array(base64ToArrayBuffer(protocolSalt));
+
+  // Derive symmetric decryption key using HKDF
+  const derivedKey = await hkdfDerive(
+    new Uint8Array(sharedSecret),
+    protocolSaltBytes,
+    sharedInfo,
+    32
+  );
+
+  // Decrypt the ciphertext
+  const decrypted = await decryptWithDerivedKey(
+    base64ToArrayBuffer(payload.ciphertext),
+    derivedKey
+  );
+
+  console.debug('decryptShareablePayload completed');
+
+  return new Uint8Array(decrypted);
+}
+
+/**
+ * Decrypt data with derived key using AES-GCM
+ * IV is expected to be prepended to the ciphertext
+ */
+async function decryptWithDerivedKey(
+  encryptedData: ArrayBuffer,
+  derivedKey: Uint8Array
+): Promise<ArrayBuffer> {
+  const encryptedArray = new Uint8Array(encryptedData);
+
+  // Extract IV (first 12 bytes)
+  const iv = encryptedArray.slice(0, 12);
+
+  // Extract ciphertext (remaining bytes)
+  const ciphertext = encryptedArray.slice(12);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    derivedKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  );
+
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    cryptoKey,
+    ciphertext
+  );
+
+  return decrypted;
+}

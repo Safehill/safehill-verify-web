@@ -1,5 +1,9 @@
 import { generateSymmetricKey, derivePublicKeyFromPrivate } from './keys';
-import { createShareablePayload } from './encryption';
+import {
+  createShareablePayload,
+  decryptShareablePayload,
+  type ShareablePayload,
+} from './encryption';
 import type { AssetVersionInputDTO } from '@/lib/api/models/dto/Asset';
 
 export interface EncryptedAssetVersion {
@@ -21,7 +25,6 @@ export class AssetEncryption {
    * @param userPrivateKey - User's private key (CryptoKey) for ECDH key agreement
    * @param userSignaturePrivateKey - User's signature private key (CryptoKey) for signing
    * @param serverPublicKey - Server's public key (base64 string) for server-side decryption
-   * @param serverPublicSignature - Server's public signature (base64 string)
    * @param protocolSalt - Protocol salt from server (base64 string)
    */
   static async encryptAsset(
@@ -29,7 +32,6 @@ export class AssetEncryption {
     userPrivateKey: CryptoKey,
     userSignaturePrivateKey: CryptoKey,
     serverPublicKey: string,
-    serverPublicSignature: string,
     protocolSalt: string
   ): Promise<EncryptedAssetVersion[]> {
     console.debug('AssetEncryption.encryptAsset called', {
@@ -152,5 +154,51 @@ export class AssetEncryption {
       ephemeralPublicKey: payload.ephemeralPublicKey,
       publicSignature: payload.signature,
     };
+  }
+
+  /**
+   * Decrypt an encrypted secret to retrieve the raw symmetric key
+   *
+   * This method takes the encryption metadata from an asset version and decrypts
+   * the symmetric key that was used to encrypt the asset data.
+   *
+   * @param encryptedSecret - The encrypted symmetric key (base64 string, ciphertext)
+   * @param ephemeralPublicKey - The ephemeral public key used in encryption (base64 string)
+   * @param publicSignature - The signature (base64 string)
+   * @param senderPublicSignature - The sender's public signature key (base64 string)
+   * @param receiverPrivateKey - Receiver's private key (CryptoKey) for decryption
+   * @param protocolSalt - Protocol salt (base64 string)
+   * @returns The decrypted symmetric key as Uint8Array
+   */
+  static async decryptSecret(
+    encryptedSecret: string,
+    ephemeralPublicKey: string,
+    publicSignature: string,
+    senderPublicSignature: string,
+    receiverPrivateKey: CryptoKey,
+    protocolSalt: string
+  ): Promise<Uint8Array> {
+    console.debug('AssetEncryption.decryptSecret called');
+
+    // Build the shareable payload from the encryption metadata
+    const payload: ShareablePayload = {
+      ephemeralPublicKey,
+      ciphertext: encryptedSecret,
+      signature: publicSignature,
+    };
+
+    // Decrypt using the primitive
+    const symmetricKeyBytes = await decryptShareablePayload(
+      payload,
+      receiverPrivateKey,
+      senderPublicSignature,
+      protocolSalt
+    );
+
+    console.debug('AssetEncryption.decryptSecret completed', {
+      symmetricKeyLength: symmetricKeyBytes.length,
+    });
+
+    return symmetricKeyBytes;
   }
 }

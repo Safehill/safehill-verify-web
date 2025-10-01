@@ -154,12 +154,10 @@ export class AssetUploadService {
     );
     const serverKeys = await getServerEncryptionKeys();
     const serverPublicKey = serverKeys.publicKey;
-    const serverPublicSignature = serverKeys.publicSignature;
     const protocolSalt = serverKeys.encryptionProtocolSalt;
 
     console.debug('AssetUploadService.encryptAllFiles server keys received', {
       publicKeyLength: serverPublicKey?.length || 0,
-      publicSignatureLength: serverPublicSignature?.length || 0,
       protocolSaltLength: protocolSalt?.length || 0,
       publicKeyPreview: serverPublicKey?.substring(0, 20) + '...',
     });
@@ -187,7 +185,6 @@ export class AssetUploadService {
         authedSession.privateKey,
         authedSession.privateSignature,
         serverPublicKey,
-        serverPublicSignature,
         protocolSalt
       );
 
