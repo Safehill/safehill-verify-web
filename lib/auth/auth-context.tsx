@@ -2,6 +2,7 @@
 
 import type { UserDTO } from '@/lib/api/models/dto/User';
 import { usePathname, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   createContext,
   type ReactNode,
@@ -42,17 +43,21 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const [authedSession, setAuthedSession] = useState<AuthedSession | null>(
     null
   );
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Logout function - clears credentials and redirects to login
+  // Logout function - clears credentials, cache, and redirects to login
   const logout = useCallback(() => {
+    // Clear all React Query cache to prevent data leakage between users
+    queryClient.clear();
+
     setAuthedSession(null);
     setIsAuthenticated(false);
     router.push('/login');
-  }, [router]);
+  }, [router, queryClient]);
 
   // Check token expiration periodically
   useEffect(() => {
