@@ -53,7 +53,16 @@ export class AssetEncryption {
 
     // Always encrypt
     const symmetricKey = await generateSymmetricKey();
-    console.debug('AssetEncryption.encryptAsset symmetric key generated');
+
+    // Export the symmetric key to log its value for debugging
+    const symmetricKeyRaw = await crypto.subtle.exportKey('raw', symmetricKey);
+    const symmetricKeyBytes = new Uint8Array(symmetricKeyRaw);
+    console.debug('AssetEncryption.encryptAsset symmetric key generated', {
+      keyLength: symmetricKeyBytes.length,
+      keyPreview: Array.from(symmetricKeyBytes.slice(0, 8))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(' '),
+    });
 
     const encryptedData = await this.encryptFileData(fileData, symmetricKey);
     console.debug(
@@ -197,8 +206,75 @@ export class AssetEncryption {
 
     console.debug('AssetEncryption.decryptSecret completed', {
       symmetricKeyLength: symmetricKeyBytes.length,
+      keyPreview: Array.from(symmetricKeyBytes.slice(0, 8))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(' '),
     });
 
     return symmetricKeyBytes;
+  }
+
+  /**
+   * Decrypt asset data using the symmetric key
+   *
+   * @param encryptedData - The encrypted asset data (with IV prepended)
+   * @param symmetricKey - The decrypted symmetric key bytes
+   * @returns The decrypted asset data as ArrayBuffer
+   */
+  static async decryptData(
+    encryptedData: Uint8Array,
+    symmetricKey: Uint8Array
+  ): Promise<ArrayBuffer> {
+    console.debug('AssetEncryption.decryptData called', {
+      encryptedDataLength: encryptedData.length,
+      symmetricKeyLength: symmetricKey.length,
+    });
+
+    // Extract IV (first 12 bytes)
+    const iv = encryptedData.slice(0, 12);
+
+    // Extract ciphertext (remaining bytes)
+    const ciphertext = encryptedData.slice(12);
+
+    console.debug('AssetEncryption.decryptData extracted IV and ciphertext', {
+      ivLength: iv.length,
+      ciphertextLength: ciphertext.length,
+    });
+
+    try {
+      // Import the symmetric key
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        symmetricKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+
+      // Decrypt the data
+      const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        cryptoKey,
+        ciphertext
+      );
+
+      console.debug('AssetEncryption.decryptData completed', {
+        decryptedLength: decrypted.byteLength,
+      });
+
+      return decrypted;
+    } catch (error) {
+      console.error('AssetEncryption.decryptData failed', {
+        error,
+        errorName: (error as Error)?.name,
+        errorMessage: (error as Error)?.message,
+        ivLength: iv.length,
+        ciphertextLength: ciphertext.length,
+        symmetricKeyLength: symmetricKey.length,
+      });
+      throw new Error(
+        `Asset data decryption failed: ${(error as Error)?.message || error}`
+      );
+    }
   }
 }

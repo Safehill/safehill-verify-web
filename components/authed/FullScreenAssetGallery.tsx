@@ -9,6 +9,7 @@ import { getUserColor } from '@/lib/utils';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import DecryptedImage from './DecryptedImage';
 
 interface Asset {
   id: string;
@@ -16,6 +17,7 @@ interface Asset {
   type: string;
   size: string;
   uploaded: string;
+  isPublic: boolean;
 }
 
 interface FullScreenAssetGalleryProps {
@@ -187,16 +189,29 @@ function AssetImageView({
     ? getUserColor(collection.createdBy)
     : 'text-gray-500';
 
+  // Determine version based on isPublic flag
+  const isPublic = asset.isPublic;
+  const publicVersion = imageData.publicVersions?.[0];
+  const encryptedVersion = imageData.versions[0];
+
   return (
     <div className="relative w-full h-full">
-      <Image
-        src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
-        alt={imageData?.globalIdentifier || 'Asset'}
-        fill
-        className="object-contain"
-        sizes="100vw"
-        unoptimized
-      />
+      {isPublic && publicVersion ? (
+        <Image
+          src={publicVersion.presignedURL}
+          alt={asset.name || 'Asset'}
+          fill
+          className="object-contain"
+          sizes="100vw"
+          unoptimized
+        />
+      ) : !isPublic && encryptedVersion ? (
+        <DecryptedImage
+          version={encryptedVersion}
+          alt={asset.name || 'Asset'}
+          className="object-contain w-full h-full"
+        />
+      ) : null}
 
       {/* Fingerprint Icon Overlaid on Image */}
       <div className="absolute top-4 right-4 z-20">
@@ -237,13 +252,30 @@ function AssetThumbnail({ asset }: { asset: Asset }) {
     );
   }
 
+  // Determine version based on isPublic flag
+  const isPublic = asset.isPublic;
+  const publicVersion = imageData.publicVersions?.[0];
+  const encryptedVersion = imageData.versions[0];
+
   return (
-    <Image
-      src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
-      alt={imageData?.globalIdentifier || 'Asset'}
-      width={64}
-      height={64}
-      className="w-full h-full object-cover"
-    />
+    <>
+      {isPublic && publicVersion ? (
+        <Image
+          src={publicVersion.presignedURL}
+          alt={asset.name || 'Asset'}
+          width={64}
+          height={64}
+          className="w-full h-full object-cover"
+        />
+      ) : !isPublic && encryptedVersion ? (
+        <DecryptedImage
+          version={encryptedVersion}
+          alt={asset.name || 'Asset'}
+          width={64}
+          height={64}
+          className="w-full h-full object-cover"
+        />
+      ) : null}
+    </>
   );
 }

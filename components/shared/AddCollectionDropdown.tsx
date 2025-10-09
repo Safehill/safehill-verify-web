@@ -51,7 +51,9 @@ export default function AddCollectionDropdown({
             >
               <Search className="h-4 w-4 text-green-600" />
               <div>
-                <div className="font-medium text-sm">Search All Collections</div>
+                <div className="font-medium text-sm">
+                  Search All Collections
+                </div>
                 <div className="text-xs text-gray-500">
                   Find and add existing collections
                 </div>

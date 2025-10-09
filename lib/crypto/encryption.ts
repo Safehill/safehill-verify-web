@@ -257,12 +257,20 @@ export async function decryptShareablePayload(
   senderPublicSignature: string,
   protocolSalt: string
 ): Promise<Uint8Array> {
-  console.debug('decryptShareablePayload started');
+  console.debug('decryptShareablePayload started', {
+    ephemeralPublicKeyLength: payload.ephemeralPublicKey.length,
+    ciphertextLength: payload.ciphertext.length,
+    signatureLength: payload.signature.length,
+  });
 
   // Import ephemeral public key from the payload
   const ephemeralPublicKeyBuffer = base64ToArrayBuffer(
     payload.ephemeralPublicKey
   );
+  console.debug('Ephemeral public key buffer', {
+    byteLength: ephemeralPublicKeyBuffer.byteLength,
+  });
+
   const ephemeralPublicKeyCrypto = await crypto.subtle.importKey(
     'raw',
     ephemeralPublicKeyBuffer,
@@ -271,16 +279,92 @@ export async function decryptShareablePayload(
     []
   );
 
-  // Import sender's public signature
+  // Import sender's public signature key for verification
+  // The key might be in SPKI format (91 bytes) or raw format (65 bytes)
   const senderPublicSignatureBuffer = base64ToArrayBuffer(
     senderPublicSignature
   );
+
+  let senderPublicSignatureCrypto: CryptoKey;
+  let senderPublicSignatureRawBuffer: ArrayBuffer;
+
+  if (senderPublicSignatureBuffer.byteLength === 65) {
+    // Already in raw format
+    senderPublicSignatureRawBuffer = senderPublicSignatureBuffer;
+    senderPublicSignatureCrypto = await crypto.subtle.importKey(
+      'raw',
+      senderPublicSignatureBuffer,
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      false,
+      ['verify']
+    );
+  } else {
+    // Key is in SPKI format, import and extract raw format
+    const tempKey = await crypto.subtle.importKey(
+      'spki',
+      senderPublicSignatureBuffer,
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      true,
+      ['verify']
+    );
+
+    // Export to raw format
+    senderPublicSignatureRawBuffer = await crypto.subtle.exportKey(
+      'raw',
+      tempKey
+    );
+
+    // Re-import as raw for verification
+    senderPublicSignatureCrypto = await crypto.subtle.importKey(
+      'raw',
+      senderPublicSignatureRawBuffer,
+      { name: 'ECDSA', namedCurve: 'P-256' },
+      false,
+      ['verify']
+    );
+  }
 
   // Derive receiver's public key from their private key
   const receiverPublicKey = await derivePublicKeyFromPrivate(
     receiverPrivateKey
   );
   const receiverPublicKeyBuffer = base64ToArrayBuffer(receiverPublicKey);
+  console.debug('Receiver public key derived', {
+    byteLength: receiverPublicKeyBuffer.byteLength,
+  });
+
+  // Get the ciphertext buffer for signature verification
+  const ciphertextBuffer = base64ToArrayBuffer(payload.ciphertext);
+
+  // Verify signature: dataToSign = ciphertext + ephemeralPublicKey + receiverPublicKey
+  const dataToVerify = new Uint8Array(
+    ciphertextBuffer.byteLength +
+      ephemeralPublicKeyBuffer.byteLength +
+      receiverPublicKeyBuffer.byteLength
+  );
+  dataToVerify.set(new Uint8Array(ciphertextBuffer), 0);
+  dataToVerify.set(
+    new Uint8Array(ephemeralPublicKeyBuffer),
+    ciphertextBuffer.byteLength
+  );
+  dataToVerify.set(
+    new Uint8Array(receiverPublicKeyBuffer),
+    ciphertextBuffer.byteLength + ephemeralPublicKeyBuffer.byteLength
+  );
+
+  const signatureBuffer = base64ToArrayBuffer(payload.signature);
+  const isValid = await crypto.subtle.verify(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    senderPublicSignatureCrypto,
+    signatureBuffer,
+    dataToVerify
+  );
+
+  if (!isValid) {
+    throw new Error('Signature verification failed');
+  }
+
+  console.debug('Signature verified successfully');
 
   // Generate shared secret using ECDH
   const sharedSecret = await crypto.subtle.deriveBits(
@@ -288,12 +372,15 @@ export async function decryptShareablePayload(
     receiverPrivateKey,
     256
   );
+  console.debug('Shared secret derived', {
+    byteLength: sharedSecret.byteLength,
+  });
 
-  // Shared info: ephemeralPublicKey + receiverPublicKey + senderPublicSignature
+  // Shared info: ephemeralPublicKey + receiverPublicKey + senderPublicSignature (all in raw format)
   const sharedInfo = new Uint8Array(
     ephemeralPublicKeyBuffer.byteLength +
       receiverPublicKeyBuffer.byteLength +
-      senderPublicSignatureBuffer.byteLength
+      senderPublicSignatureRawBuffer.byteLength
   );
   sharedInfo.set(new Uint8Array(ephemeralPublicKeyBuffer), 0);
   sharedInfo.set(
@@ -301,9 +388,16 @@ export async function decryptShareablePayload(
     ephemeralPublicKeyBuffer.byteLength
   );
   sharedInfo.set(
-    new Uint8Array(senderPublicSignatureBuffer),
+    new Uint8Array(senderPublicSignatureRawBuffer),
     ephemeralPublicKeyBuffer.byteLength + receiverPublicKeyBuffer.byteLength
   );
+
+  console.debug('Shared info constructed', {
+    totalLength: sharedInfo.byteLength,
+    ephemeralKeyLength: ephemeralPublicKeyBuffer.byteLength,
+    receiverKeyLength: receiverPublicKeyBuffer.byteLength,
+    senderSigLength: senderPublicSignatureRawBuffer.byteLength,
+  });
 
   // Decode protocol salt from base64
   const protocolSaltBytes = new Uint8Array(base64ToArrayBuffer(protocolSalt));
@@ -315,12 +409,12 @@ export async function decryptShareablePayload(
     sharedInfo,
     32
   );
+  console.debug('Symmetric key derived via HKDF', {
+    keyLength: derivedKey.length,
+  });
 
   // Decrypt the ciphertext
-  const decrypted = await decryptWithDerivedKey(
-    base64ToArrayBuffer(payload.ciphertext),
-    derivedKey
-  );
+  const decrypted = await decryptWithDerivedKey(ciphertextBuffer, derivedKey);
 
   console.debug('decryptShareablePayload completed');
 
@@ -337,11 +431,21 @@ async function decryptWithDerivedKey(
 ): Promise<ArrayBuffer> {
   const encryptedArray = new Uint8Array(encryptedData);
 
+  console.debug('decryptWithDerivedKey', {
+    encryptedDataLength: encryptedArray.length,
+    derivedKeyLength: derivedKey.length,
+  });
+
   // Extract IV (first 12 bytes)
   const iv = encryptedArray.slice(0, 12);
 
   // Extract ciphertext (remaining bytes)
   const ciphertext = encryptedArray.slice(12);
+
+  console.debug('Extracted IV and ciphertext', {
+    ivLength: iv.length,
+    ciphertextLength: ciphertext.length,
+  });
 
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
@@ -351,11 +455,22 @@ async function decryptWithDerivedKey(
     ['decrypt']
   );
 
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv },
-    cryptoKey,
-    ciphertext
-  );
+  try {
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      cryptoKey,
+      ciphertext
+    );
 
-  return decrypted;
+    console.debug('Decryption successful');
+    return decrypted;
+  } catch (error) {
+    console.error('AES-GCM decryption failed', {
+      error,
+      ivLength: iv.length,
+      ciphertextLength: ciphertext.length,
+      derivedKeyLength: derivedKey.length,
+    });
+    throw new Error(`AES-GCM decryption failed: ${error}`);
+  }
 }

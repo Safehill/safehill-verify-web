@@ -11,6 +11,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { setLogoutCallback } from '@/lib/api/api';
 
 // Define types for our authentication data
 export type AuthedSession = {
@@ -58,6 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
     router.push('/login');
   }, [router, queryClient]);
+
+  // Register logout callback with axios interceptor
+  useEffect(() => {
+    setLogoutCallback(logout);
+    return () => setLogoutCallback(null);
+  }, [logout]);
 
   // Check token expiration periodically
   useEffect(() => {

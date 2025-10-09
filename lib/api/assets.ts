@@ -12,14 +12,16 @@ import { toast } from 'sonner';
 
 // API functions for assets
 export const assetsApi = {
-  // Get asset by global identifier
-  getAsset: async (
-    globalIdentifier: string,
-    authedSession: AuthedSession
-  ): Promise<AssetOutputDTO> => {
+  // Get multiple assets by global identifiers (batch fetch)
+  getAssets: async (
+    globalIdentifiers: string[],
+    authedSession: AuthedSession,
+    versionNames?: string[]
+  ): Promise<AssetOutputDTO[]> => {
     try {
       const searchData: AssetSearchCriteriaDTO = {
-        globalIdentifiers: [globalIdentifier],
+        globalIdentifiers,
+        versionNames,
       };
 
       const response = await createAuthenticatedRequest<AssetOutputDTO[]>(
@@ -29,26 +31,37 @@ export const assetsApi = {
         searchData
       );
 
-      if (response && response.length > 0) {
-        const asset = response[0];
-
-        // Replace presigned URLs with picsum URLs when in mock mode
-        if (USE_MOCK_UPLOAD && asset.versions) {
-          asset.versions = asset.versions.map((version) => ({
+      // Replace presigned URLs with picsum URLs when in mock mode
+      if (USE_MOCK_UPLOAD) {
+        return response.map((asset) => ({
+          ...asset,
+          versions: asset.versions.map((version) => ({
             ...version,
-            presignedURL: `https://picsum.photos/seed/${globalIdentifier}-${version.versionName}/800/600`,
-          }));
-        }
-
-        return asset;
+            presignedURL: `https://picsum.photos/seed/${asset.globalIdentifier}-${version.versionName}/800/600`,
+          })),
+        }));
       }
 
-      throw new Error(
-        `Asset with global identifier ${globalIdentifier} not found`
-      );
+      return response;
     } catch (error) {
-      throw new Error(`Failed to fetch asset: ${error}`);
+      throw new Error(`Failed to fetch assets: ${error}`);
     }
+  },
+
+  // Get single asset by global identifier (convenience wrapper around getAssets)
+  getAsset: async (
+    globalIdentifier: string,
+    authedSession: AuthedSession
+  ): Promise<AssetOutputDTO> => {
+    const assets = await assetsApi.getAssets([globalIdentifier], authedSession);
+
+    if (assets && assets.length > 0) {
+      return assets[0];
+    }
+
+    throw new Error(
+      `Asset with global identifier ${globalIdentifier} not found`
+    );
   },
 
   // Get asset descriptors

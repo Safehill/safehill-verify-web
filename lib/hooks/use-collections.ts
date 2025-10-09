@@ -267,7 +267,8 @@ export const useChangeCollectionVisibility = () => {
     }: {
       id: string;
       request: CollectionChangeVisibilityDTO;
-    }) => collectionsApi.changeCollectionVisibility(id, request, authedSession!),
+    }) =>
+      collectionsApi.changeCollectionVisibility(id, request, authedSession!),
     onSuccess: async (
       result: CollectionChangeVisibilityResultDTO,
       variables: { id: string; request: CollectionChangeVisibilityDTO }

@@ -1,11 +1,14 @@
 // For assets that exist on the server
+// Note: Asset version details (URLs, encryption metadata) are fetched separately via useAsset hook
 export interface UploadedAsset {
   id: string;
   globalIdentifier: string;
-  name: string;
+  name: string; // Comes from localIdentifier in AssetOutputDTO
   type: string;
   size: string;
   uploaded: string;
+  isPublic: boolean; // True if this is a public asset (no decryption needed)
+  uploadState: 'not_started' | 'partial' | 'completed'; // Upload status from server
 }
 
 // For assets currently being uploaded

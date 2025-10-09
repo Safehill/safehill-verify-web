@@ -224,7 +224,7 @@ export const collectionsApi = {
   ): Promise<CollectionOutputDTO[]> => {
     try {
       const searchData: CollectionSearchDTO = {
-        searchScope: 'public',
+        searchScope: 'all',
         query,
       };
 

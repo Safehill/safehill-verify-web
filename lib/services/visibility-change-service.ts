@@ -2,15 +2,17 @@ import type {
   CollectionOutputDTO,
   CollectionChangeVisibilityDTO,
   CollectionAssetDecryptionDTO,
-  CollectionAssetDTO,
   Visibility,
 } from '@/lib/api/models/dto/Collection';
 import type {
+  AssetOutputDTO,
   AssetVersionInputDTO,
   AssetVersionOutputDTO,
 } from '@/lib/api/models/dto/Asset';
+import type { AuthedSession } from '@/lib/auth/auth-context';
 import { AssetEncryption } from '@/lib/crypto/asset-encryption';
 import { createShareablePayload } from '@/lib/crypto/encryption';
+import { assetsApi } from '@/lib/api/assets';
 
 /**
  * VisibilityChangeService - handles changing collection visibility
@@ -33,12 +35,13 @@ export class VisibilityChangeService {
    * This allows the server to decrypt and serve assets when the collection
    * visibility changes to confidential or public.
    *
-   * @param collection - The collection with all its assets
+   * @param collection - The collection with all its assets (without version details)
    * @param newVisibility - The new visibility setting ('confidential' or 'public')
    * @param userPrivateKey - User's private key (CryptoKey) for decryption
    * @param userPrivateSignature - User's private signature key (CryptoKey) for signing
    * @param serverPublicKey - Server's public key for encryption (base64 string)
    * @param protocolSalt - Protocol salt from server (base64 string)
+   * @param authedSession - Authenticated session for fetching asset details
    * @returns The request DTO ready to send to the change-visibility API
    */
   static async prepareVisibilityChange(
@@ -47,7 +50,8 @@ export class VisibilityChangeService {
     userPrivateKey: CryptoKey,
     userPrivateSignature: CryptoKey,
     serverPublicKey: string,
-    protocolSalt: string
+    protocolSalt: string,
+    authedSession: AuthedSession
   ): Promise<CollectionChangeVisibilityDTO> {
     console.debug('VisibilityChangeService.prepareVisibilityChange started', {
       collectionId: collection.id,
@@ -63,7 +67,8 @@ export class VisibilityChangeService {
       userPrivateKey,
       userPrivateSignature,
       serverPublicKey,
-      protocolSalt
+      protocolSalt,
+      authedSession
     );
 
     console.debug('VisibilityChangeService.prepareVisibilityChange completed', {
@@ -82,46 +87,80 @@ export class VisibilityChangeService {
    *
    * Orchestrates the re-encryption of all asset versions in the collection.
    * For each asset and each of its versions:
-   * 1. Decrypt the symmetric key using user's private key
-   * 2. Re-encrypt it with server's public key
+   * 1. Batch fetch all asset details in one API call
+   * 2. Decrypt the symmetric key using user's private key
+   * 3. Re-encrypt it with server's public key
    *
-   * @param assets - The assets in the collection
+   * @param assets - The assets in the collection (without version details)
    * @param userPrivateKey - User's private key (CryptoKey) for decryption
    * @param userPrivateSignature - User's private signature key (CryptoKey) for signing
    * @param serverPublicKey - Server's public key (base64 string)
    * @param protocolSalt - Protocol salt (base64 string)
+   * @param authedSession - Authenticated session for fetching asset details
    * @returns Array of asset decryption details for the API
    */
   private static async encryptAssetKeysForServer(
-    assets: CollectionAssetDTO[],
+    assets: AssetOutputDTO[],
     userPrivateKey: CryptoKey,
     userPrivateSignature: CryptoKey,
     serverPublicKey: string,
-    protocolSalt: string
+    protocolSalt: string,
+    authedSession: AuthedSession
   ): Promise<CollectionAssetDecryptionDTO[]> {
     console.debug('VisibilityChangeService.encryptAssetKeysForServer started', {
       assetCount: assets.length,
     });
 
+    // Batch fetch all assets in one API call
+    const globalIdentifiers = assets.map((asset) => asset.globalIdentifier);
+    const fullAssets = await assetsApi.getAssets(
+      globalIdentifiers,
+      authedSession
+    );
+
+    console.debug(
+      'VisibilityChangeService.encryptAssetKeysForServer batch fetched assets',
+      {
+        fetchedCount: fullAssets.length,
+        totalVersions: fullAssets.reduce(
+          (sum, asset) => sum + asset.versions.length,
+          0
+        ),
+      }
+    );
+
+    // Create a map for quick lookup
+    const assetMap = new Map(
+      fullAssets.map((asset) => [asset.globalIdentifier, asset])
+    );
+
     const decryptionDetails: CollectionAssetDecryptionDTO[] = [];
 
     for (const asset of assets) {
+      const fullAsset = assetMap.get(asset.globalIdentifier);
+
+      if (!fullAsset) {
+        console.warn(
+          'VisibilityChangeService.encryptAssetKeysForServer asset not found',
+          { globalIdentifier: asset.globalIdentifier }
+        );
+        continue;
+      }
+
       console.debug(
         'VisibilityChangeService.encryptAssetKeysForServer processing asset',
         {
-          globalIdentifier: asset.globalIdentifier,
-          name: asset.name,
+          globalIdentifier: fullAsset.globalIdentifier,
+          versionCount: fullAsset.versions.length,
         }
       );
 
       // Process all versions of this asset
-      // Note: CollectionAssetDTO only includes lowResolutionVersion
-      // TODO: If we need all versions, we'll need to fetch full asset details
       const versionDecryptionDetails: AssetVersionInputDTO[] = [];
 
-      if (asset.lowResolutionVersion) {
+      for (const version of fullAsset.versions) {
         const serverEncryptedKey = await this.reEncryptKeyForServer(
-          asset.lowResolutionVersion,
+          version,
           userPrivateKey,
           userPrivateSignature,
           serverPublicKey,

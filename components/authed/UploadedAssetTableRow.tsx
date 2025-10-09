@@ -6,6 +6,7 @@ import { Eye, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '../shared/button';
 import { UploadedAsset } from '@/lib/types/asset';
+import DecryptedImage from './DecryptedImage';
 
 interface UploadedAssetTableRowProps {
   asset: UploadedAsset;
@@ -19,6 +20,11 @@ export default function UploadedAssetTableRow({
   onClick,
 }: UploadedAssetTableRowProps) {
   const { data: imageData, isLoading, error } = useAsset(asset.id);
+
+  // Determine version to use based on isPublic flag
+  const isPublic = asset.isPublic;
+  const publicVersion = imageData?.publicVersions?.[0];
+  const encryptedVersion = imageData?.versions[0];
 
   return (
     <tr
@@ -35,10 +41,18 @@ export default function UploadedAssetTableRow({
             <Loader2 className="h-4 w-4 animate-spin text-white/60" />
           ) : error ? (
             <span className="text-white/60 text-xs">?</span>
-          ) : imageData ? (
+          ) : isPublic && publicVersion ? (
             <Image
-              src={imageData?.versions[0]?.presignedURL || '/placeholder.svg'}
-              alt={imageData?.globalIdentifier || 'Asset'}
+              src={publicVersion.presignedURL}
+              alt={asset.name || 'Asset'}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+            />
+          ) : !isPublic && encryptedVersion ? (
+            <DecryptedImage
+              version={encryptedVersion}
+              alt={asset.name || 'Asset'}
               width={48}
               height={48}
               className="w-full h-full object-cover"

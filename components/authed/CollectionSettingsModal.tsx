@@ -149,7 +149,8 @@ export default function CollectionSettingsModal({
             authedSession.privateKey,
             authedSession.privateSignature,
             serverKeys.publicKey,
-            serverKeys.encryptionProtocolSalt
+            serverKeys.encryptionProtocolSalt,
+            authedSession
           );
 
         await changeVisibilityMutation.mutateAsync({
@@ -751,8 +752,8 @@ export default function CollectionSettingsModal({
                       Once you archive a collection, it will be hidden from your
                       dashboard and all users who have access.
                       <br />
-                      Access to the assets will not be revoked when archiving the
-                      collection.
+                      Access to the assets will not be revoked when archiving
+                      the collection.
                     </p>
                     <Button
                       variant="outline"

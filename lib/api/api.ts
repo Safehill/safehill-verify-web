@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 // Global mock flag for S3 uploads only
-export const USE_MOCK_UPLOAD = true;
+export const USE_MOCK_UPLOAD = false;
+
+// Logout callback - will be set by AuthProvider
+let logoutCallback: (() => void) | null = null;
+
+export const setLogoutCallback = (callback: (() => void) | null) => {
+  logoutCallback = callback;
+};
 
 // Use server-side or client-side environment variable
 export const API_BASE_URL =
@@ -44,6 +51,12 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Handle 401 Unauthorized responses by logging out
+    if (error.response?.status === 401) {
+      if (logoutCallback) {
+        logoutCallback();
+      }
+    }
     return Promise.reject(error);
   }
 );
@@ -91,26 +104,42 @@ export const createAuthenticatedRequest = <T>(
     headers,
   };
 
-  switch (method) {
-    case 'get':
-      return api.get<T>(url, requestConfig).then((response) => response.data);
-    case 'post':
-      return api
-        .post<T>(url, data, requestConfig)
-        .then((response) => response.data);
-    case 'put':
-      return api
-        .put<T>(url, data, requestConfig)
-        .then((response) => response.data);
-    case 'delete':
-      return api
-        .delete<T>(url, requestConfig)
-        .then((response) => response.data);
-    case 'patch':
-      return api
-        .patch<T>(url, data, requestConfig)
-        .then((response) => response.data);
-    default:
-      throw new Error(`Unsupported HTTP method: ${method}`);
-  }
+  const makeRequest = async (): Promise<T> => {
+    try {
+      switch (method) {
+        case 'get':
+          return api
+            .get<T>(url, requestConfig)
+            .then((response) => response.data);
+        case 'post':
+          return api
+            .post<T>(url, data, requestConfig)
+            .then((response) => response.data);
+        case 'put':
+          return api
+            .put<T>(url, data, requestConfig)
+            .then((response) => response.data);
+        case 'delete':
+          return api
+            .delete<T>(url, requestConfig)
+            .then((response) => response.data);
+        case 'patch':
+          return api
+            .patch<T>(url, data, requestConfig)
+            .then((response) => response.data);
+        default:
+          throw new Error(`Unsupported HTTP method: ${method}`);
+      }
+    } catch (error) {
+      // Re-throw 401 errors immediately to ensure interceptor handles logout
+      // Don't let calling code catch and suppress these
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        throw error;
+      }
+      // For all other errors, let them propagate normally
+      throw error;
+    }
+  };
+
+  return makeRequest();
 };

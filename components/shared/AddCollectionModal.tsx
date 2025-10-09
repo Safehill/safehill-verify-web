@@ -366,7 +366,7 @@ export default function AddCollectionModal({
                 Start typing to search collections
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                You can search by ID, name, description, or full URL
+                You can search by ID, name, description, or collection URL
               </p>
             </div>
           )}

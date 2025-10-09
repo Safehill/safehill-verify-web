@@ -2,8 +2,6 @@ import type {
   AssetOutputDTO,
   AssetInputDTO,
   AssetVersionInputDTO,
-  AssetVersionOutputDTO,
-  PublicAssetVersionOutputDTO,
 } from './Asset';
 
 export type Visibility = 'public' | 'confidential' | 'not-shared';
@@ -14,13 +12,13 @@ export interface CollectionOutputDTO {
   id: string;
   name: string;
   description: string;
+  isSystemCollection: boolean;
   assetCount: number;
   visibility: Visibility;
   pricing: number;
   lastUpdated: string; // ISO string timestamp
   createdBy: string;
-  assets: CollectionAssetDTO[];
-  publicAssets: PublicCollectionAssetDTO[];
+  assets: AssetOutputDTO[];
 }
 
 export interface CollectionCreateDTO {
@@ -35,7 +33,7 @@ export interface CollectionUpdateDTO {
 }
 
 export interface CollectionSearchDTO {
-  searchScope: 'owned' | 'public' | 'all';
+  searchScope: 'owned' | 'all';
   query?: string;
   visibility?: Visibility;
   priceRange?: PriceRangeDTO;
@@ -99,20 +97,4 @@ export interface CollectionChangeVisibilityResultDTO {
   queuedAssets?: number;
   processedVersions?: number;
   processedAssetIds: string[];
-}
-
-export interface CollectionAssetDTO {
-  globalIdentifier: string;
-  name: string;
-  type: string;
-  lowResolutionVersion?: AssetVersionOutputDTO;
-  uploadedAt: string; // ISO string timestamp
-}
-
-export interface PublicCollectionAssetDTO {
-  globalIdentifier: string;
-  name: string;
-  type: string;
-  lowResolutionVersion?: PublicAssetVersionOutputDTO;
-  uploadedAt: string; // ISO string timestamp
 }

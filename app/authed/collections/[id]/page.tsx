@@ -20,6 +20,7 @@ import PaywallPage from '@/components/shared/PaywallPage';
 import AddAssetDropdown from '@/components/shared/AddAssetDropdown';
 import AddAssetModal from '@/components/shared/AddAssetModal';
 import { useUpload } from '@/lib/contexts/upload-context';
+import { useAssets } from '@/lib/hooks/use-assets';
 
 import { Badge } from '@/components/shared/badge';
 import { Button } from '@/components/shared/button';
@@ -122,29 +123,41 @@ export default function CollectionDetail() {
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    collection,
+    collection?.id, // Only depend on collection id, not the whole object
     accessCheck?.status,
     currentUserId,
     collectionId,
-    trackCollectionAccess,
+    // DO NOT include trackCollectionAccess - it changes on every render
   ]);
+
+  // Prefetch all assets to minimize API calls
+  const assetIds = useMemo(
+    () => collection?.assets.map((asset) => asset.globalIdentifier) || [],
+    [collection?.assets]
+  );
+  useAssets(assetIds, accessCheck?.status === 'granted');
 
   // Transform DTO assets to match UploadedAsset interface
   const transformedAssets = useMemo((): UploadedAsset[] => {
-    if (!collection?.assets) {
+    if (!collection) {
       return [];
     }
 
+    // Map collection assets to UploadedAsset
+    // Note: version details (URLs, encryption metadata) will be fetched via useAsset hook in child components
     return collection.assets.map((asset) => ({
       id: asset.globalIdentifier,
       globalIdentifier: asset.globalIdentifier,
-      name: asset.globalIdentifier,
-      type: 'image', // Default type since DTO doesn't have this
-      size: 'Unknown', // Default size since DTO doesn't have this
-      uploaded: asset.uploadedAt || 'Unknown',
+      name: asset.localIdentifier || asset.globalIdentifier,
+      type: 'image', // Fallback type
+      size: 'Unknown', // Size not provided in collection DTO
+      uploaded: asset.creationDate || 'Unknown',
+      isPublic: asset.isPublic ?? false,
+      uploadState: asset.uploadState,
     }));
-  }, [collection?.assets]);
+  }, [collection]);
 
   // Get pending uploads for this collection
   const pendingAssets = useMemo(() => {
@@ -448,25 +461,27 @@ export default function CollectionDetail() {
                 <span>All Collections</span>
               </Link>
             </Button>
-            <div className="flex items-center space-x-3">
-              {isOwned ? (
-                <Button
-                  className="flex gap-2 px-4 py-2 bg-purple-300/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
-                  onClick={() => setShowSettingsModal(true)}
-                >
-                  <Settings className="h-4 w-4" />
-                  <span>Settings</span>
-                </Button>
-              ) : (
-                <Button
-                  className="flex gap-2 px-4 py-2 bg-red-400/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-red-200"
-                  onClick={() => setShowRemoveWarning(true)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span>Remove this Collection</span>
-                </Button>
-              )}
-            </div>
+            {!collection.isSystemCollection && (
+              <div className="flex items-center space-x-3">
+                {isOwned ? (
+                  <Button
+                    className="flex gap-2 px-4 py-2 bg-purple-300/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-purple-200"
+                    onClick={() => setShowSettingsModal(true)}
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </Button>
+                ) : (
+                  <Button
+                    className="flex gap-2 px-4 py-2 bg-red-400/80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:text-gray-800 hover:bg-red-200"
+                    onClick={() => setShowRemoveWarning(true)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Remove this Collection</span>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Title and Description */}
@@ -574,16 +589,18 @@ export default function CollectionDetail() {
             </div>
           </div>
 
-          {collection.visibility === 'confidential' && isOwned && (
-            <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
-              <div className="text-center">
-                <p className="text-xs font-medium text-white/60">
-                  People with access
-                </p>
-                <p className="text-3xl font-bold text-white mt-2 h-10">0</p>
+          {collection.visibility === 'confidential' &&
+            isOwned &&
+            !collection.isSystemCollection && (
+              <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+                <div className="text-center">
+                  <p className="text-xs font-medium text-white/60">
+                    People with access
+                  </p>
+                  <p className="text-3xl font-bold text-white mt-2 h-10">0</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Show pricing only if not not-shared */}
           {collection.visibility !== 'not-shared' && (
@@ -618,16 +635,18 @@ export default function CollectionDetail() {
           )}
 
           {/* Show revenue only if not not-shared */}
-          {collection.visibility !== 'not-shared' && isOwned && (
-            <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
-              <div className="text-center">
-                <p className="text-xs font-medium text-white/60">
-                  Revenue Generated
-                </p>
-                <p className="text-3xl font-bold text-white mt-2 h-10">$0</p>
+          {collection.visibility !== 'not-shared' &&
+            isOwned &&
+            !collection.isSystemCollection && (
+              <div className="rounded-2xl border-2 border-solid border-white/30 bg-white/10 px-6 py-4 flex items-center justify-center shadow-none transition-all duration-200">
+                <div className="text-center">
+                  <p className="text-xs font-medium text-white/60">
+                    Revenue Generated
+                  </p>
+                  <p className="text-3xl font-bold text-white mt-2 h-10">$0</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
 
         {/* Assets List */}

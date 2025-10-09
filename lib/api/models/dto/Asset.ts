@@ -4,6 +4,11 @@ export interface AssetOutputDTO {
   createdBy: string;
   creationDate?: string;
   versions: AssetVersionOutputDTO[];
+  isPublic?: boolean;
+  /// Public versions with direct access URLs (only present when isPublic = true)
+  publicVersions?: PublicAssetVersionOutputDTO[];
+  /// Upload state (not_started, partial, completed)
+  uploadState: 'not_started' | 'partial' | 'completed';
 }
 
 export interface AssetVersionOutputDTO {
