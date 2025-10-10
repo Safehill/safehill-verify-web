@@ -14,9 +14,11 @@ import { assetsApi } from '@/lib/api/assets';
 import { USE_MOCK_UPLOAD } from '@/lib/api/api';
 import { getServerEncryptionKeys } from '@/lib/hooks/useServerEncryptionKeys';
 import { AuthedSession } from '@/lib/auth/auth-context';
+import { AssetResizingService } from './asset-resizing-service';
 
 export interface UploadProgress {
   stage:
+    | 'resizing'
     | 'encrypting'
     | 'creating'
     | 'uploading'
@@ -36,16 +38,25 @@ export interface UploadResult {
 
 /**
  * AssetUploadService - orchestrate the 3-stage upload pipeline
- * 1. Create assets on server (get presigned URLs)
- * 2. Upload encrypted data to S3
- * 3. Mark assets as uploaded
+ * 1. Resize images to create multiple quality versions
+ * 2. Create assets on server (get presigned URLs)
+ * 3. Upload encrypted data to S3
+ * 4. Mark assets as uploaded
  */
 export class AssetUploadService {
-  private onProgress?: (uploadId: string, progress: UploadProgress) => void;
+  private onProgress?: (
+    uploadId: string,
+    versionName: string,
+    progress: UploadProgress
+  ) => void;
   private maxConcurrentUploads: number;
 
   constructor(
-    onProgress?: (uploadId: string, progress: UploadProgress) => void,
+    onProgress?: (
+      uploadId: string,
+      versionName: string,
+      progress: UploadProgress
+    ) => void,
     maxConcurrentUploads: number = 5
   ) {
     this.onProgress = onProgress;
@@ -94,8 +105,7 @@ export class AssetUploadService {
       const creationResult = await this.createAssetsOnServer(
         encryptedAssets,
         collection.id,
-        authedSession,
-        globalIdentifiers
+        authedSession
       );
 
       // Stage 3: Upload each file to S3 and confirm (in batches)
@@ -113,7 +123,8 @@ export class AssetUploadService {
       const errorMessage =
         error instanceof Error ? error.message : 'Upload failed';
       return files.map((file, index) => {
-        this.updateProgress(globalIdentifiers[index], {
+        // Report error for all versions (we use 'all' as a placeholder since we don't know which versions were created)
+        this.updateProgress(globalIdentifiers[index], 'all', {
           stage: 'error',
           progress: 0,
           error: errorMessage,
@@ -127,9 +138,13 @@ export class AssetUploadService {
     }
   }
 
-  private updateProgress(uploadId: string, progress: UploadProgress) {
+  private updateProgress(
+    uploadId: string,
+    versionName: string,
+    progress: UploadProgress
+  ) {
     if (this.onProgress) {
-      this.onProgress(uploadId, progress);
+      this.onProgress(uploadId, versionName, progress);
     }
   }
 
@@ -162,28 +177,59 @@ export class AssetUploadService {
       publicKeyPreview: serverPublicKey?.substring(0, 20) + '...',
     });
 
+    const resizingService = new AssetResizingService();
     const encryptedAssets = [];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const globalIdentifier = globalIdentifiers[i];
 
-      console.debug('AssetUploadService.encryptAllFiles encrypting file', {
+      console.debug('AssetUploadService.encryptAllFiles processing file', {
         index: i,
         fileName: file.name,
         globalIdentifier,
       });
 
-      this.updateProgress(globalIdentifier, {
-        stage: 'encrypting',
-        progress: 20,
-        message: 'Encrypting asset...',
+      // Step 1: Resize to create versions
+      const resizedVersions = await resizingService.createVersions(file);
+      console.debug('AssetUploadService.encryptAllFiles versions created', {
+        fileName: file.name,
+        versionCount: resizedVersions.length,
+        versions: resizedVersions.map((v) => ({
+          quality: v.quality,
+          size: v.file.size,
+          dimensions: `${v.width}x${v.height}`,
+        })),
       });
 
-      const encryptedVersions = await AssetEncryption.encryptAsset(
-        file,
-        authedSession.privateKey,
+      // Report progress for all versions during resizing/encrypting stages
+      resizedVersions.forEach((v) => {
+        this.updateProgress(globalIdentifier, v.quality, {
+          stage: 'resizing',
+          progress: 10,
+          message: 'Creating image versions...',
+        });
+      });
+
+      // Step 2: Encrypt all versions with shared symmetric key
+      resizedVersions.forEach((v) => {
+        this.updateProgress(globalIdentifier, v.quality, {
+          stage: 'encrypting',
+          progress: 20,
+          message: 'Encrypting asset versions...',
+        });
+      });
+
+      const versionInputs = resizedVersions.map((v) => ({
+        file: v.file,
+        versionName: v.quality,
+      }));
+
+      const encryptedVersions = await AssetEncryption.encryptAssetVersions(
+        versionInputs,
+        authedSession.user.publicKey,
         authedSession.privateSignature,
+        authedSession.user.publicSignature,
         serverPublicKey,
         protocolSalt
       );
@@ -207,19 +253,20 @@ export class AssetUploadService {
       encryptedVersions: EncryptedAssetVersion[];
     }[],
     collectionId: string,
-    authedSession: AuthedSession,
-    globalIdentifiers: string[]
+    authedSession: AuthedSession
   ): Promise<CollectionAssetAddResultDTO> {
     console.debug('AssetUploadService.createAssetsOnServer started', {
       assetCount: encryptedAssets.length,
       collectionId,
     });
 
-    globalIdentifiers.forEach((globalIdentifier) => {
-      this.updateProgress(globalIdentifier, {
-        stage: 'creating',
-        progress: 40,
-        message: 'Creating assets on server...',
+    encryptedAssets.forEach((asset) => {
+      asset.encryptedVersions.forEach((version) => {
+        this.updateProgress(asset.globalIdentifier, version.versionName, {
+          stage: 'creating',
+          progress: 40,
+          message: 'Creating assets on server...',
+        });
       });
     });
 
@@ -392,7 +439,7 @@ export class AssetUploadService {
           60 + ((versionIndex + 1) * 30) / totalVersions;
 
         // Upload this version to S3
-        this.updateProgress(asset.globalIdentifier, {
+        this.updateProgress(asset.globalIdentifier, version.versionName, {
           stage: 'uploading',
           progress: Math.round(versionProgressStart),
           message: `Uploading ${version.versionName} version...`,
@@ -427,10 +474,12 @@ export class AssetUploadService {
       }
 
       // All versions uploaded - mark as completed
-      this.updateProgress(asset.globalIdentifier, {
-        stage: 'completed',
-        progress: 100,
-        message: 'All versions uploaded successfully',
+      asset.encryptedVersions.forEach((version) => {
+        this.updateProgress(asset.globalIdentifier, version.versionName, {
+          stage: 'completed',
+          progress: 100,
+          message: 'All versions uploaded successfully',
+        });
       });
 
       // Notify that this item finished successfully
@@ -446,10 +495,12 @@ export class AssetUploadService {
       const errorObject =
         error instanceof Error ? error : new Error(errorMessage);
 
-      this.updateProgress(asset.globalIdentifier, {
-        stage: 'error',
-        progress: 0,
-        error: errorMessage,
+      asset.encryptedVersions.forEach((version) => {
+        this.updateProgress(asset.globalIdentifier, version.versionName, {
+          stage: 'error',
+          progress: 0,
+          error: errorMessage,
+        });
       });
 
       // Notify that this item finished with an error
@@ -488,7 +539,7 @@ export class AssetUploadService {
       const overallProgress =
         progressStart + (uploadProgress * (progressEnd - progressStart)) / 100;
 
-      this.updateProgress(globalIdentifier, {
+      this.updateProgress(globalIdentifier, versionName, {
         stage: 'uploading',
         progress: Math.round(overallProgress),
         message: `Uploading ${versionName}... ${Math.round(uploadProgress)}%`,
@@ -523,7 +574,7 @@ export class AssetUploadService {
               progressStart +
               (uploadProgress * (progressEnd - progressStart)) / 100;
 
-            this.updateProgress(globalIdentifier, {
+            this.updateProgress(globalIdentifier, versionName, {
               stage: 'uploading',
               progress: Math.round(overallProgress),
               message: `Uploading ${versionName}... ${Math.round(

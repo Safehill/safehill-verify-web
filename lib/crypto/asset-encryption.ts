@@ -1,4 +1,4 @@
-import { generateSymmetricKey, derivePublicKeyFromPrivate } from './keys';
+import { generateSymmetricKey } from './keys';
 import {
   createShareablePayload,
   decryptShareablePayload,
@@ -18,89 +18,108 @@ export interface EncryptedAssetVersion {
  */
 export class AssetEncryption {
   /**
-   * Encrypt a file for collection storage
-   * Always encrypts - conditional logic will be added later
+   * Encrypt multiple versions of an asset using a shared symmetric key
+   * All versions of the same asset will use the same symmetric key
    *
-   * @param file - The file to encrypt
-   * @param userPrivateKey - User's private key (CryptoKey) for ECDH key agreement
-   * @param userSignaturePrivateKey - User's signature private key (CryptoKey) for signing
+   * @param versions - Array of file versions with their names
+   * @param userPublicKey - User's public key (base64 string, SPKI format from current session)
+   * @param userPrivateSignature - User's signature private key (CryptoKey) for signing
+   * @param userPublicSignature - User's public signature key (base64 string, SPKI format from current session)
    * @param serverPublicKey - Server's public key (base64 string) for server-side decryption
    * @param protocolSalt - Protocol salt from server (base64 string)
    */
-  static async encryptAsset(
-    file: File,
-    userPrivateKey: CryptoKey,
-    userSignaturePrivateKey: CryptoKey,
+  static async encryptAssetVersions(
+    versions: { file: File; versionName: string }[],
+    userPublicKey: string,
+    userPrivateSignature: CryptoKey,
+    userPublicSignature: string,
     serverPublicKey: string,
     protocolSalt: string
   ): Promise<EncryptedAssetVersion[]> {
-    console.debug('AssetEncryption.encryptAsset called', {
-      fileName: file.name,
-      fileSize: file.size,
+    console.debug('AssetEncryption.encryptAssetVersions called', {
+      versionCount: versions.length,
+      versionNames: versions.map((v) => v.versionName),
     });
 
-    // Derive user's public key from private key for self-encryption
-    const userPublicKey = await derivePublicKeyFromPrivate(userPrivateKey);
-    console.debug('AssetEncryption.encryptAsset user public key derived');
-
-    const fileData = await this.readFileAsArrayBuffer(file);
-    console.debug(
-      'AssetEncryption.encryptAsset file read complete, size:',
-      fileData.byteLength
-    );
-
-    const versionName = 'original'; // Only generate "original" version for now
-
-    // Always encrypt
+    // Generate a single symmetric key for all versions of this asset
     const symmetricKey = await generateSymmetricKey();
 
     // Export the symmetric key to log its value for debugging
     const symmetricKeyRaw = await crypto.subtle.exportKey('raw', symmetricKey);
     const symmetricKeyBytes = new Uint8Array(symmetricKeyRaw);
-    console.debug('AssetEncryption.encryptAsset symmetric key generated', {
-      keyLength: symmetricKeyBytes.length,
-      keyPreview: Array.from(symmetricKeyBytes.slice(0, 8))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join(' '),
-    });
-
-    const encryptedData = await this.encryptFileData(fileData, symmetricKey);
     console.debug(
-      'AssetEncryption.encryptAsset file encryption complete, encrypted size:',
-      encryptedData.byteLength
-    );
-
-    const selfEncryption = await this.createEncryptionDetails(
-      symmetricKey,
-      versionName,
-      userPublicKey,
-      userSignaturePrivateKey,
-      protocolSalt
-    );
-    const serverEncryption = await this.createEncryptionDetails(
-      symmetricKey,
-      versionName,
-      serverPublicKey,
-      userSignaturePrivateKey,
-      protocolSalt
-    );
-
-    console.debug('AssetEncryption.encryptAsset encryption details created', {
-      versionName,
-      selfEncryption:
-        selfEncryption.senderEncryptedSecret.substring(0, 20) + '...',
-      serverEncryption:
-        serverEncryption.senderEncryptedSecret.substring(0, 20) + '...',
-    });
-
-    return [
+      'AssetEncryption.encryptAssetVersions symmetric key generated (shared for all versions)',
       {
-        versionName,
+        keyLength: symmetricKeyBytes.length,
+        keyPreview: Array.from(symmetricKeyBytes.slice(0, 8))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join(' '),
+      }
+    );
+
+    const encryptedVersions: EncryptedAssetVersion[] = [];
+
+    // Encrypt each version with the same symmetric key
+    for (const version of versions) {
+      console.debug('AssetEncryption.encryptAssetVersions processing version', {
+        fileName: version.file.name,
+        versionName: version.versionName,
+        fileSize: version.file.size,
+      });
+
+      const fileData = await this.readFileAsArrayBuffer(version.file);
+      console.debug(
+        'AssetEncryption.encryptAssetVersions file read complete, size:',
+        fileData.byteLength
+      );
+
+      const encryptedData = await this.encryptFileData(fileData, symmetricKey);
+      console.debug(
+        'AssetEncryption.encryptAssetVersions file encryption complete, encrypted size:',
+        encryptedData.byteLength
+      );
+
+      const selfEncryption = await this.createEncryptionDetails(
+        symmetricKey,
+        version.versionName,
+        userPublicKey,
+        userPrivateSignature,
+        userPublicSignature,
+        protocolSalt
+      );
+      const serverEncryption = await this.createEncryptionDetails(
+        symmetricKey,
+        version.versionName,
+        serverPublicKey,
+        userPrivateSignature,
+        userPublicSignature,
+        protocolSalt
+      );
+
+      console.debug(
+        'AssetEncryption.encryptAssetVersions encryption details created',
+        {
+          versionName: version.versionName,
+          selfEncryption:
+            selfEncryption.senderEncryptedSecret.substring(0, 20) + '...',
+          serverEncryption:
+            serverEncryption.senderEncryptedSecret.substring(0, 20) + '...',
+        }
+      );
+
+      encryptedVersions.push({
+        versionName: version.versionName,
         encryptedData,
         selfEncryption,
         serverEncryption,
-      },
-    ];
+      });
+    }
+
+    console.debug('AssetEncryption.encryptAssetVersions completed', {
+      totalVersions: encryptedVersions.length,
+    });
+
+    return encryptedVersions;
   }
 
   static generateGlobalIdentifier(): string {
@@ -140,7 +159,8 @@ export class AssetEncryption {
     symmetricKey: CryptoKey,
     versionName: string,
     targetPublicKey: string,
-    senderSignaturePrivateKey: CryptoKey,
+    senderPrivateSignature: CryptoKey,
+    senderPublicSignature: string,
     protocolSalt: string
   ): Promise<AssetVersionInputDTO> {
     // Export the symmetric key to raw bytes
@@ -153,7 +173,8 @@ export class AssetEncryption {
     const payload = await createShareablePayload(
       new Uint8Array(symmetricKeyBytes),
       targetPublicKey,
-      senderSignaturePrivateKey,
+      senderPrivateSignature,
+      senderPublicSignature,
       protocolSalt
     );
 
@@ -174,8 +195,9 @@ export class AssetEncryption {
    * @param encryptedSecret - The encrypted symmetric key (base64 string, ciphertext)
    * @param ephemeralPublicKey - The ephemeral public key used in encryption (base64 string)
    * @param publicSignature - The signature (base64 string)
-   * @param senderPublicSignature - The sender's public signature key (base64 string)
+   * @param senderPublicSignature - The sender's public signature key (base64 string, SPKI format)
    * @param receiverPrivateKey - Receiver's private key (CryptoKey) for decryption
+   * @param receiverPublicKey - Receiver's public key (base64 string, SPKI format)
    * @param protocolSalt - Protocol salt (base64 string)
    * @returns The decrypted symmetric key as Uint8Array
    */
@@ -185,6 +207,7 @@ export class AssetEncryption {
     publicSignature: string,
     senderPublicSignature: string,
     receiverPrivateKey: CryptoKey,
+    receiverPublicKey: string,
     protocolSalt: string
   ): Promise<Uint8Array> {
     console.debug('AssetEncryption.decryptSecret called');
@@ -200,6 +223,7 @@ export class AssetEncryption {
     const symmetricKeyBytes = await decryptShareablePayload(
       payload,
       receiverPrivateKey,
+      receiverPublicKey,
       senderPublicSignature,
       protocolSalt
     );

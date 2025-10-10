@@ -76,6 +76,7 @@ export default function DecryptedImage({
           version.publicSignature,
           version.senderPublicSignature,
           authedSession.privateKey,
+          authedSession.user.publicKey,
           serverKeys.encryptionProtocolSalt
         );
         console.debug(`[${imageId}] Secret key decrypted successfully`);

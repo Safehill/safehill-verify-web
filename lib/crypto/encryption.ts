@@ -1,5 +1,4 @@
 import { arrayBufferToBase64, base64ToArrayBuffer } from './base64';
-import { derivePublicKeyFromPrivate } from './keys';
 
 /**
  * Represents the shareable encrypted payload
@@ -12,19 +11,117 @@ export interface ShareablePayload {
 }
 
 /**
+ * Convert ECDSA signature from IEEE P1363 format to DER format
+ * P1363 format: r || s (64 bytes for P-256: 32 bytes r + 32 bytes s)
+ * DER format: ASN.1 encoded SEQUENCE of two INTEGERs
+ */
+function p1363ToDer(p1363Signature: ArrayBuffer): Uint8Array {
+  const sig = new Uint8Array(p1363Signature);
+  const r = sig.slice(0, 32);
+  const s = sig.slice(32, 64);
+
+  // Helper to encode an integer in DER format
+  const encodeInteger = (bytes: Uint8Array): Uint8Array => {
+    // Remove leading zeros, but keep one if the value would be interpreted as negative
+    let i = 0;
+    while (i < bytes.length - 1 && bytes[i] === 0) {
+      i++;
+    }
+
+    // If high bit is set, prepend 0x00 to indicate positive number
+    const needsPadding = bytes[i] >= 0x80;
+    const length = bytes.length - i + (needsPadding ? 1 : 0);
+
+    const result = new Uint8Array(2 + length);
+    result[0] = 0x02; // INTEGER tag
+    result[1] = length;
+    if (needsPadding) {
+      result[2] = 0x00;
+      result.set(bytes.slice(i), 3);
+    } else {
+      result.set(bytes.slice(i), 2);
+    }
+    return result;
+  };
+
+  const rDer = encodeInteger(r);
+  const sDer = encodeInteger(s);
+
+  // Build SEQUENCE
+  const totalLength = rDer.length + sDer.length;
+  const result = new Uint8Array(2 + totalLength);
+  result[0] = 0x30; // SEQUENCE tag
+  result[1] = totalLength;
+  result.set(rDer, 2);
+  result.set(sDer, 2 + rDer.length);
+
+  return result;
+}
+
+/**
+ * Convert ECDSA signature from DER format to IEEE P1363 format
+ * DER format: ASN.1 encoded SEQUENCE of two INTEGERs
+ * P1363 format: r || s (64 bytes for P-256)
+ */
+function derToP1363(derSignature: ArrayBuffer): Uint8Array {
+  const sig = new Uint8Array(derSignature);
+
+  // Parse DER SEQUENCE
+  if (sig[0] !== 0x30) {
+    throw new Error('Invalid DER signature: not a SEQUENCE');
+  }
+
+  let pos = 2; // Skip SEQUENCE tag and length
+
+  // Parse r
+  if (sig[pos] !== 0x02) {
+    throw new Error('Invalid DER signature: r is not an INTEGER');
+  }
+  const rLength = sig[pos + 1];
+  const rBytes = sig.slice(pos + 2, pos + 2 + rLength);
+  pos += 2 + rLength;
+
+  // Parse s
+  if (sig[pos] !== 0x02) {
+    throw new Error('Invalid DER signature: s is not an INTEGER');
+  }
+  const sLength = sig[pos + 1];
+  const sBytes = sig.slice(pos + 2, pos + 2 + sLength);
+
+  // Convert to fixed 32-byte arrays (remove padding or add leading zeros)
+  const r = new Uint8Array(32);
+  const s = new Uint8Array(32);
+
+  const rStart = Math.max(0, rBytes.length - 32);
+  const sStart = Math.max(0, sBytes.length - 32);
+
+  r.set(rBytes.slice(rStart), 32 - (rBytes.length - rStart));
+  s.set(sBytes.slice(sStart), 32 - (sBytes.length - sStart));
+
+  // Concatenate r and s
+  const result = new Uint8Array(64);
+  result.set(r, 0);
+  result.set(s, 32);
+
+  return result;
+}
+
+/**
  * Creates a shareable encrypted payload using ECDH key agreement
  * Equivalent to shareable() and SafehillCypher.encrypt() in Kotlin
  *
  * @param data - The data to encrypt (e.g., symmetric key bytes)
- * @param receiverPublicKey - Receiver's public key (base64 encoded, raw format)
- * @param senderSignaturePrivateKey - Sender's signature private key (CryptoKey)
+ * @param receiverPublicKey - Receiver's public key (base64 encoded, raw or SPKI format)
+ * @param senderPrivateSignature - Sender's signature private key (CryptoKey) for signing
+ * @param senderPublicSignature - Sender's public signature key (base64 encoded, SPKI format from user profile)
  * @param protocolSalt - Salt for HKDF key derivation (base64 encoded string from server)
  * @returns ShareablePayload with ephemeral key, ciphertext, and signature
  */
 export async function createShareablePayload(
   data: Uint8Array,
   receiverPublicKey: string,
-  senderSignaturePrivateKey: CryptoKey,
+  senderPrivateSignature: CryptoKey,
+  senderPublicSignature: string,
   protocolSalt: string
 ): Promise<ShareablePayload> {
   // Generate ephemeral key pair
@@ -34,52 +131,21 @@ export async function createShareablePayload(
     ['deriveKey', 'deriveBits']
   );
 
-  // Import receiver's public key
-  // The key might be in SPKI format (91 bytes) or raw format (65 bytes)
+  // Import receiver's public key (should be in SPKI/DER format from session)
   const receiverPublicKeyBuffer = base64ToArrayBuffer(receiverPublicKey);
   console.debug('createShareablePayload importing receiver public key', {
     keyLength: receiverPublicKeyBuffer.byteLength,
     keyPreview: receiverPublicKey.substring(0, 20) + '...',
   });
 
-  let receiverPublicKeyCrypto: CryptoKey;
-
-  // Determine the receiver public key raw buffer
-  let receiverPublicKeyRawBuffer: ArrayBuffer;
-
-  // Try importing as raw first (65 bytes for P-256)
-  if (receiverPublicKeyBuffer.byteLength === 65) {
-    // Already in raw format
-    receiverPublicKeyRawBuffer = receiverPublicKeyBuffer;
-    receiverPublicKeyCrypto = await crypto.subtle.importKey(
-      'raw',
-      receiverPublicKeyBuffer,
-      { name: 'ECDH', namedCurve: 'P-256' },
-      false,
-      []
-    );
-  } else {
-    // Key is in SPKI format, import and extract raw format
-    const tempKey = await crypto.subtle.importKey(
-      'spki',
-      receiverPublicKeyBuffer,
-      { name: 'ECDH', namedCurve: 'P-256' },
-      true,
-      []
-    );
-
-    // Export to raw format
-    receiverPublicKeyRawBuffer = await crypto.subtle.exportKey('raw', tempKey);
-
-    // Re-import as raw for ECDH operations
-    receiverPublicKeyCrypto = await crypto.subtle.importKey(
-      'raw',
-      receiverPublicKeyRawBuffer,
-      { name: 'ECDH', namedCurve: 'P-256' },
-      false,
-      []
-    );
-  }
+  // Import SPKI key for ECDH operations
+  const receiverPublicKeyCrypto = await crypto.subtle.importKey(
+    'spki',
+    receiverPublicKeyBuffer,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    false,
+    []
+  );
 
   // Generate shared secret using ECDH
   const sharedSecret = await crypto.subtle.deriveBits(
@@ -88,34 +154,38 @@ export async function createShareablePayload(
     256
   );
 
-  // Export ephemeral public key in raw format
+  // Export ephemeral public key in SPKI/DER format
   const ephemeralPublicKeyBuffer = await crypto.subtle.exportKey(
-    'raw',
+    'spki',
     ephemeralKeyPair.publicKey
   );
 
-  // Derive sender's public signature key
-  const senderPublicSignature = await derivePublicKeyFromPrivate(
-    senderSignaturePrivateKey
-  );
+  // Use sender's public signature from user profile (SPKI format)
   const senderPublicSignatureBuffer = base64ToArrayBuffer(
     senderPublicSignature
   );
+  console.debug(
+    'createShareablePayload using sender public signature from profile',
+    {
+      keyLength: senderPublicSignatureBuffer.byteLength,
+      keyPreview: senderPublicSignature.substring(0, 20) + '...',
+    }
+  );
 
-  // Shared info: ephemeralPublicKey + receiverPublicKey + senderPublicSignature
+  // Shared info: ephemeralPublicKey (DER) + receiverPublicKey (DER) + senderPublicSignature (DER)
   const sharedInfo = new Uint8Array(
     ephemeralPublicKeyBuffer.byteLength +
-      receiverPublicKeyRawBuffer.byteLength +
+      receiverPublicKeyBuffer.byteLength +
       senderPublicSignatureBuffer.byteLength
   );
   sharedInfo.set(new Uint8Array(ephemeralPublicKeyBuffer), 0);
   sharedInfo.set(
-    new Uint8Array(receiverPublicKeyRawBuffer),
+    new Uint8Array(receiverPublicKeyBuffer),
     ephemeralPublicKeyBuffer.byteLength
   );
   sharedInfo.set(
     new Uint8Array(senderPublicSignatureBuffer),
-    ephemeralPublicKeyBuffer.byteLength + receiverPublicKeyRawBuffer.byteLength
+    ephemeralPublicKeyBuffer.byteLength + receiverPublicKeyBuffer.byteLength
   );
 
   // Decode protocol salt from base64
@@ -132,11 +202,11 @@ export async function createShareablePayload(
   // Encrypt the data with the derived key
   const ciphertext = await encryptWithDerivedKey(data, derivedKey);
 
-  // Sign: ciphertext + ephemeralPublicKey + receiverPublicKey (raw format)
+  // Sign: ciphertext + ephemeralPublicKey (DER) + receiverPublicKey (DER)
   const dataToSign = new Uint8Array(
     ciphertext.byteLength +
       ephemeralPublicKeyBuffer.byteLength +
-      receiverPublicKeyRawBuffer.byteLength
+      receiverPublicKeyBuffer.byteLength
   );
   dataToSign.set(new Uint8Array(ciphertext), 0);
   dataToSign.set(
@@ -144,20 +214,28 @@ export async function createShareablePayload(
     ciphertext.byteLength
   );
   dataToSign.set(
-    new Uint8Array(receiverPublicKeyRawBuffer),
+    new Uint8Array(receiverPublicKeyBuffer),
     ciphertext.byteLength + ephemeralPublicKeyBuffer.byteLength
   );
 
-  const signature = await crypto.subtle.sign(
+  const signatureP1363 = await crypto.subtle.sign(
     { name: 'ECDSA', hash: 'SHA-256' },
-    senderSignaturePrivateKey,
+    senderPrivateSignature,
     dataToSign
   );
+
+  // Convert signature from P1363 (64 bytes) to DER format for compatibility
+  const signatureDer = p1363ToDer(signatureP1363);
+
+  console.debug('Signature generated', {
+    p1363Length: signatureP1363.byteLength,
+    derLength: signatureDer.byteLength,
+  });
 
   return {
     ephemeralPublicKey: arrayBufferToBase64(ephemeralPublicKeyBuffer),
     ciphertext: arrayBufferToBase64(ciphertext),
-    signature: arrayBufferToBase64(signature),
+    signature: arrayBufferToBase64(signatureDer),
   };
 }
 
@@ -247,13 +325,15 @@ async function encryptWithDerivedKey(
  *
  * @param payload - The shareable payload to decrypt
  * @param receiverPrivateKey - Receiver's private key (CryptoKey)
- * @param senderPublicSignature - Sender's public signature key (base64 encoded, raw format)
+ * @param receiverPublicKey - Receiver's public key (base64 encoded, SPKI format)
+ * @param senderPublicSignature - Sender's public signature key (base64 encoded, SPKI format)
  * @param protocolSalt - Salt for HKDF key derivation (base64 encoded string from server)
  * @returns Decrypted data as Uint8Array
  */
 export async function decryptShareablePayload(
   payload: ShareablePayload,
   receiverPrivateKey: CryptoKey,
+  receiverPublicKey: string,
   senderPublicSignature: string,
   protocolSalt: string
 ): Promise<Uint8Array> {
@@ -263,80 +343,45 @@ export async function decryptShareablePayload(
     signatureLength: payload.signature.length,
   });
 
-  // Import ephemeral public key from the payload
+  // Import ephemeral public key from the payload (in SPKI/DER format)
   const ephemeralPublicKeyBuffer = base64ToArrayBuffer(
     payload.ephemeralPublicKey
   );
-  console.debug('Ephemeral public key buffer', {
+  console.debug('Ephemeral public key buffer (SPKI)', {
     byteLength: ephemeralPublicKeyBuffer.byteLength,
   });
 
   const ephemeralPublicKeyCrypto = await crypto.subtle.importKey(
-    'raw',
+    'spki',
     ephemeralPublicKeyBuffer,
     { name: 'ECDH', namedCurve: 'P-256' },
     false,
     []
   );
 
-  // Import sender's public signature key for verification
-  // The key might be in SPKI format (91 bytes) or raw format (65 bytes)
+  // Import sender's public signature key for verification (SPKI/DER format)
   const senderPublicSignatureBuffer = base64ToArrayBuffer(
     senderPublicSignature
   );
 
-  let senderPublicSignatureCrypto: CryptoKey;
-  let senderPublicSignatureRawBuffer: ArrayBuffer;
-
-  if (senderPublicSignatureBuffer.byteLength === 65) {
-    // Already in raw format
-    senderPublicSignatureRawBuffer = senderPublicSignatureBuffer;
-    senderPublicSignatureCrypto = await crypto.subtle.importKey(
-      'raw',
-      senderPublicSignatureBuffer,
-      { name: 'ECDSA', namedCurve: 'P-256' },
-      false,
-      ['verify']
-    );
-  } else {
-    // Key is in SPKI format, import and extract raw format
-    const tempKey = await crypto.subtle.importKey(
-      'spki',
-      senderPublicSignatureBuffer,
-      { name: 'ECDSA', namedCurve: 'P-256' },
-      true,
-      ['verify']
-    );
-
-    // Export to raw format
-    senderPublicSignatureRawBuffer = await crypto.subtle.exportKey(
-      'raw',
-      tempKey
-    );
-
-    // Re-import as raw for verification
-    senderPublicSignatureCrypto = await crypto.subtle.importKey(
-      'raw',
-      senderPublicSignatureRawBuffer,
-      { name: 'ECDSA', namedCurve: 'P-256' },
-      false,
-      ['verify']
-    );
-  }
-
-  // Derive receiver's public key from their private key
-  const receiverPublicKey = await derivePublicKeyFromPrivate(
-    receiverPrivateKey
+  const senderPublicSignatureCrypto = await crypto.subtle.importKey(
+    'spki',
+    senderPublicSignatureBuffer,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['verify']
   );
+
+  // Receiver's public key (in SPKI/DER format from session)
   const receiverPublicKeyBuffer = base64ToArrayBuffer(receiverPublicKey);
-  console.debug('Receiver public key derived', {
+  console.debug('Receiver public key from session (SPKI format)', {
     byteLength: receiverPublicKeyBuffer.byteLength,
   });
 
   // Get the ciphertext buffer for signature verification
   const ciphertextBuffer = base64ToArrayBuffer(payload.ciphertext);
 
-  // Verify signature: dataToSign = ciphertext + ephemeralPublicKey + receiverPublicKey
+  // Verify signature: ciphertext + ephemeralPublicKey (DER) + receiverPublicKey (DER)
   const dataToVerify = new Uint8Array(
     ciphertextBuffer.byteLength +
       ephemeralPublicKeyBuffer.byteLength +
@@ -352,11 +397,14 @@ export async function decryptShareablePayload(
     ciphertextBuffer.byteLength + ephemeralPublicKeyBuffer.byteLength
   );
 
-  const signatureBuffer = base64ToArrayBuffer(payload.signature);
+  const signatureDer = base64ToArrayBuffer(payload.signature);
+  // Convert signature from DER to P1363 format for Web Crypto API verification
+  const signatureP1363 = derToP1363(signatureDer);
+
   const isValid = await crypto.subtle.verify(
     { name: 'ECDSA', hash: 'SHA-256' },
     senderPublicSignatureCrypto,
-    signatureBuffer,
+    signatureP1363,
     dataToVerify
   );
 
@@ -376,11 +424,11 @@ export async function decryptShareablePayload(
     byteLength: sharedSecret.byteLength,
   });
 
-  // Shared info: ephemeralPublicKey + receiverPublicKey + senderPublicSignature (all in raw format)
+  // Shared info: ephemeralPublicKey (DER) + receiverPublicKey (DER) + senderPublicSignature (DER)
   const sharedInfo = new Uint8Array(
     ephemeralPublicKeyBuffer.byteLength +
       receiverPublicKeyBuffer.byteLength +
-      senderPublicSignatureRawBuffer.byteLength
+      senderPublicSignatureBuffer.byteLength
   );
   sharedInfo.set(new Uint8Array(ephemeralPublicKeyBuffer), 0);
   sharedInfo.set(
@@ -388,7 +436,7 @@ export async function decryptShareablePayload(
     ephemeralPublicKeyBuffer.byteLength
   );
   sharedInfo.set(
-    new Uint8Array(senderPublicSignatureRawBuffer),
+    new Uint8Array(senderPublicSignatureBuffer),
     ephemeralPublicKeyBuffer.byteLength + receiverPublicKeyBuffer.byteLength
   );
 
@@ -396,7 +444,7 @@ export async function decryptShareablePayload(
     totalLength: sharedInfo.byteLength,
     ephemeralKeyLength: ephemeralPublicKeyBuffer.byteLength,
     receiverKeyLength: receiverPublicKeyBuffer.byteLength,
-    senderSigLength: senderPublicSignatureRawBuffer.byteLength,
+    senderSigLength: senderPublicSignatureBuffer.byteLength,
   });
 
   // Decode protocol salt from base64

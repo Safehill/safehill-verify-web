@@ -181,15 +181,19 @@ export function UploadProvider({ children }: UploadProviderProps) {
       try {
         // Create upload service with progress callback
         const uploadService = new AssetUploadService(
-          (globalIdentifier: string, progress: UploadProgress) => {
+          (
+            globalIdentifier: string,
+            versionName: string,
+            progress: UploadProgress
+          ) => {
             console.debug('UploadContext.uploadFiles progress update', {
               globalIdentifier,
+              versionName,
               stage: progress.stage,
               progress: progress.progress,
               message: progress.message,
             });
-            // Since we only have 1 version ("original") for now, pass it directly
-            updateVersionProgress(globalIdentifier, 'original', progress);
+            updateVersionProgress(globalIdentifier, versionName, progress);
           }
         );
 

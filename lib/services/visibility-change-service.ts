@@ -61,11 +61,17 @@ export class VisibilityChangeService {
       assetCount: collection.assets.length,
     });
 
+    // Get user's public key and signature from authenticated session
+    const userPublicKey = authedSession.user.publicKey;
+    const userPublicSignature = authedSession.user.publicSignature;
+
     // Re-encrypt all asset decryption keys for the server
     const assetDecryptionDetails = await this.encryptAssetKeysForServer(
       collection.assets,
       userPrivateKey,
+      userPublicKey,
       userPrivateSignature,
+      userPublicSignature,
       serverPublicKey,
       protocolSalt,
       authedSession
@@ -93,7 +99,9 @@ export class VisibilityChangeService {
    *
    * @param assets - The assets in the collection (without version details)
    * @param userPrivateKey - User's private key (CryptoKey) for decryption
+   * @param userPublicKey - User's public key (base64 string)
    * @param userPrivateSignature - User's private signature key (CryptoKey) for signing
+   * @param userPublicSignature - User's public signature key (base64 string)
    * @param serverPublicKey - Server's public key (base64 string)
    * @param protocolSalt - Protocol salt (base64 string)
    * @param authedSession - Authenticated session for fetching asset details
@@ -102,7 +110,9 @@ export class VisibilityChangeService {
   private static async encryptAssetKeysForServer(
     assets: AssetOutputDTO[],
     userPrivateKey: CryptoKey,
+    userPublicKey: string,
     userPrivateSignature: CryptoKey,
+    userPublicSignature: string,
     serverPublicKey: string,
     protocolSalt: string,
     authedSession: AuthedSession
@@ -162,7 +172,9 @@ export class VisibilityChangeService {
         const serverEncryptedKey = await this.reEncryptKeyForServer(
           version,
           userPrivateKey,
+          userPublicKey,
           userPrivateSignature,
+          userPublicSignature,
           serverPublicKey,
           protocolSalt
         );
@@ -198,7 +210,9 @@ export class VisibilityChangeService {
    *
    * @param version - The asset version with encryption metadata
    * @param userPrivateKey - User's private key (CryptoKey) for decryption
+   * @param userPublicKey - User's public key (base64 string)
    * @param userPrivateSignature - User's private signature key (CryptoKey) for signing
+   * @param userPublicSignature - User's public signature key (base64 string)
    * @param serverPublicKey - Server's public key (base64 string)
    * @param protocolSalt - Protocol salt (base64 string)
    * @returns New version input DTO with server-encrypted key
@@ -206,7 +220,9 @@ export class VisibilityChangeService {
   private static async reEncryptKeyForServer(
     version: AssetVersionOutputDTO,
     userPrivateKey: CryptoKey,
+    userPublicKey: string,
     userPrivateSignature: CryptoKey,
+    userPublicSignature: string,
     serverPublicKey: string,
     protocolSalt: string
   ): Promise<AssetVersionInputDTO> {
@@ -222,6 +238,7 @@ export class VisibilityChangeService {
       version.publicSignature,
       version.senderPublicSignature,
       userPrivateKey,
+      userPublicKey,
       protocolSalt
     );
 
@@ -238,6 +255,7 @@ export class VisibilityChangeService {
       symmetricKeyBytes,
       serverPublicKey,
       userPrivateSignature,
+      userPublicSignature,
       protocolSalt
     );
 
