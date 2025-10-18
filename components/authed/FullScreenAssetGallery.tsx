@@ -6,6 +6,7 @@ import FingerprintIcon from '@/components/shared/FingerprintIcon';
 import { useCollection } from '@/lib/hooks/use-collections';
 import { useAsset } from '@/lib/hooks/use-assets';
 import { getUserColor } from '@/lib/utils';
+import { selectVersion, selectPublicVersion } from '@/lib/utils/asset-versions';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -190,9 +191,10 @@ function AssetImageView({
     : 'text-gray-500';
 
   // Determine version based on isPublic flag
+  // Use high-resolution for full-screen view, with fallback to low-res if hi-res not available yet
   const isPublic = asset.isPublic;
-  const publicVersion = imageData.publicVersions?.[0];
-  const encryptedVersion = imageData.versions[0];
+  const publicVersion = selectPublicVersion(imageData.publicVersions, 'hi');
+  const encryptedVersion = selectVersion(imageData.versions, 'hi');
 
   return (
     <div className="relative w-full h-full">
@@ -253,9 +255,10 @@ function AssetThumbnail({ asset }: { asset: Asset }) {
   }
 
   // Determine version based on isPublic flag
+  // Use low-resolution for thumbnails for better performance
   const isPublic = asset.isPublic;
-  const publicVersion = imageData.publicVersions?.[0];
-  const encryptedVersion = imageData.versions[0];
+  const publicVersion = selectPublicVersion(imageData.publicVersions, 'low');
+  const encryptedVersion = selectVersion(imageData.versions, 'low');
 
   return (
     <>

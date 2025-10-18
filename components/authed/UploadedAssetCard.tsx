@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { UploadedAsset } from '@/lib/types/asset';
 import DecryptedImage from './DecryptedImage';
+import { selectVersion, selectPublicVersion } from '@/lib/utils/asset-versions';
 
 interface UploadedAssetCardProps {
   asset: UploadedAsset;
@@ -22,11 +23,10 @@ export default function UploadedAssetCard({
   const { data: imageData, isLoading, error } = useAsset(asset.id);
 
   // Determine version to use based on isPublic flag
-  // For public assets: publicVersions will have data, versions will be empty
-  // For encrypted assets: versions will have data, publicVersions will be undefined
+  // For thumbnails, prefer low-resolution for better performance
   const isPublic = asset.isPublic;
-  const publicVersion = imageData?.publicVersions?.[0]; // First public version (low-res)
-  const encryptedVersion = imageData?.versions[0]; // First encrypted version (low-res)
+  const publicVersion = selectPublicVersion(imageData?.publicVersions, 'low');
+  const encryptedVersion = selectVersion(imageData?.versions, 'low');
 
   return (
     <div

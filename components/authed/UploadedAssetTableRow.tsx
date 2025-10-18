@@ -2,6 +2,7 @@
 
 import { useAsset } from '@/lib/hooks/use-assets';
 import { timeAgo } from '@/lib/utils';
+import { selectVersion, selectPublicVersion } from '@/lib/utils/asset-versions';
 import { Eye, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '../shared/button';
@@ -22,9 +23,10 @@ export default function UploadedAssetTableRow({
   const { data: imageData, isLoading, error } = useAsset(asset.id);
 
   // Determine version to use based on isPublic flag
+  // For thumbnails, prefer low-resolution for better performance
   const isPublic = asset.isPublic;
-  const publicVersion = imageData?.publicVersions?.[0];
-  const encryptedVersion = imageData?.versions[0];
+  const publicVersion = selectPublicVersion(imageData?.publicVersions, 'low');
+  const encryptedVersion = selectVersion(imageData?.versions, 'low');
 
   return (
     <tr
