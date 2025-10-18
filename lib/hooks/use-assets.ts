@@ -7,7 +7,9 @@ import type { AssetOutputDTO } from '@/lib/api/models/dto/Asset';
  * Calculate stale time based on presigned URL expiration
  * We use 80% of the shortest expiration time to ensure we refetch before URLs expire
  */
-const calculateStaleTime = (asset: AssetOutputDTO | AssetOutputDTO[]): number => {
+const calculateStaleTime = (
+  asset: AssetOutputDTO | AssetOutputDTO[]
+): number => {
   const assets = Array.isArray(asset) ? asset : [asset];
 
   // Find the shortest expiration time across all assets and their versions

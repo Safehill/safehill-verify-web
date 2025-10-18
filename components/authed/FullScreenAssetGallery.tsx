@@ -191,25 +191,27 @@ function AssetImageView({
     : 'text-gray-500';
 
   // Determine version based on isPublic flag
-  // Use high-resolution for full-screen view, with fallback to low-res if hi-res not available yet
+  // Use high-resolution for full-screen view, with low-res preview for progressive loading
   const isPublic = asset.isPublic;
-  const publicVersion = selectPublicVersion(imageData.publicVersions, 'hi');
-  const encryptedVersion = selectVersion(imageData.versions, 'hi');
+  const publicVersionHi = selectPublicVersion(imageData.publicVersions, 'hi');
+  const encryptedVersionHi = selectVersion(imageData.versions, 'hi');
+  const encryptedVersionLow = selectVersion(imageData.versions, 'low');
 
   return (
     <div className="relative w-full h-full">
-      {isPublic && publicVersion ? (
+      {isPublic && publicVersionHi ? (
         <Image
-          src={publicVersion.presignedURL}
+          src={publicVersionHi.presignedURL}
           alt={asset.name || 'Asset'}
           fill
           className="object-contain"
           sizes="100vw"
           unoptimized
         />
-      ) : !isPublic && encryptedVersion ? (
+      ) : !isPublic && encryptedVersionHi ? (
         <DecryptedImage
-          version={encryptedVersion}
+          version={encryptedVersionHi}
+          lowResPreview={encryptedVersionLow}
           alt={asset.name || 'Asset'}
           className="object-contain w-full h-full"
         />
