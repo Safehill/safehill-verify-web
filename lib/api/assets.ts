@@ -1,6 +1,7 @@
 import type { AuthedSession } from '@/lib/auth/auth-context';
 import type {
   AssetOutputDTO,
+  AssetInputDTO,
   AssetSearchCriteriaDTO,
   AssetDescriptorDTO,
   AssetSimilarMatchDTO,
@@ -12,6 +13,41 @@ import { toast } from 'sonner';
 
 // API functions for assets
 export const assetsApi = {
+  // Create a single asset (automatically added to user's Dropbox collection)
+  createAsset: async (
+    asset: AssetInputDTO,
+    authedSession: AuthedSession
+  ): Promise<AssetOutputDTO> => {
+    console.debug('assetsApi.createAsset called', {
+      globalIdentifier: asset.globalIdentifier,
+      versionCount: asset.versions.length,
+    });
+
+    try {
+      const result = await createAuthenticatedRequest<AssetOutputDTO>(
+        'post',
+        '/assets/create',
+        authedSession,
+        asset
+      );
+
+      console.debug('assetsApi.createAsset successful', {
+        globalIdentifier: result.globalIdentifier,
+        versionCount: result.versions.length,
+        uploadState: result.uploadState,
+      });
+
+      return result;
+    } catch (error) {
+      console.error('assetsApi.createAsset failed', error);
+      throw new Error(
+        `Failed to create asset: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
+  },
+
   // Get multiple assets by global identifiers (batch fetch)
   getAssets: async (
     globalIdentifiers: string[],

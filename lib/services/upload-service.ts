@@ -4,7 +4,7 @@ import type {
   CollectionAssetAddRequestDTO,
   CollectionAssetAddResultDTO,
 } from '@/lib/api/models/dto/Collection';
-import type { AssetInputDTO } from '@/lib/api/models/dto/Asset';
+import type { AssetInputDTO, AssetOutputDTO } from '@/lib/api/models/dto/Asset';
 import {
   AssetEncryption,
   type EncryptedAssetVersion,
@@ -104,7 +104,7 @@ export class AssetUploadService {
       );
       const creationResult = await this.createAssetsOnServer(
         encryptedAssets,
-        collection.id,
+        collection,
         authedSession
       );
 
@@ -252,12 +252,13 @@ export class AssetUploadService {
       globalIdentifier: string;
       encryptedVersions: EncryptedAssetVersion[];
     }[],
-    collectionId: string,
+    collection: CollectionOutputDTO,
     authedSession: AuthedSession
   ): Promise<CollectionAssetAddResultDTO> {
     console.debug('AssetUploadService.createAssetsOnServer started', {
       assetCount: encryptedAssets.length,
-      collectionId,
+      collectionId: collection.id,
+      isSystemCollection: collection.isSystemCollection,
     });
 
     encryptedAssets.forEach((asset) => {
@@ -270,7 +271,7 @@ export class AssetUploadService {
       });
     });
 
-    // Build request for batch asset creation
+    // Build asset input objects
     const assets: AssetInputDTO[] = encryptedAssets.map((asset) => ({
       globalIdentifier: asset.globalIdentifier,
       localIdentifier: undefined,
@@ -282,6 +283,50 @@ export class AssetUploadService {
       versions: asset.encryptedVersions.map((v) => v.selfEncryption),
       force: false,
     }));
+
+    // For system collections (Dropbox), create assets individually
+    // Assets are automatically added to Dropbox on creation
+    if (collection.isSystemCollection) {
+      console.debug(
+        'AssetUploadService.createAssetsOnServer using individual asset creation for system collection'
+      );
+
+      try {
+        const createdAssets: AssetOutputDTO[] = [];
+
+        for (const asset of assets) {
+          const result = await assetsApi.createAsset(asset, authedSession);
+          createdAssets.push(result);
+        }
+
+        console.debug(
+          'AssetUploadService.createAssetsOnServer system collection creation successful',
+          {
+            createdCount: createdAssets.length,
+          }
+        );
+
+        return {
+          success: true,
+          message: 'Assets created and added to Dropbox',
+          addedCount: createdAssets.length,
+          skippedCount: 0,
+          assets: createdAssets,
+        };
+      } catch (error) {
+        console.error(
+          'AssetUploadService.createAssetsOnServer system collection creation failed',
+          error
+        );
+        throw error;
+      }
+    }
+
+    // For non-system collections, use batch add-to-collection endpoint
+    // which handles both creation and addition in one call
+    console.debug(
+      'AssetUploadService.createAssetsOnServer using batch add-to-collection for non-system collection'
+    );
 
     const serverDecryptionDetails = encryptedAssets.map((asset) => ({
       assetGlobalIdentifier: asset.globalIdentifier,
@@ -302,7 +347,7 @@ export class AssetUploadService {
 
     try {
       const result = await collectionsApi.addAssetsToCollection(
-        collectionId,
+        collection.id,
         request,
         authedSession
       );
