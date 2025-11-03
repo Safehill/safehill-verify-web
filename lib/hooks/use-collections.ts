@@ -3,7 +3,7 @@ import type {
   CollectionOutputDTO,
   CollectionCreateDTO,
   CollectionUpdateDTO,
-  PaymentConfirmationDTO,
+  CreateCheckoutSessionRequestDTO,
   CollectionChangeVisibilityDTO,
   CollectionChangeVisibilityResultDTO,
 } from '@/lib/api/models/dto/Collection';
@@ -197,46 +197,23 @@ export const useCollectionAccess = (id: string) => {
   });
 };
 
-// Hook to create payment intent
-export const useCreatePaymentIntent = () => {
+// Hook to create checkout session
+export const useCreateCheckoutSession = () => {
   const { authedSession } = useAuth();
 
   return useMutation({
-    mutationFn: ({ collectionId }: { collectionId: string }) =>
-      collectionsApi.createPaymentIntent(collectionId, authedSession!),
-  });
-};
-
-// Hook to confirm payment
-export const useConfirmPayment = () => {
-  const { authedSession } = useAuth();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (variables: {
+    mutationFn: ({
+      collectionId,
+      request,
+    }: {
       collectionId: string;
-      paymentIntentId: string;
+      request: CreateCheckoutSessionRequestDTO;
     }) =>
-      collectionsApi.confirmPayment(
-        variables.collectionId,
-        variables.paymentIntentId,
+      collectionsApi.createCheckoutSession(
+        collectionId,
+        request,
         authedSession!
       ),
-    onSuccess: (
-      result: PaymentConfirmationDTO,
-      variables: { collectionId: string; paymentIntentId: string }
-    ) => {
-      if (result.success) {
-        // Invalidate access check and collection data
-        queryClient.invalidateQueries({
-          queryKey: collectionKeys.accessCheck(variables.collectionId),
-        });
-        queryClient.invalidateQueries({
-          queryKey: collectionKeys.detail(variables.collectionId),
-        });
-        queryClient.invalidateQueries({ queryKey: collectionKeys.lists() });
-      }
-    },
   });
 };
 

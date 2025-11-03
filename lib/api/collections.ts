@@ -5,8 +5,8 @@ import type {
   CollectionUpdateDTO,
   CollectionSearchDTO,
   AccessCheckResultDTO,
-  PaymentIntentDTO,
-  PaymentConfirmationDTO,
+  CheckoutSessionDTO,
+  CreateCheckoutSessionRequestDTO,
   CollectionAssetAddRequestDTO,
   CollectionAssetAddResultDTO,
   CollectionChangeVisibilityDTO,
@@ -56,38 +56,21 @@ export const collectionsApi = {
     }
   },
 
-  // Create payment intent for collection purchase
-  createPaymentIntent: async (
+  // Create checkout session for collection purchase
+  createCheckoutSession: async (
     collectionId: string,
+    request: CreateCheckoutSessionRequestDTO,
     authedSession: AuthedSession
-  ): Promise<PaymentIntentDTO> => {
+  ): Promise<CheckoutSessionDTO> => {
     try {
-      return await createAuthenticatedRequest<PaymentIntentDTO>(
+      return await createAuthenticatedRequest<CheckoutSessionDTO>(
         'post',
-        `/collections/payment-intent/${collectionId}`,
+        `/collections/checkout-session/${collectionId}`,
         authedSession,
-        {}
+        request
       );
     } catch (_error) {
-      throw new Error('Failed to create payment intent');
-    }
-  },
-
-  // Confirm payment and grant access
-  confirmPayment: async (
-    collectionId: string,
-    paymentIntentId: string,
-    authedSession: AuthedSession
-  ): Promise<PaymentConfirmationDTO> => {
-    try {
-      return await createAuthenticatedRequest<PaymentConfirmationDTO>(
-        'post',
-        `/collections/confirm-payment/${collectionId}`,
-        authedSession,
-        {}
-      );
-    } catch (_error) {
-      throw new Error('Payment confirmation failed');
+      throw new Error('Failed to create checkout session');
     }
   },
 

@@ -72,10 +72,39 @@ export default function CollectionSettingsModal({
     }
   }, [showModal, collection]);
 
-  // Calculate platform fees (8.5% fee)
-  const platformFeeRate = 0.085;
+  // Safehill's platform fee rate (applied to amount after payment processor fees)
+  const platformFeeRate = 0.18;
+
+  // Pricing tiers for web (via Stripe)
+  // These prices are set to align with Apple IAP tiers while ensuring sellers receive
+  // the same payout regardless of which platform the buyer uses.
+  //
+  // Apple IAP Tiers: $0.99, $4.99, $9.99, $19.99, $49.99, $99.99
+  // Web Tiers:       $0.99, $3.99, $7.99, $15.99, $39.99, $79.99
+  //
+  // Fee Structure (designed to give sellers consistent payouts):
+  // - Web (Stripe): Buyer pays -> Stripe takes 2.9% + $0.30 -> Safehill takes 18% of remainder -> Seller gets rest
+  // - Apple (iOS):  Buyer pays -> Apple takes 30% -> Safehill takes variable % -> Seller gets SAME as web
+  //
+  // Example for tier 5:
+  // Web:   $39.99 -> Stripe: $1.46 -> After: $38.53 -> Safehill: $6.94 (18% of $38.53) -> Seller: $31.59
+  // Apple: $49.99 -> Apple: $15.00 -> After: $34.99 -> Safehill: $3.40 (9.7% of $34.99) -> Seller: $31.59
+  //
+  // Note: Safehill absorbs the cost difference between payment processors to ensure
+  // sellers see consistent payouts in the UI regardless of buyer's platform.
+  const pricingTiers = [0, 0.99, 3.99, 7.99, 15.99, 39.99, 79.99];
+
+  // Find the closest tier to current pricing
   const numericPricing = parseFloat(pricing) || 0;
-  const platformFee = numericPricing * platformFeeRate;
+  const currentTierIndex =
+    pricingTiers.findIndex((tier) => Math.abs(tier - numericPricing) < 0.01) ??
+    0;
+
+  // Calculate total platform fee (Stripe fees + Safehill's fee combined)
+  // User doesn't need to know the breakdown - just what they get vs what platform takes
+  const stripeFee = numericPricing > 0 ? numericPricing * 0.029 + 0.3 : 0;
+  const safehillFee = numericPricing * platformFeeRate;
+  const platformFee = stripeFee + safehillFee;
 
   // Determine which visibility options are disabled based on original hierarchy
   const originalIsPublic = collection.visibility === 'public';
@@ -583,23 +612,48 @@ export default function CollectionSettingsModal({
                         : ''
                     }`}
                   >
-                    <div className="flex items-center space-x-4">
+                    <div className="flex flex-col space-y-3">
                       <div className="text-2xl font-bold text-gray-900">
-                        ${numericPricing}
+                        ${numericPricing.toFixed(2)}
                       </div>
                       <input
                         type="range"
                         min="0"
-                        max="100"
-                        value={numericPricing}
-                        onChange={(e) => setPricing(e.target.value)}
+                        max={pricingTiers.length - 1}
+                        step="1"
+                        value={currentTierIndex}
+                        onChange={(e) => {
+                          const tierIndex = parseInt(e.target.value);
+                          setPricing(pricingTiers[tierIndex].toFixed(2));
+                        }}
                         disabled={visibility !== 'confidential'}
-                        className={`flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
+                        className={`w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
                           visibility !== 'confidential'
                             ? 'opacity-50 cursor-not-allowed'
                             : ''
                         }`}
                       />
+                      {/* Tier labels aligned with slider thumb positions */}
+                      <div className="relative w-full h-5">
+                        {pricingTiers.map((tier, index) => {
+                          // Calculate position percentage for each tier
+                          const percentage =
+                            (index / (pricingTiers.length - 1)) * 100;
+                          return (
+                            <span
+                              key={index}
+                              className={`absolute text-xs transform -translate-x-1/2 ${
+                                currentTierIndex === index
+                                  ? 'font-bold text-purple-600'
+                                  : 'text-gray-500'
+                              }`}
+                              style={{ left: `${percentage}%` }}
+                            >
+                              ${tier === 0 ? '0' : tier.toFixed(2)}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
 

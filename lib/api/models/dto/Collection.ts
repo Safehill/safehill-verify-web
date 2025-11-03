@@ -52,15 +52,17 @@ export interface AccessCheckResultDTO {
   createdBy?: string;
 }
 
-export interface PaymentIntentDTO {
-  clientSecret: string;
+export interface CheckoutSessionDTO {
+  sessionUrl?: string; // For hosted mode (mobile)
+  clientSecret?: string; // For embedded mode (web)
+  sessionId: string;
   amount: number;
   currency: string;
 }
 
-export interface PaymentConfirmationDTO {
-  success: boolean;
-  message?: string;
+export interface CreateCheckoutSessionRequestDTO {
+  ui_mode: 'hosted' | 'embedded';
+  web_base_url?: string; // Required for embedded mode
 }
 
 export interface CollectionAssetAddRequestDTO {
