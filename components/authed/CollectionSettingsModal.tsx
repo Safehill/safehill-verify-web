@@ -72,27 +72,29 @@ export default function CollectionSettingsModal({
     }
   }, [showModal, collection]);
 
-  // Safehill's platform fee rate (applied to amount after payment processor fees)
+  // Safehill's platform fee rate (applied to gross amount before payment processor fees)
   const platformFeeRate = 0.18;
 
   // Pricing tiers for web (via Stripe)
-  // These prices are set to align with Apple IAP tiers while ensuring sellers receive
-  // the same payout regardless of which platform the buyer uses.
+  // Apple IAP prices are set higher to ensure sellers receive the same payout regardless
+  // of which platform the buyer uses. Buyers pay 25-39% more on iOS.
   //
-  // Apple IAP Tiers: $0.99, $4.99, $9.99, $19.99, $49.99, $99.99
-  // Web Tiers:       $0.99, $3.99, $7.99, $15.99, $39.99, $79.99
+  // Web Tiers (Stripe):     $0.99, $1.99, $4.99, $9.99, $19.99, $29.99, $49.99, $99.99
+  // Apple IAP Tiers (iOS):  $0.99, $2.49, $6.49, $13.49, $26.99, $40.99, $68.99, $138.99
   //
-  // Fee Structure (designed to give sellers consistent payouts):
-  // - Web (Stripe): Buyer pays -> Stripe takes 2.9% + $0.30 -> Safehill takes 18% of remainder -> Seller gets rest
-  // - Apple (iOS):  Buyer pays -> Apple takes 30% -> Safehill takes variable % -> Seller gets SAME as web
+  // Fee Structure:
+  // - Web (Stripe): Buyer pays -> Stripe takes 2.9% + $0.30 -> Safehill takes 18% of gross -> Seller gets rest
+  // - Apple (iOS):  Buyer pays MORE -> Apple takes 30% of gross -> Safehill takes remainder -> Seller gets SAME as web
+  //   Safehill's Apple fee = Apple tier price - Apple's 30% cut - Seller's payout (calculated from Stripe tier)
   //
-  // Example for tier 5:
-  // Web:   $39.99 -> Stripe: $1.46 -> After: $38.53 -> Safehill: $6.94 (18% of $38.53) -> Seller: $31.59
-  // Apple: $49.99 -> Apple: $15.00 -> After: $34.99 -> Safehill: $3.40 (9.7% of $34.99) -> Seller: $31.59
+  // Example for tier 6 ($29.99 web / $40.99 Apple):
+  // Web:   $29.99 -> Stripe: $1.17 (2.9% + $0.30) -> Safehill: $5.40 (18%) -> Seller: $23.42
+  // Apple: $40.99 -> Apple: $12.30 (30%) -> Safehill: $5.27 (12.9%) -> Seller: $23.42 ✓
+  // Buyer surcharge on iOS: 36.68% | Safehill fee vs Stripe: -2.4%
   //
-  // Note: Safehill absorbs the cost difference between payment processors to ensure
-  // sellers see consistent payouts in the UI regardless of buyer's platform.
-  const pricingTiers = [0, 0.99, 3.99, 7.99, 15.99, 39.99, 79.99];
+  // Note: Sellers receive identical payouts across platforms. The iOS price premium mostly
+  // covers the buyer's choice to use Apple IAP, with Safehill absorbing a slight reduction.
+  const pricingTiers = [0, 0.99, 1.99, 4.99, 9.99, 19.99, 29.99, 49.99, 99.99];
 
   // Find the closest tier to current pricing
   const numericPricing = parseFloat(pricing) || 0;
