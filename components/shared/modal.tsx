@@ -12,6 +12,7 @@ interface ModalProps {
   showModal: boolean;
   setShowModal: Dispatch<SetStateAction<boolean>>;
   title?: string;
+  description?: string;
 }
 
 const Modal = ({
@@ -20,6 +21,7 @@ const Modal = ({
   showModal,
   setShowModal,
   title,
+  description,
 }: ModalProps) => {
   const { isMobile } = useMediaQuery();
 
@@ -30,14 +32,20 @@ const Modal = ({
         <Drawer.Portal>
           <Drawer.Content
             className={cn(
-              'fixed bottom-0 left-0 right-0 z-50 mt-24 rounded-t-[10px] border-t border-gray-200 bg-white',
+              'fixed bottom-0 left-0 right-0 z-50 mt-24 rounded-t-[10px] border-t border-gray-200 bg-white max-h-[95vh] flex flex-col',
               className
             )}
           >
-            <div className="sticky top-0 z-20 flex w-full items-center justify-center rounded-t-[10px] bg-inherit">
+            <div className="sticky top-0 z-20 flex w-full items-center justify-center rounded-t-[10px] bg-inherit flex-shrink-0">
               <div className="my-3 h-1 w-12 rounded-full bg-gray-300" />
             </div>
-            {children}
+            <Drawer.Title className="absolute left-[-10000px]">
+              {title || 'Modal'}
+            </Drawer.Title>
+            <Drawer.Description className="absolute left-[-10000px]">
+              {description || 'Modal content'}
+            </Drawer.Description>
+            <div className="flex-1 overflow-y-auto">{children}</div>
           </Drawer.Content>
           <Drawer.Overlay />
         </Drawer.Portal>
@@ -62,8 +70,11 @@ const Modal = ({
           )}
         >
           <Dialog.Title className="absolute left-[-10000px]">
-            {title || ''}
+            {title || 'Modal'}
           </Dialog.Title>
+          <Dialog.Description className="absolute left-[-10000px]">
+            {description || 'Modal content'}
+          </Dialog.Description>
           {children}
         </Dialog.Content>
       </Dialog.Portal>

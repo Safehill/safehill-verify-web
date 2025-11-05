@@ -2,6 +2,7 @@
 
 import CollectionCard from '@/components/authed/CollectionCard';
 import AuthedSectionTopBar from '@/components/authed/AuthedSectionTopBar';
+import HeaderSpacer from '@/components/authed/HeaderSpacer';
 import AddCollectionModal from '@/components/shared/AddCollectionModal';
 import AddCollectionDropdown from '@/components/shared/AddCollectionDropdown';
 import CreateCollectionModal from '@/components/shared/CreateCollectionModal';
@@ -110,7 +111,10 @@ export default function AuthedSectionLayout() {
     <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
       <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
 
-      <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
+      {/* Spacer to push content below fixed header */}
+      <HeaderSpacer />
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 min-w-[350px]">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">

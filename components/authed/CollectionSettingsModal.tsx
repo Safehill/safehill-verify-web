@@ -9,10 +9,13 @@ import {
   useDeleteCollection,
   useChangeCollectionVisibility,
 } from '@/lib/hooks/use-collections';
+import { usePayoutAccountStatus } from '@/lib/hooks/use-payouts';
+import { isPayoutRequirementsDisabled } from '@/lib/utils/feature-flags';
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import { generateCollectionLink } from '@/lib/api/collections';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { VisibilityChangeService } from '@/lib/services/visibility-change-service';
 import { useServerEncryptionKeys } from '@/lib/hooks/useServerEncryptionKeys';
@@ -61,6 +64,9 @@ export default function CollectionSettingsModal({
   const { authedSession } = useAuth();
   const { data: serverKeys, isLoading: isLoadingServerKeys } =
     useServerEncryptionKeys();
+
+  // Check payout status for validation
+  const { data: payoutStatus } = usePayoutAccountStatus();
 
   // Reset form values when collection changes or modal opens
   useEffect(() => {
@@ -113,6 +119,18 @@ export default function CollectionSettingsModal({
   const originalIsConfidential = collection.visibility === 'confidential';
   const originalIsNotShared = collection.visibility === 'not-shared';
   const historicalRevenue = 0;
+
+  // Check if payouts are fully active
+  // Skip validation if payout requirements are disabled via feature flag
+  const isPayoutActive =
+    isPayoutRequirementsDisabled() ||
+    (payoutStatus?.hasAccount &&
+      payoutStatus?.status === 'active' &&
+      payoutStatus?.chargesEnabled &&
+      payoutStatus?.payoutsEnabled);
+
+  // Pricing is only enabled if visibility is confidential AND payouts are active
+  const isPricingEnabled = visibility === 'confidential' && isPayoutActive;
 
   // Handle visibility change with warnings
   const handleVisibilityChange = (newVisibility: Visibility) => {
@@ -170,6 +188,14 @@ export default function CollectionSettingsModal({
       const descriptionChanged = description !== collection.description;
       const visibilityChanged = visibility !== collection.visibility;
       const pricingChanged = numericPricing !== collection.pricing;
+
+      // Validate payout setup if pricing is being changed
+      if (pricingChanged && numericPricing > 0 && !isPayoutActive) {
+        toast.error(
+          'Please set up payouts before setting a price on your collection.'
+        );
+        return;
+      }
 
       // Step 1: Change visibility if needed (must happen first)
       if (visibilityChanged) {
@@ -609,7 +635,7 @@ export default function CollectionSettingsModal({
                 <div className="lg:col-span-2">
                   <div
                     className={`transition-opacity ${
-                      visibility !== 'confidential'
+                      !isPricingEnabled
                         ? 'opacity-50 pointer-events-none select-none'
                         : ''
                     }`}
@@ -628,9 +654,9 @@ export default function CollectionSettingsModal({
                           const tierIndex = parseInt(e.target.value);
                           setPricing(pricingTiers[tierIndex].toFixed(2));
                         }}
-                        disabled={visibility !== 'confidential'}
+                        disabled={!isPricingEnabled}
                         className={`w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider ${
-                          visibility !== 'confidential'
+                          !isPricingEnabled
                             ? 'opacity-50 cursor-not-allowed'
                             : ''
                         }`}
@@ -675,6 +701,31 @@ export default function CollectionSettingsModal({
                           <p className="text-sm text-gray-700">
                             Only confidentially shared collections can be sold.
                           </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : !isPayoutActive ? (
+                    <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-yellow-600 text-xs font-bold">
+                            !
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-yellow-800 mb-1">
+                            Payout setup required
+                          </p>
+                          <p className="text-sm text-yellow-700 mb-2">
+                            You need to complete payout setup before you can set
+                            prices on your collections.
+                          </p>
+                          <Link
+                            href="/authed/payouts"
+                            className="text-sm font-medium text-yellow-900 underline hover:text-yellow-800"
+                          >
+                            Set up payouts now →
+                          </Link>
                         </div>
                       </div>
                     </div>

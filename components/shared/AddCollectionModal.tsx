@@ -54,7 +54,7 @@ export default function AddCollectionModal({
   showModal,
   setShowModal,
 }: AddCollectionModalProps) {
-  const { authedSession } = useAuth();
+  const { authedSession: _authedSession } = useAuth();
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState('');

@@ -196,16 +196,30 @@ Polling strategy:
 
 Use Stripe test mode for development:
 
-1. **Test Cards**:
+1. **Test Data That Works**:
+
+   Individual Account:
+   - Legal name: John Doe
+   - Email: john.doe@example.com
+   - DOB: 01/01/1990
+   - SSN: 000-00-0000 (Stripe's magic test value)
+   - Address: 123 Main St, San Francisco, CA 94111
+   - Phone: 415-555-0123
+   
+   Bank Account (for payouts):
+   - Routing number: 110000000 (Stripe test routing number)
+   - Account number: 000123456789
+
+2. **Test Cards**:
    - Success: `4242 4242 4242 4242`
    - Decline: `4000 0000 0000 0002`
    - Authentication Required: `4000 0025 0000 3155`
 
-2. **Webhook Testing**:
+3. **Webhook Testing**:
    - Use Stripe CLI: `stripe listen --forward-to localhost:8080/collections/stripe-webhook`
    - Trigger events: `stripe trigger checkout.session.completed`
 
-3. **Test Flow**:
+4. **Test Flow**:
    - Click "Purchase" button
    - Verify embedded checkout loads
    - Enter test card: `4242 4242 4242 4242`

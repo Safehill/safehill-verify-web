@@ -198,7 +198,7 @@ export const assetsApi = {
   markAssetUploadedMock: async (
     globalIdentifier: string,
     versionName: string,
-    authedSession: AuthedSession
+    _authedSession: AuthedSession
   ): Promise<void> => {
     console.debug('assetsApi.markAssetUploadedMock called', {
       globalIdentifier,

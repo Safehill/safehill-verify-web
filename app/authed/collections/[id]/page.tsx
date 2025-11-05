@@ -3,6 +3,7 @@
 import AssetGallery from '@/components/authed/AssetGallery';
 import UploadedAssetTableRow from '@/components/authed/UploadedAssetTableRow';
 import UploadingAssetTableRow from '@/components/authed/UploadingAssetTableRow';
+import HeaderSpacer from '@/components/authed/HeaderSpacer';
 import {
   isUploadingAsset,
   getAssetId,
@@ -400,7 +401,7 @@ export default function CollectionDetail() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
         <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
-        <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 min-w-[350px]">
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
             <span className="ml-2 text-white">Loading collection...</span>
@@ -415,7 +416,7 @@ export default function CollectionDetail() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
         <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
-        <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 min-w-[350px]">
           <div className="text-center py-12">
             <div className="mx-auto h-12 w-12 text-white/60">
               <X className="h-full w-full" />
@@ -447,7 +448,10 @@ export default function CollectionDetail() {
     <div className="min-h-screen bg-gradient-to-br from-deepTeal to-mutedTeal">
       <AuthedSectionTopBar breadcrumbs={breadcrumbs} />
 
-      <div className="mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8 min-w-[350px]">
+      {/* Spacer to push content below fixed header */}
+      <HeaderSpacer />
+
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 min-w-[350px]">
         {/* Header */}
         <div className="mb-8">
           {/* Buttons Row */}

@@ -13,6 +13,7 @@ export interface CollectionOutputDTO {
   name: string;
   description: string;
   isSystemCollection: boolean;
+  isArchived: boolean;
   assetCount: number;
   visibility: Visibility;
   pricing: number;
