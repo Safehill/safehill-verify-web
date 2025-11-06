@@ -4,8 +4,11 @@ import { useRouter } from 'next/navigation';
 import type React from 'react';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth/auth-context';
+import { Toaster } from 'sonner';
+import { UploadProvider } from '@/lib/contexts/upload-context';
+import UploadProgressToaster from '@/components/shared/UploadProgressToaster';
 
-export default function DashboardLayout({
+export default function AuthedSectionLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -13,13 +16,22 @@ export default function DashboardLayout({
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
-  // Protect all dashboard routes
+  // Protect all authed section routes
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login');
+      // Redirect to login with current path as redirect parameter
+      const currentPath = window.location.pathname;
+      const loginUrl = `/login?redirect=${encodeURIComponent(currentPath)}`;
+      router.push(loginUrl);
     }
   }, [isAuthenticated, router]);
 
   // Only render children if authenticated
-  return isAuthenticated ? <>{children}</> : null;
+  return isAuthenticated ? (
+    <UploadProvider>
+      {children}
+      <Toaster />
+      <UploadProgressToaster />
+    </UploadProvider>
+  ) : null;
 }

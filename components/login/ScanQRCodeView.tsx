@@ -2,20 +2,20 @@ import { ArrowRight, RefreshCw } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { Button } from '@/components/shared/button';
 import { Progress } from '@/components/shared/progress';
-import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
+import type { AuthedSession } from '@/lib/auth/auth-context';
 
 const ScanQRCodeView = ({
   qrCodePayload,
   timeRemaining,
   progress,
-  authenticatedUser,
+  authedSession,
   generateQRCode,
   onBack,
 }: {
   qrCodePayload: string;
   timeRemaining: number;
   progress: number;
-  authenticatedUser: AuthenticatedUser | null;
+  authedSession: AuthedSession | null;
   generateQRCode: () => void;
   onBack: () => void;
 }) => {
@@ -47,7 +47,7 @@ const ScanQRCodeView = ({
             <Progress value={progress} className="h-2" />
           </div>
 
-          {authenticatedUser ? (
+          {authedSession ? (
             <div className="flex items-center gap-2 text-green-600">
               <div className="animate-pulse">
                 Authentication successful! Redirecting...
@@ -67,7 +67,7 @@ const ScanQRCodeView = ({
           )}
 
           {/* Back button */}
-          {!authenticatedUser && (
+          {!authedSession && (
             <div className="w-full py-5">
               <Button
                 variant="outline"

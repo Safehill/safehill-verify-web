@@ -2,19 +2,22 @@
 
 import type { UserDTO } from '@/lib/api/models/dto/User';
 import { usePathname, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import {
-    createContext,
-    type ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from 'react';
+import { setLogoutCallback } from '@/lib/api/api';
 
 // Define types for our authentication data
 export type AuthedSession = {
-  bearerToken: string;
+  authToken: string;
   privateKey: CryptoKey;
-  signature: CryptoKey;
+  privateSignature: CryptoKey;
   user: UserDTO;
   expiresAt: number;
 };
@@ -41,17 +44,27 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const [authedSession, setAuthedSession] = useState<AuthedSession | null>(
     null
   );
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Logout function - clears credentials and redirects to login
-  const logout = () => {
+  // Logout function - clears credentials, cache, and redirects to login
+  const logout = useCallback(() => {
+    // Clear all React Query cache to prevent data leakage between users
+    queryClient.clear();
+
     setAuthedSession(null);
     setIsAuthenticated(false);
     router.push('/login');
-  };
+  }, [router, queryClient]);
+
+  // Register logout callback with axios interceptor
+  useEffect(() => {
+    setLogoutCallback(logout);
+    return () => setLogoutCallback(null);
+  }, [logout]);
 
   // Check token expiration periodically
   useEffect(() => {
@@ -61,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkExpiration = () => {
       if (authedSession.expiresAt < Date.now()) {
-        console.log('Authentication expired');
+        // console.log('Authentication expired');
         logout();
       }
     };
@@ -72,11 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Then check every minute
     const interval = setInterval(checkExpiration, 60 * 1000);
     return () => clearInterval(interval);
-  }, [authedSession]);
+  }, [authedSession, logout]);
 
   // Redirect to login if accessing protected route without authentication
   useEffect(() => {
-    if (pathname?.startsWith('/dashboard') && !isAuthenticated) {
+    if (pathname?.startsWith('/authed') && !isAuthenticated) {
       router.push('/login');
     }
   }, [pathname, isAuthenticated, router]);

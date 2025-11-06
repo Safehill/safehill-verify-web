@@ -2,6 +2,7 @@
 
 import LineSeparator from '@/components/home/LineSeparator';
 import UserView from '@/components/shared/UserView';
+import type { UserDTO } from '@/lib/api/models/dto/User';
 import { useUsers } from '@/lib/hooks/use-users';
 import { formattedDate } from '@/lib/utils';
 import { FingerPrintIcon } from '@heroicons/react/24/outline';
@@ -19,12 +20,12 @@ const ImageDetails: React.FC<ImageMetadataProps> = ({
   const authorIds = matches.map((match) => match.author);
   const {
     data: users,
-    isLoading: usersLoading,
-    error: usersFetchError,
+    isLoading: _usersLoading,
+    error: _usersFetchError,
   } = useUsers(authorIds);
 
   const resolveUser = (id: string) =>
-    users?.find((u) => u.identifier === id) ?? null;
+    users?.find((u: UserDTO) => u.identifier === id) ?? null;
 
   return (
     <div className="z-10 w-full px-5 xl:px-0">

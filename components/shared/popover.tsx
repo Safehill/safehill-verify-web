@@ -1,9 +1,9 @@
 'use client';
 
+import useMediaQuery from '@/lib/hooks/use-media-query';
+import * as Dialog from '@radix-ui/react-dialog';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import type { Dispatch, ReactNode, SetStateAction } from 'react';
-import { Drawer } from 'vaul';
-import useMediaQuery from '@/lib/hooks/use-media-query';
 
 export default function Popover({
   children,
@@ -11,6 +11,7 @@ export default function Popover({
   align = 'center',
   openPopover,
   setOpenPopover,
+  darkTheme = false,
 }: {
   children: ReactNode;
   content: ReactNode | string;
@@ -18,26 +19,49 @@ export default function Popover({
   openPopover: boolean;
   setOpenPopover: Dispatch<SetStateAction<boolean>>;
   mobileOnly?: boolean;
+  darkTheme?: boolean;
 }) {
   const { isMobile } = useMediaQuery();
 
   if (isMobile) {
     return (
-      <Drawer.Root open={openPopover} onOpenChange={setOpenPopover}>
-        <div className="sm:hidden">{children}</div>
-        <Drawer.Overlay className="fixed inset-0 z-40 bg-gray-100 bg-opacity-10 backdrop-blur" />
-        <Drawer.Portal>
-          <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 mt-24 rounded-t-[10px] border-t border-gray-200 bg-white">
-            <div className="sticky top-0 z-20 flex w-full items-center justify-center rounded-t-[10px] bg-inherit">
-              <div className="my-3 h-1 w-12 rounded-full bg-gray-300" />
+      <Dialog.Root open={openPopover} onOpenChange={setOpenPopover}>
+        <Dialog.Trigger asChild>
+          <div className="sm:hidden">{children}</div>
+        </Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-40 bg-black bg-opacity-50 backdrop-blur" />
+          <Dialog.Content
+            className={`fixed bottom-0 left-0 right-0 z-50 rounded-t-[10px] ${
+              darkTheme
+                ? 'bg-[#222] border-t border-[#333]'
+                : 'bg-white border-t border-gray-200'
+            }`}
+          >
+            <Dialog.Title className="absolute left-[-10000px]">
+              Menu
+            </Dialog.Title>
+            <div
+              className={`sticky top-0 z-20 flex w-full items-center justify-center rounded-t-[10px] ${
+                darkTheme ? 'bg-[#222]' : 'bg-inherit'
+              }`}
+            >
+              <div
+                className={`my-3 h-1 w-12 rounded-full ${
+                  darkTheme ? 'bg-gray-600' : 'bg-gray-300'
+                }`}
+              />
             </div>
-            <div className="flex min-h-[150px] w-full items-center justify-center overflow-hidden bg-white pb-8 align-middle shadow-xl">
+            <div
+              className={`w-full pb-8 shadow-xl ${
+                darkTheme ? 'bg-[#222]' : 'bg-white'
+              }`}
+            >
               {content}
             </div>
-          </Drawer.Content>
-          <Drawer.Overlay />
-        </Drawer.Portal>
-      </Drawer.Root>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     );
   }
 
@@ -50,8 +74,16 @@ export default function Popover({
         <PopoverPrimitive.Content
           sideOffset={8}
           align={align}
-          className="z-50 hidden animate-slide-up-fade items-center rounded-md border border-gray-200 bg-white drop-shadow-lg sm:block"
+          className={`z-50 animate-slide-up-fade items-center rounded-md drop-shadow-lg ${
+            darkTheme
+              ? 'border-2 border-[#333] bg-[#111]'
+              : 'border border-gray-200 bg-white'
+          }`}
         >
+          {/* Disclosure triangle on the left */}
+          {darkTheme && (
+            <div className="absolute top-1/2 -right-4 transform -translate-y-1/2 w-0 h-0 border-t-6 border-b-6 border-l-6 border-transparent border-l-[#111]"></div>
+          )}
           {content}
         </PopoverPrimitive.Content>
       </PopoverPrimitive.Portal>

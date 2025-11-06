@@ -30,12 +30,12 @@ export function useOpenCV() {
     !OpenCVSingleton.isLoaded &&
     !OpenCVSingleton.hasInitStarted
   ) {
-    console.log('useOpenCV initializing');
+    // console.log('useOpenCV initializing');
     OpenCVSingleton.hasInitStarted = true;
 
     try {
       cv.onRuntimeInitialized = () => {
-        console.log('useOpenCV initialization COMPLETE!');
+        // console.log('useOpenCV initialization COMPLETE!');
         OpenCVSingleton.isLoaded = true;
         notifyAll();
       };
@@ -103,7 +103,7 @@ export function useOpenCV() {
     return hexString;
   }
 
-  function binaryToUint8List(binaryString: string): number[] {
+  function _binaryToUint8List(binaryString: string): number[] {
     // Pad the binary string with leading zeros if needed
     while (binaryString.length % 8 !== 0) {
       binaryString = '0' + binaryString;

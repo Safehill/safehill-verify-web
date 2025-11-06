@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
 import { WS_BASE_URL } from '@/lib/api/api';
-import type { AuthenticatedUser } from '@/lib/api/models/AuthenticatedUser';
+import type { AuthedSession } from '@/lib/auth/auth-context';
 import type {
   AuthCredentialsMessage,
   AuthSessionInitializationMessage,
@@ -12,12 +11,13 @@ import {
   importPrivateKeySigning,
   initializePrivateKeyAgreement,
 } from '@/lib/crypto/keys';
+import { useCallback, useEffect, useState } from 'react';
 
 export type SessionWebSocketState = {
   session: AuthSessionInitializationMessage | null;
   symmetricKey: CryptoKey | null;
-  authenticatedUser: AuthenticatedUser | null;
-  setAuthenticatedUser: (authenticatedUser: AuthenticatedUser | null) => void;
+  authedSession: AuthedSession | null;
+  setAuthedSession: (authedSession: AuthedSession | null) => void;
   error: string | null;
   isConnecting: boolean;
   retry: () => void;
@@ -36,8 +36,8 @@ export const WebsocketSessionStatus = {
 export function useSessionWebSocket(): SessionWebSocketState {
   const [websocketSession, setWebsocketSession] =
     useState<AuthSessionInitializationMessage | null>(null);
-  const [authenticatedUser, setAuthenticatedUser] =
-    useState<AuthenticatedUser | null>(null);
+  const [localAuthedSession, setLocalLocalAuthedSession] =
+    useState<AuthedSession | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { setAuthedSession } = useAuth();
@@ -48,7 +48,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
     !SessionEncryption.symmetricKey &&
     !SessionEncryption.isInitializing
   ) {
-    console.log('Creating encryption key');
+    // console.log('Creating encryption key');
     SessionEncryption.isInitializing = true;
 
     generateSymmetricKey().then((key) => {
@@ -77,15 +77,15 @@ export function useSessionWebSocket(): SessionWebSocketState {
     }
     WebsocketSessionStatus.isConnecting = true;
     setError(null);
-    setAuthenticatedUser(null);
+    setLocalLocalAuthedSession(null);
     setWebsocketSession(null);
 
     const ws = new WebSocket(`${WS_BASE_URL}/web/sessions`);
     WebsocketSessionStatus.wsRef = ws;
-    console.log('Connecting to WS:', ws.url);
+    // console.log('Connecting to WS:', ws.url);
 
     ws.onopen = () => {
-      console.log('WS open');
+      // console.log('WS open');
     };
 
     ws.onmessage = async (event) => {
@@ -98,9 +98,9 @@ export function useSessionWebSocket(): SessionWebSocketState {
           break;
         case 'auth-credentials': {
           if (!SessionEncryption.symmetricKey) {
-            console.error(
-              "auth credentials received but symmetric key wasn't initialized. This isn't supposed to happen."
-            );
+            // console.error(
+            //   "auth credentials received but symmetric key wasn't initialized. This isn't supposed to happen."
+            // );
             return;
           }
 
@@ -121,33 +121,33 @@ export function useSessionWebSocket(): SessionWebSocketState {
           const privateSignature = await importPrivateKeySigning(
             privateSignatureData
           );
-          const authenticatedUser = {
+          const newSession = {
             authToken: credentialsMessage.authToken,
             privateKey: privateKey,
             privateSignature: privateSignature,
             user: credentialsMessage.user,
-          } as AuthenticatedUser;
-          setAuthenticatedUser(authenticatedUser);
+          } as AuthedSession;
+          setLocalLocalAuthedSession(newSession);
           break;
         }
       }
     };
 
-    ws.onerror = (e) => {
-      console.error('WS error', e);
+    ws.onerror = (_e) => {
+      // console.error('WS error', e);
       setError('Failed to connect to the server');
       WebsocketSessionStatus.isConnecting = false;
-      setAuthenticatedUser(null);
+      setLocalLocalAuthedSession(null);
       setWebsocketSession(null);
     };
 
     ws.onclose = () => {
-      console.log('WS close');
+      // console.log('WS close');
       if (!websocketSession) {
         setError('WebSocket closed before session information was received.');
       }
       WebsocketSessionStatus.isConnecting = true;
-      setAuthenticatedUser(null);
+      setLocalLocalAuthedSession(null);
       setWebsocketSession(null);
     };
   }, [websocketSession]);
@@ -161,16 +161,16 @@ export function useSessionWebSocket(): SessionWebSocketState {
       return;
     }
 
-    setAuthedSession(null);
+    setLocalLocalAuthedSession(null);
 
     connect();
-  }, [null, WebsocketSessionStatus.isConnecting]);
+  }, [connect, websocketSession]);
 
   return {
     session: websocketSession,
     symmetricKey: SessionEncryption.symmetricKey,
-    authenticatedUser,
-    setAuthenticatedUser,
+    authedSession: localAuthedSession,
+    setAuthedSession,
     error,
     isConnecting: WebsocketSessionStatus.isConnecting,
     retry: connect,

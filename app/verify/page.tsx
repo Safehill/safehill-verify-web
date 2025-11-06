@@ -7,11 +7,11 @@ import type {
   FingerprintMatchDTO,
   ImageMatch,
 } from '@/components/verification/FileDetailsProps';
-import FileUploader from '@/components/verification/FileUploader';
+import VerificationFileUploader from '@/components/verification/VerificationFileUploader';
 import ProvidedImage from '@/components/verification/ProvidedImage';
 import VerifyResultsPage from '@/components/verification/VerifyResultsPage';
 import AxiosInstance from '@/lib/api/api';
-import type { AssetSimilarMatchRequestDTO } from '@/lib/api/models/dto/AssetFingerprint';
+import type { AssetSimilarMatchRequestDTO } from '@/lib/api/models/dto/Asset';
 import { useImageEmbedding } from '@/lib/hooks/use-image-embedding';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -33,7 +33,7 @@ export default function VerifyPage() {
   const handleFileProvided = (files: File[]) => {
     const file = files.length > 0 ? files[0] : null;
 
-    console.log('File has been received ' + file);
+    // console.log('File has been received ' + file);
 
     if (file && canvasRef.current) {
       const canvas = canvasRef.current!;
@@ -51,7 +51,7 @@ export default function VerifyPage() {
             toast.error('Embedding model still warming up');
             return;
           }
-          console.log('Image data has been pulled ' + imageData);
+          // console.log('Image data has been pulled ' + imageData);
           calculateImageEmbedding(imageData)
             .then((embeddingBase64) => {
               const fileDetails: FileDetails = {
@@ -65,7 +65,7 @@ export default function VerifyPage() {
               } as AssetSimilarMatchRequestDTO;
               performAuthentication(fingerprint);
             })
-            .catch((err) => {
+            .catch((_err) => {
               toast.error('Failed to calculate embedding');
               setIsLoading(false);
             });
@@ -77,17 +77,17 @@ export default function VerifyPage() {
   };
 
   const performAuthentication = (matching: AssetSimilarMatchRequestDTO) => {
-    console.log('Calling API');
+    // console.log('Calling API');
     AxiosInstance.post<FingerprintMatchDTO[]>(
       '/fingerprint/retrieve-similar',
       matching
     )
       .then((response) => {
-        console.log('received response ' + response.status);
+        // console.log('received response ' + response.status);
         handleApiResponse(response.data);
       })
       .catch((error) => {
-        console.log('received error ' + error.message);
+        // console.log('received error ' + error.message);
         handleApiResponse(error);
       });
   };
@@ -181,7 +181,7 @@ export default function VerifyPage() {
   } else {
     return (
       <>
-        <FileUploader
+        <VerificationFileUploader
           isLoading={isLoading}
           setIsLoading={setIsLoading}
           onSubmit={handleFileProvided}

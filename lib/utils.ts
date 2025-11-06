@@ -6,13 +6,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const timeAgo = (timestamp: Date, timeOnly?: boolean): string => {
+export const timeAgo = (
+  timestamp: string | Date,
+  timeOnly?: boolean
+): string => {
   if (!timestamp) {
     return 'never';
   }
-  return `${ms(Date.now() - new Date(timestamp).getTime())}${
-    timeOnly ? '' : ' ago'
-  }`;
+
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+
+  if (isNaN(date.getTime())) {
+    return 'invalid date';
+  }
+
+  return `${ms(Date.now() - date.getTime())}${timeOnly ? '' : ' ago'}`;
 };
 
 export async function fetcher<JSON = any>(
@@ -84,3 +92,152 @@ export const formattedDate = (date: Date, includeHour: boolean = false) => {
     minute: includeHour ? 'numeric' : undefined,
   });
 };
+
+const COLORS = [
+  'text-red-200',
+  'text-red-500',
+  'text-green-500',
+  'text-green-800',
+  'text-blue-500',
+  'text-yellow-500',
+  'text-yellow-800',
+  'text-purple-500',
+  'text-pink-500',
+  'text-pink-200',
+  'text-orange-500',
+  'text-orange-200',
+  'text-cyan-500',
+];
+
+export function getFingerprintColor(identifier: string): string {
+  // Simple hash function to get consistent color for same identifier
+  let hash = 0;
+  for (let i = 0; i < identifier.length; i++) {
+    const char = identifier.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  return COLORS[Math.abs(hash) % COLORS.length];
+}
+
+// User colors for consistent user identification (base colors without prefix)
+const USER_COLORS = [
+  'blue-500',
+  'green-500',
+  'purple-500',
+  'pink-500',
+  'indigo-500',
+  'teal-500',
+  'orange-500',
+  'red-500',
+  'yellow-500',
+  'emerald-500',
+];
+
+// Helper function to generate consistent hash for user identifier
+function getUserHash(identifier: string): number {
+  let hash = 0;
+  for (let i = 0; i < identifier.length; i++) {
+    const char = identifier.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+}
+
+export function getUserColor(identifier: string): string {
+  const colorIndex = getUserHash(identifier) % USER_COLORS.length;
+  return `text-${USER_COLORS[colorIndex]}`;
+}
+
+export function getAvatarColor(identifier: string): string {
+  const colorIndex = getUserHash(identifier) % USER_COLORS.length;
+  return `bg-${USER_COLORS[colorIndex]}`;
+}
+
+// Alternative function that returns the actual color value for inline styles
+export function getAvatarColorValue(identifier: string): string {
+  const colorIndex = getUserHash(identifier) % USER_COLORS.length;
+  const colorMap: { [key: string]: string } = {
+    'blue-500': '#3b82f6',
+    'green-500': '#10b981',
+    'purple-500': '#8b5cf6',
+    'pink-500': '#ec4899',
+    'indigo-500': '#6366f1',
+    'teal-500': '#14b8a6',
+    'orange-500': '#f97316',
+    'red-500': '#ef4444',
+    'yellow-500': '#eab308',
+    'emerald-500': '#10b981',
+  };
+  return colorMap[USER_COLORS[colorIndex]] || '#6b7280';
+}
+
+/**
+ * Validates a redirect URL to prevent open redirects
+ * @param redirectUrl - The URL to validate
+ * @returns true if the URL is safe to redirect to
+ */
+export function isValidRedirectUrl(redirectUrl: string): boolean {
+  // Must start with /
+  if (!redirectUrl.startsWith('/')) {
+    return false;
+  }
+
+  // Must not contain protocol (prevents open redirects)
+  if (redirectUrl.includes('://')) {
+    return false;
+  }
+
+  // Must not contain script tags or other dangerous patterns
+  if (redirectUrl.includes('<script') || redirectUrl.includes('javascript:')) {
+    return false;
+  }
+
+  // Only allow internal paths
+  const allowedPaths = ['/authed', '/collections', '/verify'];
+  return allowedPaths.some((path) => redirectUrl.startsWith(path));
+}
+
+/**
+ * Safely extracts and validates a redirect URL from search parameters
+ * @param searchParams - URL search parameters
+ * @param fallback - Fallback URL if no valid redirect is found
+ * @returns The validated redirect URL or fallback
+ */
+export function getValidRedirectUrl(
+  searchParams: URLSearchParams,
+  fallback: string = '/authed'
+): string {
+  const redirectTo = searchParams.get('redirect');
+
+  if (!redirectTo) {
+    return fallback;
+  }
+
+  return isValidRedirectUrl(redirectTo) ? redirectTo : fallback;
+}
+
+/**
+ * Get initials from user name or identifier
+ * @param name - User's display name
+ * @param identifier - User's identifier (fallback if name is not available)
+ * @returns Up to 2 uppercase initials
+ */
+export function getInitials(name?: string, identifier?: string): string {
+  if (name) {
+    return name
+      .split(' ')
+      .map((word) => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  if (identifier) {
+    return identifier.slice(0, 2).toUpperCase();
+  }
+
+  return 'U';
+}

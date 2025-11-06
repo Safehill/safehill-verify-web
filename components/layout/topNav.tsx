@@ -124,7 +124,7 @@ export default function TopNav({
             <UserButton>
               <UserButton.MenuItems>
                 <UserButton.Link
-                  label="Dashboard"
+                  label="Authed Section"
                   labelIcon={<LayoutDashboard className="h-4 w-4" />}
                   href="/"
                 />

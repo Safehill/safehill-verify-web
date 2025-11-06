@@ -5,8 +5,8 @@ import { Button } from '@/components/shared/button';
 import MessageView from '@/components/shared/MessageView';
 import PrimaryButton from '@/components/shared/PrimaryButton';
 import type {
-    FileDetails,
-    ImageMatch,
+  FileDetails,
+  ImageMatch,
 } from '@/components/verification/FileDetailsProps';
 import ImageDetails from '@/components/verification/ImageDetails';
 import ProvidedImage from '@/components/verification/ProvidedImage';

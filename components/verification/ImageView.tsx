@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function ConfidentialPlaceholder({
   url,
@@ -44,7 +44,7 @@ const ImageView = ({
 
   useEffect(() => {
     setURL(URL.createObjectURL(file!));
-  }, []);
+  }, [file]);
 
   if (!url) {
     return (

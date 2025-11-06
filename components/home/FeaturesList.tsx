@@ -27,8 +27,8 @@ const FeaturesList = () => {
           We use fingerprints to track access to your content in Safehill.
           <br />
           <br />
-          We then detect use on the web using its unique features, even if the
-          content is altered or tampered with.
+          We can then detect unauthorized use on the web even if the content is
+          altered or tampered with.
         </>
       ),
     },
@@ -38,13 +38,13 @@ const FeaturesList = () => {
       titleClass: 'text-green-500',
       content: (
         <>
-          Distribute your content with confidence, and rely on our usage
-          monitoring to get credit and royalties for it.
+          Distribute your content with confidence, and rely on our monitoring
+          system to prevent breach of copyright or to earn royalties.
         </>
       ),
     },
     {
-      icon: '🙈',
+      icon: '💾',
       title: 'Controlled Distribution',
       titleClass: 'text-yellow-300',
       content: (
@@ -54,11 +54,6 @@ const FeaturesList = () => {
           <div className="flex flex-row gap-4 my-5 justify-center">
             <img
               src="/images/share-choice-3.png"
-              alt="Sharing options"
-              className="w-[125px] sm:w-[170px] rounded-xl shadow-lg"
-            />
-            <img
-              src="/images/share-choice-4.png"
               alt="Sharing options"
               className="w-[125px] sm:w-[170px] rounded-xl shadow-lg"
             />

@@ -16,8 +16,6 @@ jobs:
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
-      with:
-        version: 8.14.1
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -37,6 +35,9 @@ jobs:
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
+
+    - name: Check lockfile
+      run: pwd ; ls -al ; head -n 5 pnpm-lock.yaml || echo "no lockfile"
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -63,8 +64,6 @@ jobs:
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
-      with:
-        version: 8.14.1
 
     - name: Setup Node.js
       uses: actions/setup-node@v4

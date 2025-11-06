@@ -1,6 +1,6 @@
+import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
-import { cn } from '@/lib/utils';
 
 const sizeVariants = cva('object-cover', {
   variants: {
@@ -19,7 +19,7 @@ type SizeProps = React.ImgHTMLAttributes<HTMLImageElement> &
   VariantProps<typeof sizeVariants>;
 
 const SafehillAppLogo = React.forwardRef<HTMLImageElement, SizeProps>(
-  ({ className, variant, ...props }, ref) => {
+  ({ className, variant, ...props }, _ref) => {
     const Comp = 'img';
     return (
       <div className="rounded-xl overflow-hidden shadow-lg">
