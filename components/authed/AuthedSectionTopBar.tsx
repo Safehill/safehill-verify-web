@@ -2,11 +2,11 @@
 
 import Popover from '@/components/shared/popover';
 import { useAuth } from '@/lib/auth/auth-context';
-import { usePayoutAccountStatus } from '@/lib/hooks/use-payouts';
+import { usePayoutAccountStatus, usePayoutBalance } from '@/lib/hooks/use-payouts';
 import { useCollections } from '@/lib/hooks/use-collections';
 import { getAvatarColorValue, getInitials } from '@/lib/utils';
 import { isPayoutRequirementsDisabled } from '@/lib/utils/feature-flags';
-import { ChevronRight, LogOut, Wallet, Box, AlertTriangle } from 'lucide-react';
+import { ChevronRight, ChevronDown, LogOut, Wallet, Box, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -52,6 +52,27 @@ export default function AuthedSectionTopBar({
     usePayoutAccountStatus();
   const { data: collections = [] } = useCollections();
 
+  // Get balance for earnings display
+  const { data: balance } = usePayoutBalance({
+    enabled: !!payoutStatus?.hasAccount && payoutStatus?.status === 'active',
+  });
+
+  // Format currency for earnings display
+  const formatCurrency = (amount: number, currency: string = 'USD') => {
+    // Format for compact display with "k" for thousands (e.g., "$13.4k")
+    if (amount >= 1000) {
+      const thousands = amount / 1000;
+      return `$${thousands.toFixed(1)}k`;
+    }
+    // For amounts under $1000, show full value (e.g., "$17.47")
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
   // Check if user owns any collections
   const ownsCollections = collections.some(
     (collection: any) => collection.createdBy === currentUserId
@@ -70,6 +91,12 @@ export default function AuthedSectionTopBar({
       !payoutStatus.chargesEnabled ||
       !payoutStatus.payoutsEnabled);
 
+  // Get the section icon and name
+  const currentSection = isPayoutsSection
+    ? { icon: Wallet, name: 'Payouts' }
+    : { icon: Box, name: 'Collections' };
+  const SectionIcon = currentSection.icon;
+
   return (
     <div className="fixed top-0 z-40 w-full">
       {/* Main header bar */}
@@ -77,10 +104,10 @@ export default function AuthedSectionTopBar({
         <div className="flex h-16 items-center justify-between px-4 md:px-8 max-w-screen-xl mx-auto">
           {/* Left side - Breadcrumb navigation */}
           <div className="flex items-center space-x-2">
-            {/* Safehill Logo with Section Switcher */}
+            {/* Section Switcher Button */}
             <Popover
               content={
-                <div className="w-full p-2">
+                <div className="w-full sm:w-[170px] p-2">
                   <Link
                     href="/authed"
                     className={`w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
@@ -90,7 +117,7 @@ export default function AuthedSectionTopBar({
                     }`}
                     onClick={() => setOpenSectionPopover(false)}
                   >
-                    <Box className="mr-2 h-4 w-4" />
+                    <Box className="mr-2 h-4 w-4 stroke-[3]" />
                     Collections
                   </Link>
                   <Link
@@ -102,7 +129,7 @@ export default function AuthedSectionTopBar({
                     }`}
                     onClick={() => setOpenSectionPopover(false)}
                   >
-                    <Wallet className="mr-2 h-4 w-4" />
+                    <Wallet className="mr-2 h-4 w-4 stroke-[3]" />
                     Payouts
                   </Link>
                 </div>
@@ -111,23 +138,26 @@ export default function AuthedSectionTopBar({
               setOpenPopover={setOpenSectionPopover}
               align="start"
             >
-              <div className="flex items-center cursor-pointer">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-300 to-pink-100 flex items-center justify-center hover:scale-110 transition-all duration-300">
-                  <img
-                    src="/images/snoog-black.png"
-                    alt="Logo"
-                    className="w-[40px] object-cover object-top py-3 mx-2"
-                  />
+              {/*<button className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gradient-to-br from-orange-300 to-pink-100 hover:from-orange-400 hover:to-pink-200 transition-all duration-200 cursor-pointer w-[170px]">*/}
+              <button className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-orange-100/20 border-orange-300 border-2 transition-all duration-200 cursor-pointer w-[170px]">
+                <div className="flex items-center gap-3">
+                  <SectionIcon className="h-6 w-6 text-orange-300" />
+                  <span className="text-base font-semibold text-orange-300">
+                    {currentSection.name}
+                  </span>
                 </div>
-              </div>
+                <ChevronDown className="h-4 w-4 text-orange-300" />
+              </button>
             </Popover>
 
-            {/* Breadcrumb separator */}
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            {/* Breadcrumb separator - only show if there are sub-breadcrumbs */}
+            {breadcrumbs.length > 1 && (
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+            )}
 
-            {/* Breadcrumb items */}
+            {/* Sub-breadcrumb items (skip first item as it's now the button) */}
             <nav className="flex items-center space-x-2">
-              {breadcrumbs.map((item, index) => (
+              {breadcrumbs.slice(1).map((item, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   {item.href ? (
                     <Link
@@ -141,7 +171,7 @@ export default function AuthedSectionTopBar({
                       {item.label}
                     </span>
                   )}
-                  {index < breadcrumbs.length - 1 && (
+                  {index < breadcrumbs.slice(1).length - 1 && (
                     <ChevronRight className="h-4 w-4 text-white/60" />
                   )}
                 </div>
@@ -149,8 +179,21 @@ export default function AuthedSectionTopBar({
             </nav>
           </div>
 
-          {/* Right side - User avatar and menu */}
+          {/* Right side - Earnings and User avatar */}
           <div className="flex items-center space-x-4">
+            {/* Earnings Display - Always show */}
+            <div className="hidden sm:flex items-center text-white/90 text-sm">
+              <span className="font-extralight">Total earnings</span>
+              <Link
+                href="/authed/payouts">
+                <span className="ml-1 font-black underline">
+                {balance
+                  ? formatCurrency(balance.totalEarnings, balance.currency)
+                  : '$0.00'}
+                </span>
+              </Link>
+            </div>
+
             <Popover
               content={
                 <div className="w-full p-4">
