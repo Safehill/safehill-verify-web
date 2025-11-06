@@ -4,7 +4,7 @@ import Modal from '@/components/shared/modal';
 import { useEffect, useState, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { Loader2 } from 'lucide-react';
-import { loadConnectAndInitialize } from '@stripe/connect-js';
+import { loadConnectAndInitialize } from '@stripe/connect-js/pure';
 
 interface PayoutDashboardModalProps {
   showModal: boolean;
@@ -70,7 +70,7 @@ export default function PayoutDashboardModal({
           appearance: {
             overlays: 'drawer',
             variables: {
-              colorPrimary: '#14b8a6', // teal color to match your theme
+              colorPrimary: '#9527F5',
             },
           },
         });
