@@ -39,7 +39,7 @@ jobs:
           ${{ runner.os }}-pnpm-store-
 
     - name: Check lockfile
-    - run: pwd ; ls -al ; head -n 5 pnpm-lock.yaml || echo "no lockfile"
+      run: pwd ; ls -al ; head -n 5 pnpm-lock.yaml || echo "no lockfile"
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
