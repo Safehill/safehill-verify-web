@@ -2,11 +2,21 @@
 
 import Popover from '@/components/shared/popover';
 import { useAuth } from '@/lib/auth/auth-context';
-import { usePayoutAccountStatus, usePayoutBalance } from '@/lib/hooks/use-payouts';
+import {
+  usePayoutAccountStatus,
+  usePayoutBalance,
+} from '@/lib/hooks/use-payouts';
 import { useCollections } from '@/lib/hooks/use-collections';
 import { getAvatarColorValue, getInitials } from '@/lib/utils';
 import { isPayoutRequirementsDisabled } from '@/lib/utils/feature-flags';
-import { ChevronRight, ChevronDown, LogOut, Wallet, Box, AlertTriangle } from 'lucide-react';
+import {
+  ChevronRight,
+  ChevronDown,
+  LogOut,
+  Wallet,
+  Box,
+  AlertTriangle,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -184,12 +194,11 @@ export default function AuthedSectionTopBar({
             {/* Earnings Display - Always show */}
             <div className="hidden sm:flex items-center text-white/90 text-sm">
               <span className="font-extralight">Total earnings</span>
-              <Link
-                href="/authed/payouts">
+              <Link href="/authed/payouts">
                 <span className="ml-1 font-black underline">
-                {balance
-                  ? formatCurrency(balance.totalEarnings, balance.currency)
-                  : '$0.00'}
+                  {balance
+                    ? formatCurrency(balance.totalEarnings, balance.currency)
+                    : '$0.00'}
                 </span>
               </Link>
             </div>

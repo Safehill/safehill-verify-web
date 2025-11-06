@@ -47,7 +47,8 @@ export default function Home() {
       title: 'Add Your Content',
       mainContent: (
         <>
-          Add your content to a Collection via the web app or on a mobile device.
+          Add your content to a Collection via the web app or on a mobile
+          device.
           <br />
           We authenticate it, secure it, and fingerprint it.
         </>
@@ -153,7 +154,7 @@ export default function Home() {
       icon: '💼',
       title: 'Help your Legal Team',
       description:
-        'With proof of ownership and traceability, you prevent IP and copyright battles. Make your Legal team\'s work easy',
+        "With proof of ownership and traceability, you prevent IP and copyright battles. Make your Legal team's work easy",
     },
   ];
 
@@ -196,7 +197,8 @@ export default function Home() {
           </h1>
 
           <p className="text-center text-xl md:text-2xl font-light tracking-[-0.01em] bg-gradient-to-br from-yellow-100/90 to-cyan-200/60 bg-clip-text text-transparent mb-10">
-            It&apos;s a cryptographically-secure and verifiable representation of
+            It&apos;s a cryptographically-secure and verifiable representation
+            of
             <br />
             the identity of content and its accessors.
             <br />
@@ -278,7 +280,8 @@ export default function Home() {
             <p className="text-transparent bg-gradient-to-br from-cyan-100 to-cyan-200/60 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5">
               Fingerprints will protect you from unauthorized use or resale.
               <br />
-              You can now forget about IP and Copyright breaches made by humans and AI.
+              You can now forget about IP and Copyright breaches made by humans
+              and AI.
               <br />
             </p>
             <br />
