@@ -11,7 +11,7 @@ import Navbar from '@/components/layout/navbar';
 import SafehillAppLogo from '@/components/shared/SafehillAppLogo';
 import TabView from '@/components/shared/TabView';
 import {
-  ArrowDownCircleIcon,
+  // ArrowDownCircleIcon,
   ArrowRightCircleIcon,
   CalendarDaysIcon,
   FingerprintIcon,
@@ -65,7 +65,7 @@ export default function Home() {
     },
     {
       icon: null,
-      title: 'Distribute with Peace of Mind',
+      title: 'Distribute and Sell with Peace of Mind',
       mainContent: (
         <>
           Change visibility, pricing and target audience for the collection.
@@ -140,7 +140,7 @@ export default function Home() {
     },
     {
       icon: '🧑‍🎨',
-      title: 'Focus on Making Great Content',
+      title: 'Focus just on your Content',
       description:
         'Spend less time and money worrying about protecting your valuable work, and more on what you do best: creating and sharing your masterpieces.',
     },
@@ -185,7 +185,7 @@ export default function Home() {
     },
     {
       id: 'fingerprint',
-      label: 'Finger… What?',
+      label: 'Fingerprints',
       gradient: 'linear-gradient(135deg,rgb(230, 195, 89),rgb(148, 214, 122))',
       content: (
         <div>
@@ -200,7 +200,7 @@ export default function Home() {
             It&apos;s a cryptographically-secure and verifiable representation
             of
             <br />
-            the identity of content and its accessors.
+            your content and its accessors.
             <br />
             <br />
             Fingerprints let us …
@@ -257,44 +257,59 @@ export default function Home() {
       <main className="flex min-h-screen w-full flex-col items-center justify-center pt-32">
         <div className="z-10 w-full">
           <h1
-            className="animate-fade-up bg-gradient-to-br from-purple-200 to-orange-300 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[5.5rem] pt-16 pb-20"
+            className="animate-fade-up bg-gradient-to-br from-orange-300 to-purple-100 bg-clip-text text-center font-display text-8xl md:text-9xl font-bold tracking-[-0.02em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 pt-16 pb-10"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
-            Yours. Truly.
+            Yours.
+            <br />
+            Truly.
           </h1>
 
           <div className="my-20">
             <ImageCarousel />
           </div>
 
+          <p className="text-transparent bg-gradient-to-br from-orange-100 to-red-100 bg-clip-text text-center text-lg sm:text-lg md:text-2xl font-light tracking-[-0.01em] px-2 md:mt-10">
+            Distributing your digital content means losing control over
+          </p>
+          <h1
+            className="animate-fade-up bg-gradient-to-br from-red-100 to-red-400 bg-clip-text text-center font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-transparent opacity-0 drop-shadow-lg [text-wrap:balance] leading-tight sm:leading-tight md:leading-tight px-2 sm:px-4 md:px-5 mt-10 mb-20"
+            style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
+          >
+            Confidentiality,
+            <br />
+            IP and Copyrights,
+            <br />
+            Reputation and
+            <br />
+            Royalties.
+          </h1>
+
+          <LineSeparator />
+
           <div className="mt-20 px-10">
             <h1
-              className="animate-fade-up bg-gradient-to-br from-yellow-100 to-orange-100 bg-clip-text text-center font-display text-4xl sm:text-6xl md:text-7xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5"
+              className="animate-fade-up bg-gradient-to-br from-red-200 to-cyan-100 bg-clip-text text-center font-display text-6xl sm:text-6xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5 mb-10"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
-              Are you sitting on your assets?
+              But what if you can keep control?
             </h1>
-            <p className="text-transparent bg-gradient-to-br from-orange-100 to-cyan-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-10">
-              Sell rights to see them, without giving up ownership and control.
+            <p className="text-transparent bg-gradient-to-br from-cyan-100 to-purple-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-20">
+              Via <b>Fingerprints</b>, when your content travels you can follow.
             </p>
-            <p className="text-transparent bg-gradient-to-br from-cyan-100 to-cyan-200/60 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5">
-              Fingerprints will protect you from unauthorized use or resale.
-              <br />
-              You can now forget about IP and Copyright breaches made by humans
-              and AI.
-              <br />
-            </p>
-            <br />
-            <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-10">
-              <Link
-                href="#howitworks"
-                className="flex gap-2 px-6 py-2 bg-cyan-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"
-              >
-                How does it work?
-                <ArrowDownCircleIcon className="w-5 h-5" />
-              </Link>
-            </div>
           </div>
+
+          {/*<div className="mt-20 px-10">*/}
+          {/*  <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-10 mb-20">*/}
+          {/*    <Link*/}
+          {/*      href="#howitworks"*/}
+          {/*      className="flex gap-2 px-6 py-2 bg-cyan-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"*/}
+          {/*    >*/}
+          {/*      How does it work?*/}
+          {/*      <ArrowDownCircleIcon className="w-5 h-5" />*/}
+          {/*    </Link>*/}
+          {/*  </div>*/}
+          {/*</div>*/}
 
           <div className="flex flex-row justify-center items-center mt-20 ">
             <div className="bg-white rounded-full p-2 shadow-md text-cyan-800/80">
@@ -345,31 +360,34 @@ export default function Home() {
           </div>
 
           <div className="md:mt-20 mb-20 px-5">
-            <div
-              className="mt-4 animate-fade-up text-center text-purple-100/80 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light tracking-[-0.01em] py-10"
-              style={{
-                animationDelay: '0.25s',
-                animationFillMode: 'forwards',
-                top: 0,
-              }}
-            >
+            <p className="text-transparent bg-gradient-to-br from-purple-100 to-orange-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-20">
               With true ownership over your content, you can …
-            </div>
+            </p>
             {/* Typewriter effect for animated headline */}
             <TypewriterHeadline
               className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold text-transparent drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-10"
               style={{}}
               strings={[
-                'finally get credit<br />and royalties<br />from it.',
+                'get proper <br />credit and<br />royalties<br />from it.',
                 'prevent<br />unauthorized<br />distribution<br />or leaks.',
-                'share it while<br />retaining<br />control.',
-                'prevent and aid legal<br />battles over<br />copyrights<br />and IP.',
+                'revoke rights<br />as needed.',
+                'prevent and aid<br />legal battles<br />over IP and<br />copyrights.',
                 'avoid<br />AI-generated<br />copyright <br />infringements.',
               ]}
             />
           </div>
 
-          <LineSeparator />
+          <div className="my-20 px-5">
+            <LineSeparator />
+          </div>
+
+          <div className="z-10 w-full xl:px-20 pb-20 px-5">
+            <TabView tabs={whyTabs} defaultTab="why-safehill" />
+          </div>
+
+          <div className="my-10">
+            <LineSeparator />
+          </div>
 
           <div id="howitworks" className="z-10 w-full pt-40">
             <h1
@@ -382,21 +400,12 @@ export default function Home() {
               className="animate-fade-up text-center text-teal-100 opacity-0 [text-wrap:balance] text-lg md:text-2xl font-light tracking-[-0.01em] px-5 pt-5 pb-20"
               style={{ animationDelay: '0.25s', animationFillMode: 'forwards' }}
             >
-              In three simple steps
+              It&apos;s easier than you think
             </p>
 
             <ItemizedList items={steps} />
             <FeaturesList />
           </div>
-
-          <div className="my-20 px-5">
-            <LineSeparator />
-          </div>
-
-          <div className="z-10 w-full xl:px-20 pb-20 px-5">
-            <TabView tabs={whyTabs} defaultTab="why-safehill" />
-          </div>
-
           <div className="my-10">
             <LineSeparator />
           </div>

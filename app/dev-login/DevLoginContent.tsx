@@ -1,12 +1,17 @@
 'use client';
 
-import {Button} from '@/components/shared/button';
-import {Card, CardContent, CardHeader, CardTitle,} from '@/components/shared/card';
-import {useAuth} from '@/lib/auth/auth-context';
-import {getValidRedirectUrl} from '@/lib/utils';
-import {AlertTriangle, Key, Shield, User} from 'lucide-react';
-import {useRouter, useSearchParams} from 'next/navigation';
-import {useEffect, useState} from 'react';
+import { Button } from '@/components/shared/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/shared/card';
+import { useAuth } from '@/lib/auth/auth-context';
+import { getValidRedirectUrl } from '@/lib/utils';
+import { AlertTriangle, Key, Shield, User } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // Mock user data for development
 const MOCK_USER = {
