@@ -13,13 +13,16 @@ export function DownloadAppButtons(props: { className: string }) {
           className={props.className}
         />
       </a>
-      <a target="_blank" className="flex-shrink-0">
+      <div className="relative flex-shrink-0 w-fit">
         <img
           src="/images/play-store.png"
-          alt="Google Play Store download"
-          className={props.className}
+          alt="Google Play Store download - Coming Soon"
+          className={`${props.className} opacity-40 pointer-events-none cursor-not-allowed`}
         />
-      </a>
+        <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-lg whitespace-nowrap">
+          Coming Soon
+        </span>
+      </div>
     </>
   );
 }
