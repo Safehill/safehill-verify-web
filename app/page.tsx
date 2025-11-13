@@ -361,7 +361,7 @@ export default function Home() {
 
           <div className="md:mt-20 mb-20 px-5">
             <p className="text-transparent bg-gradient-to-br from-purple-100 to-orange-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-20">
-              With true ownership over your content, you can …
+              And with true ownership over your content, you can …
             </p>
             {/* Typewriter effect for animated headline */}
             <TypewriterHeadline
