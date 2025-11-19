@@ -274,23 +274,27 @@ export default function Home() {
             Distributing your digital content means losing control over
           </p>
           <h1
-            className="animate-fade-up bg-gradient-to-br from-red-100 to-red-400 bg-clip-text text-center font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-transparent opacity-0 drop-shadow-lg [text-wrap:balance] leading-tight sm:leading-tight md:leading-tight px-2 sm:px-4 md:px-5 mt-10 mb-20"
+            className="animate-fade-up bg-gradient-to-br from-red-100 to-red-400 bg-clip-text text-center font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-transparent opacity-0 drop-shadow-lg [text-wrap:balance] leading-tight sm:leading-tight md:leading-tight px-2 sm:px-4 md:px-5 mt-10 mb-10"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Confidentiality,
             <br />
             IP, Copyrights,
             <br />
-            Reputation and
+            and Royalties.
             <br />
-            Royalties.
+            <br />
+            👋
           </h1>
 
           <LineSeparator />
 
           <div className="mt-20 px-10">
+            <p className="text-transparent bg-gradient-to-br from-red-200 to-red-50 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-5">
+              It is time to
+            </p>
             <h1
-              className="animate-fade-up bg-gradient-to-br from-red-200 to-cyan-100 bg-clip-text text-center font-display text-8xl sm:text-8xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5 mb-10"
+              className="animate-fade-up bg-gradient-to-br from-red-200 to-cyan-100 bg-clip-text text-center font-display text-6xl sm:text-8xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5 mb-10"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
               Rethink
@@ -298,9 +302,9 @@ export default function Home() {
               distribution.
             </h1>
             <p className="text-transparent bg-gradient-to-br from-cyan-100 to-purple-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-20">
-              <b>Fingerprints</b> let you follow your content as it travels.
+              Grant rights to view. Do not lose control.
               <br />
-              You only give rights to view.
+              <b>Fingerprints</b> let you follow your content as it travels.
             </p>
           </div>
 
