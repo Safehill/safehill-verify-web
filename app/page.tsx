@@ -50,7 +50,7 @@ export default function Home() {
           Add your content to a Collection via the web app or on a mobile
           device.
           <br />
-          We authenticate it, secure it, and fingerprint it.
+          We verify your claim, fingerprint it and store it securely.
         </>
       ),
       sideContent: (
@@ -68,9 +68,10 @@ export default function Home() {
       title: 'Distribute and Sell with Peace of Mind',
       mainContent: (
         <>
-          Change visibility, pricing and target audience for the collection.
+          Change visibility, pricing (if for sale) and target audience for the
+          collection.
           <br />
-          Decide who can see its content, and whether they can re-distribute it.
+          Decide who has view rights, and whether they can re-distribute it.
         </>
       ),
       sideContent: (
@@ -136,7 +137,7 @@ export default function Home() {
       icon: '🔗',
       title: 'Collaborate Confidentially',
       description:
-        'Because of our superior security standards and distribution controls, you are protected from data, security and copyright breaches',
+        'Because of our superior security standards and distribution controls, you are protected from leaks, and data, security and copyright breaches',
     },
     {
       icon: '🧑‍🎨',
@@ -273,29 +274,37 @@ export default function Home() {
             Distributing your digital content means losing control over
           </p>
           <h1
-            className="animate-fade-up bg-gradient-to-br from-red-100 to-red-400 bg-clip-text text-center font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-transparent opacity-0 drop-shadow-lg [text-wrap:balance] leading-tight sm:leading-tight md:leading-tight px-2 sm:px-4 md:px-5 mt-10 mb-20"
+            className="animate-fade-up bg-gradient-to-br from-red-100 to-red-400 bg-clip-text text-center font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-transparent opacity-0 drop-shadow-lg [text-wrap:balance] leading-tight sm:leading-tight md:leading-tight px-2 sm:px-4 md:px-5 mt-10 mb-10"
             style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
           >
             Confidentiality,
             <br />
-            IP and Copyrights,
+            IP, Copyrights,
             <br />
-            Reputation and
+            and Royalties.
             <br />
-            Royalties.
+            <br />
+            👋
           </h1>
 
           <LineSeparator />
 
           <div className="mt-20 px-10">
+            <p className="text-transparent bg-gradient-to-br from-red-200 to-red-50 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-5">
+              It is time to
+            </p>
             <h1
-              className="animate-fade-up bg-gradient-to-br from-red-200 to-cyan-100 bg-clip-text text-center font-display text-6xl sm:text-6xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5 mb-10"
+              className="animate-fade-up bg-gradient-to-br from-red-200 to-cyan-100 bg-clip-text text-center font-display text-6xl sm:text-8xl font-bold tracking-[-0.01em] text-transparent opacity-0 drop-shadow-sm [text-wrap:balance] leading-tight sm:leading-tight md:leading-[5rem] px-2 sm:px-4 md:px-5 mb-10"
               style={{ animationDelay: '0.15s', animationFillMode: 'forwards' }}
             >
-              But what if you can keep control?
+              Rethink
+              <br />
+              distribution.
             </h1>
             <p className="text-transparent bg-gradient-to-br from-cyan-100 to-purple-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-20">
-              Via <b>Fingerprints</b>, when your content travels you can follow.
+              Grant rights to view. Do not lose control.
+              <br />
+              <b>Fingerprints</b> let you follow your content as it travels.
             </p>
           </div>
 
@@ -361,16 +370,16 @@ export default function Home() {
 
           <div className="md:mt-20 mb-20 px-5">
             <p className="text-transparent bg-gradient-to-br from-purple-100 to-orange-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-20">
-              And with true ownership over your content, you can …
+              With true ownership over your content, you can …
             </p>
             {/* Typewriter effect for animated headline */}
             <TypewriterHeadline
               className="bg-gradient-to-br from-purple-100 to-orange-300 bg-clip-text text-center font-display text-5xl md:text-7xl font-bold text-transparent drop-shadow-sm [text-wrap:balance] px-6 sm:px-8 md:leading-[4rem] pb-10"
               style={{}}
               strings={[
-                'get proper <br />credit and<br />royalties<br />from it.',
                 'prevent<br />unauthorized<br />distribution<br />or leaks.',
-                'revoke rights<br />as needed.',
+                'get <br />credit and<br />royalties.',
+                'withdraw<br />view rights<br />as needed.',
                 'prevent and aid<br />legal battles<br />over IP and<br />copyrights.',
                 'avoid<br />AI-generated<br />copyright <br />infringements.',
               ]}
