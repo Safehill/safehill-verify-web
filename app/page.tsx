@@ -11,7 +11,6 @@ import Navbar from '@/components/layout/navbar';
 import SafehillAppLogo from '@/components/shared/SafehillAppLogo';
 import TabView from '@/components/shared/TabView';
 import {
-  // ArrowDownCircleIcon,
   ArrowRightCircleIcon,
   CalendarDaysIcon,
   FingerprintIcon,
@@ -307,18 +306,6 @@ export default function Home() {
               <b>Fingerprints</b> let you follow your content as it travels.
             </p>
           </div>
-
-          {/*<div className="mt-20 px-10">*/}
-          {/*  <div className="flex flex-row z-10 w-full justify-center items-center px-2 mt-10 mb-20">*/}
-          {/*    <Link*/}
-          {/*      href="#howitworks"*/}
-          {/*      className="flex gap-2 px-6 py-2 bg-cyan-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-teal/80 hover:text-gray-800"*/}
-          {/*    >*/}
-          {/*      How does it work?*/}
-          {/*      <ArrowDownCircleIcon className="w-5 h-5" />*/}
-          {/*    </Link>*/}
-          {/*  </div>*/}
-          {/*</div>*/}
 
           <div className="flex flex-row justify-center items-center mt-20 ">
             <div className="bg-white rounded-full p-2 shadow-md text-cyan-800/80">

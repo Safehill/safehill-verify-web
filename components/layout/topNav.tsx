@@ -1,11 +1,16 @@
 'use client';
 
 import {
-  MagnifyingGlassIcon,
   Bars3Icon as MenuIcon,
+  MagnifyingGlassIcon,
   XMarkIcon as XIcon,
 } from '@heroicons/react/24/outline';
-import { CalendarDaysIcon, LogInIcon } from 'lucide-react';
+import {
+  ArrowDown,
+  CalendarDaysIcon,
+  LogInIcon,
+  SearchIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
@@ -24,20 +29,29 @@ export default function TopNav({
       <div className="hidden sm:flex justify-end items-center gap-2">
         {currentPage === 'home' && (
           <Link
-            href="/authenticate"
-            className="flex gap-2 px-4 py-2 bg-purple-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+            href="#howitworks"
+            className="flex gap-2 px-4 py-2 bg-cyan-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-cyan-100/80 hover:text-gray-800"
           >
-            Authenticator
-            <MagnifyingGlassIcon className="w-5 h-5" />
+            Get started
+            <ArrowDown className="w-5 h-5" />
           </Link>
         )}
         {currentPage === 'home' && (
           <Link
             href="https://tally.so/r/3qoGxg"
-            className="flex gap-2 px-4 py-2 bg-yellow-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange/80 hover:text-gray-800"
+            className="flex gap-2 px-4 py-2 bg-yellow-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-orange-100/80 hover:text-gray-800"
           >
             Get in touch
             <CalendarDaysIcon className="w-5 h-5" />
+          </Link>
+        )}
+        {currentPage === 'home' && (
+          <Link
+            href="/authenticate"
+            className="flex gap-2 px-4 py-2 bg-purple-100 /80 font-display text-black text-sm rounded-lg transform transition-all duration-100 hover:scale-105 hover:shadow-lg hover:bg-purple-100/80 hover:text-gray-800"
+          >
+            Authenticate
+            <SearchIcon className="w-5 h-5" />
           </Link>
         )}
         {currentPage !== 'login' && (
@@ -79,24 +93,35 @@ export default function TopNav({
       >
         <ul className="flex flex-col items-center text-center gap-2 py-4 px-4">
           {currentPage === 'home' && (
-            <li className="w-full px-6 py-3 bg-purple-100 rounded-lg text-sm text-black font-normal shadow-md transition-all duration-50 hover:bg-purple-100/100 hover:text-gray-800">
+            <li className="w-full px-6 py-3 bg-cyan-100 rounded-lg text-sm text-black font-normal shadow-md transition-all duration-50 hover:bg-cyan-100/80 hover:text-gray-800">
               <Link
-                href="/authenticate"
+                href="#howitworks"
                 className="flex items-center justify-center gap-x-2"
               >
-                Authenticator
-                <MagnifyingGlassIcon className="w-5 h-5" />
+                Get started
+                <ArrowDown className="w-5 h-5" />
               </Link>
             </li>
           )}
           {currentPage === 'home' && (
-            <li className="w-full px-6 py-3 bg-yellow-100 rounded-lg text-sm text-black font-normal shadow-md transition-all duration-50 hover:bg-orange-100/100 hover:text-gray-800">
+            <li className="w-full px-6 py-3 bg-yellow-100 rounded-lg text-sm text-black font-normal shadow-md transition-all duration-50 hover:bg-orange-100/80 hover:text-gray-800">
               <Link
                 href="https://tally.so/r/3qoGxg"
                 className="flex items-center justify-center gap-x-2"
               >
                 Get in touch
                 <CalendarDaysIcon className="w-5 h-5" />
+              </Link>
+            </li>
+          )}
+          {currentPage === 'home' && (
+            <li className="w-full px-6 py-3 bg-purple-100 rounded-lg text-sm text-black font-normal shadow-md transition-all duration-50 hover:bg-purple-100/80 hover:text-gray-800">
+              <Link
+                href="/authenticate"
+                className="flex items-center justify-center gap-x-2"
+              >
+                Authenticate
+                <MagnifyingGlassIcon className="w-5 h-5" />
               </Link>
             </li>
           )}

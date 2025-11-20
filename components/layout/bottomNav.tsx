@@ -13,7 +13,7 @@ export default function BottomNav({ darkTheme }: { darkTheme: boolean }) {
           darkTheme ? 'hover:bg-white/30' : 'hover:bg-primary hover:text-white'
         }`}
       >
-        Download the App
+        Get Started
       </Link>
       <Link
         href="/privacy"
