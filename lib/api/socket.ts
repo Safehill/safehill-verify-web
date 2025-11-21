@@ -33,6 +33,16 @@ export const WebsocketSessionStatus = {
   wsRef: null as WebSocket | null,
 };
 
+export function resetWebSocketState() {
+  if (WebsocketSessionStatus.wsRef) {
+    WebsocketSessionStatus.wsRef.close();
+    WebsocketSessionStatus.wsRef = null;
+  }
+  WebsocketSessionStatus.isConnecting = false;
+  SessionEncryption.symmetricKey = null;
+  SessionEncryption.isInitializing = false;
+}
+
 export function useSessionWebSocket(): SessionWebSocketState {
   const [websocketSession, setWebsocketSession] =
     useState<AuthSessionInitializationMessage | null>(null);

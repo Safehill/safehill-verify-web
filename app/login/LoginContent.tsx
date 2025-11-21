@@ -5,7 +5,7 @@ import ScanQRCodeView from '@/components/login/ScanQRCodeView';
 import { Button } from '@/components/shared/button';
 import { Card } from '@/components/shared/card';
 import { API_BASE_URL } from '@/lib/api/api';
-import { useSessionWebSocket } from '@/lib/api/socket';
+import { resetWebSocketState, useSessionWebSocket } from '@/lib/api/socket';
 import { arrayBufferToBase64 } from '@/lib/crypto/base64';
 import { cryptoKeyToBase64, encryptWithKey } from '@/lib/crypto/keys';
 import { ArrowDown } from 'lucide-react';
@@ -24,6 +24,11 @@ export default function LoginContent() {
   const [timeRemaining, setTimeRemaining] = useState(CODE_VALIDITY_IN_SECONDS);
   const [progress, setProgress] = useState(100);
   const [hasRedirected, setHasRedirected] = useState(false);
+
+  // Reset WebSocket state on mount to ensure clean connection
+  useEffect(() => {
+    resetWebSocketState();
+  }, []);
 
   const {
     session: websocketSession,
