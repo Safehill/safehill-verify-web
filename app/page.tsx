@@ -298,7 +298,7 @@ export default function Home() {
             >
               Rethink
               <br />
-              distribution.
+              Distribution.
             </h1>
             <p className="text-transparent bg-gradient-to-br from-cyan-100 to-purple-100 bg-clip-text text-center text-xl md:text-2xl font-light tracking-[-0.01em] px-2 mt-5 mb-20">
               Grant rights to view. Do not lose control.

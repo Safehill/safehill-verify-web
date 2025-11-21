@@ -12,6 +12,7 @@ import {
   useState,
 } from 'react';
 import { setLogoutCallback } from '@/lib/api/api';
+import { resetWebSocketState } from '@/lib/api/socket';
 
 // Define types for our authentication data
 export type AuthedSession = {
@@ -52,6 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout function - clears credentials, cache, and redirects to login
   const logout = useCallback(() => {
+    // Reset WebSocket state to allow fresh connection on login page
+    resetWebSocketState();
+
     // Clear all React Query cache to prevent data leakage between users
     queryClient.clear();
 
