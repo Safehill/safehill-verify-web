@@ -237,6 +237,7 @@ export class VisibilityChangeService {
       version.ephemeralPublicKey,
       version.publicSignature,
       version.senderPublicSignature,
+      version.serverPublicSignature,
       userPrivateKey,
       userPublicKey,
       protocolSalt

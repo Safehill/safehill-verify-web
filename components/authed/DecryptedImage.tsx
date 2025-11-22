@@ -44,6 +44,7 @@ async function decryptVersion(
     version.ephemeralPublicKey,
     version.publicSignature,
     version.senderPublicSignature,
+    version.serverPublicSignature,
     authedSession.privateKey,
     authedSession.user.publicKey,
     serverKeys.encryptionProtocolSalt

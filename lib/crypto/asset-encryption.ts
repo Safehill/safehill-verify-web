@@ -196,6 +196,7 @@ export class AssetEncryption {
    * @param ephemeralPublicKey - The ephemeral public key used in encryption (base64 string)
    * @param publicSignature - The signature (base64 string)
    * @param senderPublicSignature - The sender's public signature key (base64 string, SPKI format)
+   * @param serverPublicSignature - Server's public signature (base64 string, SPKI format). Present only for server-mediated shares (confidential collections).
    * @param receiverPrivateKey - Receiver's private key (CryptoKey) for decryption
    * @param receiverPublicKey - Receiver's public key (base64 string, SPKI format)
    * @param protocolSalt - Protocol salt (base64 string)
@@ -206,6 +207,7 @@ export class AssetEncryption {
     ephemeralPublicKey: string,
     publicSignature: string,
     senderPublicSignature: string,
+    serverPublicSignature: string | undefined,
     receiverPrivateKey: CryptoKey,
     receiverPublicKey: string,
     protocolSalt: string
@@ -224,7 +226,7 @@ export class AssetEncryption {
       payload,
       receiverPrivateKey,
       receiverPublicKey,
-      senderPublicSignature,
+      serverPublicSignature || senderPublicSignature,
       protocolSalt
     );
 
