@@ -17,6 +17,11 @@ export interface AssetVersionOutputDTO {
   publicSignature: string;
   encryptedSecret: string;
   senderPublicSignature: string;
+  /**
+   * Server's public signature (base64). Present only for server-mediated shares (confidential collections).
+   * When present, clients should verify against this signature instead of senderPublicSignature.
+   */
+  serverPublicSignature?: string;
   presignedURL: string;
   presignedURLExpiresInMinutes: number;
   timeUploaded?: string;
