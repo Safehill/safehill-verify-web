@@ -39,8 +39,7 @@ export function resetWebSocketState() {
     WebsocketSessionStatus.wsRef = null;
   }
   WebsocketSessionStatus.isConnecting = false;
-  SessionEncryption.symmetricKey = null;
-  SessionEncryption.isInitializing = false;
+  // Note: We keep SessionEncryption state intact - the symmetric key can be reused
 }
 
 export function useSessionWebSocket(): SessionWebSocketState {
