@@ -10,6 +10,8 @@ import type {
 } from '@/lib/api/models/dto/Asset';
 import { createAuthenticatedRequest, USE_MOCK_UPLOAD } from './api';
 import { toast } from 'sonner';
+import { AssetClaimedError } from '@/lib/errors/upload-errors';
+import axios from 'axios';
 
 // API functions for assets
 export const assetsApi = {
@@ -40,6 +42,21 @@ export const assetsApi = {
       return result;
     } catch (error) {
       console.error('assetsApi.createAsset failed', error);
+
+      // Check if this is a 403 response (asset claimed by another user)
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        // Extract conflicting assets from server response (if provided)
+        const conflictingAssets = error.response?.data?.conflictingAssets as
+          | AssetSimilarMatchDTO[]
+          | undefined;
+
+        throw new AssetClaimedError(
+          'This asset has already been claimed by another user',
+          conflictingAssets
+        );
+      }
+
+      // For other errors, throw generic error
       throw new Error(
         `Failed to create asset: ${
           error instanceof Error ? error.message : 'Unknown error'

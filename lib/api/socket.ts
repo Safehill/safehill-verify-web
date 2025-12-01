@@ -94,10 +94,19 @@ export function useSessionWebSocket(): SessionWebSocketState {
     // console.log('Connecting to WS:', ws.url);
 
     ws.onopen = () => {
+      // Guard: ignore events from old WebSocket instances
+      if (ws !== WebsocketSessionStatus.wsRef) {
+        return;
+      }
       // console.log('WS open');
     };
 
     ws.onmessage = async (event) => {
+      // Guard: ignore events from old WebSocket instances
+      if (ws !== WebsocketSessionStatus.wsRef) {
+        return;
+      }
+
       const sessionRaw = JSON.parse(event.data);
       const content = JSON.parse(sessionRaw['content']);
       switch (sessionRaw['type']) {
@@ -143,6 +152,11 @@ export function useSessionWebSocket(): SessionWebSocketState {
     };
 
     ws.onerror = (_e) => {
+      // Guard: ignore events from old WebSocket instances
+      if (ws !== WebsocketSessionStatus.wsRef) {
+        return;
+      }
+
       // console.error('WS error', e);
       setError('Failed to connect to the server');
       WebsocketSessionStatus.isConnecting = false;
@@ -151,29 +165,39 @@ export function useSessionWebSocket(): SessionWebSocketState {
     };
 
     ws.onclose = () => {
+      // Guard: ignore events from old WebSocket instances
+      if (ws !== WebsocketSessionStatus.wsRef) {
+        return;
+      }
+
       // console.log('WS close');
-      if (!websocketSession) {
+      // Only show error if we never got session info
+      if (WebsocketSessionStatus.isConnecting) {
         setError('WebSocket closed before session information was received.');
       }
-      WebsocketSessionStatus.isConnecting = true;
+      WebsocketSessionStatus.isConnecting = false;
       setLocalLocalAuthedSession(null);
       setWebsocketSession(null);
     };
-  }, [websocketSession]);
+  }, []);
 
-  // Connect on load
+  // Connect on mount
   useEffect(() => {
-    if (WebsocketSessionStatus.isConnecting) {
-      return;
-    }
-    if (websocketSession) {
-      return;
+    // Only connect if not already connecting (prevents double connection in strict mode)
+    if (!WebsocketSessionStatus.isConnecting) {
+      setLocalLocalAuthedSession(null);
+      connect();
     }
 
-    setLocalLocalAuthedSession(null);
-
-    connect();
-  }, [connect, websocketSession]);
+    // Cleanup on unmount (handles React strict mode gracefully)
+    return () => {
+      if (WebsocketSessionStatus.wsRef) {
+        WebsocketSessionStatus.wsRef.close();
+        WebsocketSessionStatus.wsRef = null;
+      }
+      WebsocketSessionStatus.isConnecting = false;
+    };
+  }, []); // Empty deps: only run on mount/unmount
 
   return {
     session: websocketSession,

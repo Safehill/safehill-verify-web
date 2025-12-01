@@ -175,7 +175,7 @@ export default function CollectionDetail() {
       collectionName: upload.collectionName,
       uploadProgress: upload.progress,
       uploadStatus: upload.status as 'uploading' | 'error',
-      uploadError: upload.error,
+      uploadError: upload.error?.message,
       thumbnailURL: URL.createObjectURL(upload.file), // Create preview from File object
     }));
   }, [uploads, collection?.name]);

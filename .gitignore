@@ -15,6 +15,9 @@
 # production
 /build
 
+# models
+public/models
+
 # misc
 .DS_Store
 *.pem
@@ -38,3 +41,4 @@ next-env.d.ts
 
 # misc
 .vscode
+

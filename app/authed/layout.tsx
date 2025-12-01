@@ -1,12 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import type React from 'react';
 import { useEffect } from 'react';
 import { useAuth } from '@/lib/auth/auth-context';
 import { Toaster } from 'sonner';
 import { UploadProvider } from '@/lib/contexts/upload-context';
 import UploadProgressToaster from '@/components/shared/UploadProgressToaster';
+import { useImageEmbedding } from '@/lib/hooks/use-image-embedding';
 
 export default function AuthedSectionLayout({
   children,
@@ -15,6 +15,9 @@ export default function AuthedSectionLayout({
 }) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+
+  // Preload embedding model (with 200ms delay to ensure Toaster is mounted)
+  useImageEmbedding({ delayMs: 200 });
 
   // Protect all authed section routes
   useEffect(() => {
@@ -29,8 +32,8 @@ export default function AuthedSectionLayout({
   // Only render children if authenticated
   return isAuthenticated ? (
     <UploadProvider>
+      <Toaster position="bottom-center" richColors />
       {children}
-      <Toaster />
       <UploadProgressToaster />
     </UploadProvider>
   ) : null;
