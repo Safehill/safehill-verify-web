@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  experimental: {
-    turbo: false,
-  },
+  turbopack: false,
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -16,10 +14,19 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: [
-      'lh3.googleusercontent.com',
-      'picsum.photos',
-      'localhost.localstack.cloud',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost.localstack.cloud',
+      },
     ],
   },
   async redirects() {
