@@ -37,7 +37,6 @@ export interface PublicAssetVersionOutputDTO {
 export interface AssetInputDTO {
   globalIdentifier: string;
   localIdentifier?: string;
-  fingerprint?: string;
   perceptualHash?: string;
   embeddings?: string;
   creationDate: string;

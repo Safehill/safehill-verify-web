@@ -12,32 +12,80 @@ let session: ort.InferenceSession | null = null;
 /**
  * Load TinyCLIP ONNX model using ONNX Runtime Web
  */
+/**
+ * Wrapper for IndexedDB get with timeout
+ */
+async function getWithTimeout<T>(
+  key: string,
+  timeoutMs: number = 5000
+): Promise<T | undefined> {
+  return Promise.race([
+    get<T>(key),
+    new Promise<undefined>((resolve) =>
+      setTimeout(() => {
+        resolve(undefined);
+      }, timeoutMs)
+    ),
+  ]);
+}
+
 export async function loadTinyCLIPModel(): Promise<void> {
   if (session) {
+    console.log('[TinyCLIP] Session already exists, skipping load');
     return;
   }
 
-  let modelBuffer = await get(MODEL_KEY);
+  console.log('[TinyCLIP] Starting model load');
+  console.log('[TinyCLIP] Checking IndexedDB cache...');
+  let modelBuffer = await getWithTimeout<ArrayBuffer>(MODEL_KEY);
+  console.log('[TinyCLIP] IndexedDB check complete, cached:', !!modelBuffer);
 
   if (!modelBuffer) {
-    // console.log('Model not cached, downloading...');
+    console.log(
+      '[TinyCLIP] Model not cached, downloading from:',
+      MODEL_ZIP_URL
+    );
     const res = await fetch(MODEL_ZIP_URL);
-    const zipBuffer = await res.arrayBuffer();
+    console.log(
+      '[TinyCLIP] Download response received, size:',
+      res.headers.get('content-length')
+    );
 
+    const zipBuffer = await res.arrayBuffer();
+    console.log(
+      '[TinyCLIP] ZIP downloaded, size:',
+      zipBuffer.byteLength,
+      'bytes'
+    );
+
+    console.log('[TinyCLIP] Unzipping...');
     const unzipped = unzipSync(new Uint8Array(zipBuffer));
     const modelBytes = unzipped['TinyCLIP.onnx'];
     if (!modelBytes) {
       throw new Error('Model file not found in zip');
     }
+    console.log('[TinyCLIP] Unzipped model size:', modelBytes.length, 'bytes');
 
     modelBuffer = modelBytes.buffer;
+    console.log('[TinyCLIP] Caching to IndexedDB...');
     await set(MODEL_KEY, modelBuffer);
-    // console.log('Model cached in IndexedDB');
+    console.log('[TinyCLIP] Model cached successfully');
   } else {
-    // console.log('Loaded model from IndexedDB');
+    console.log('[TinyCLIP] Model loaded from IndexedDB cache');
   }
 
+  console.log('[TinyCLIP] Creating ONNX inference session...');
+  console.log('[TinyCLIP] Model buffer size:', modelBuffer.byteLength, 'bytes');
+
+  const sessionStartTime = Date.now();
   session = await ort.InferenceSession.create(modelBuffer);
+  const sessionDuration = Date.now() - sessionStartTime;
+
+  console.log(
+    '[TinyCLIP] ONNX session created successfully in',
+    sessionDuration,
+    'ms'
+  );
 }
 
 /**

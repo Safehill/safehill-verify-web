@@ -15,10 +15,17 @@ import { USE_MOCK_UPLOAD } from '@/lib/api/api';
 import { getServerEncryptionKeys } from '@/lib/hooks/useServerEncryptionKeys';
 import { AuthedSession } from '@/lib/auth/auth-context';
 import { AssetResizingService } from './asset-resizing-service';
+import {
+  generateEmbeddingFromImageData,
+  serializeEmbeddingToBase64,
+} from '@/lib/embeddings/tinyclip-embeddings';
+import { EmbeddingsSingleton } from '@/lib/hooks/use-image-embedding';
+import { EmbeddingModelError } from '@/lib/errors/upload-errors';
 
 export interface UploadProgress {
   stage:
     | 'resizing'
+    | 'fingerprinting'
     | 'encrypting'
     | 'creating'
     | 'uploading'
@@ -27,13 +34,59 @@ export interface UploadProgress {
     | 'error';
   progress: number;
   message?: string;
-  error?: string;
+  error?: Error;
 }
 
 export interface UploadResult {
   success: boolean;
   globalIdentifier: string;
   error?: string;
+}
+
+/**
+ * Wait for the embedding model to be ready, with timeout
+ * @param timeoutMs Maximum time to wait in milliseconds (default: 60 seconds)
+ * @returns Promise that resolves when model is loaded, rejects on timeout or failure
+ */
+async function waitForEmbeddingModel(timeoutMs: number = 60000): Promise<void> {
+  const startTime = Date.now();
+
+  return new Promise((resolve, reject) => {
+    const checkState = () => {
+      const state = EmbeddingsSingleton.state;
+
+      if (state === 'loaded') {
+        resolve();
+        return;
+      }
+
+      if (state === 'failed_twice') {
+        reject(
+          new EmbeddingModelError(
+            'Fingerprint model failed to load. Please retry the upload.',
+            true
+          )
+        );
+        return;
+      }
+
+      // Check timeout
+      if (Date.now() - startTime > timeoutMs) {
+        reject(
+          new EmbeddingModelError(
+            'Timeout waiting for fingerprint model to load',
+            true
+          )
+        );
+        return;
+      }
+
+      // Check again in 500ms
+      setTimeout(checkState, 500);
+    };
+
+    checkState();
+  });
 }
 
 /**
@@ -120,19 +173,19 @@ export class AssetUploadService {
       );
     } catch (error) {
       console.error('AssetUploadService.uploadFiles failed', error);
-      const errorMessage =
-        error instanceof Error ? error.message : 'Upload failed';
+      const errorObject =
+        error instanceof Error ? error : new Error('Upload failed');
       return files.map((file, index) => {
         // Report error for all versions (we use 'all' as a placeholder since we don't know which versions were created)
         this.updateProgress(globalIdentifiers[index], 'all', {
           stage: 'error',
           progress: 0,
-          error: errorMessage,
+          error: errorObject,
         });
         return {
           success: false,
           globalIdentifier: globalIdentifiers[index],
-          error: errorMessage,
+          error: errorObject.message,
         };
       });
     }
@@ -157,6 +210,7 @@ export class AssetUploadService {
       file: File;
       globalIdentifier: string;
       encryptedVersions: EncryptedAssetVersion[];
+      embeddings: string;
     }[]
   > {
     console.debug('AssetUploadService.encryptAllFiles started', {
@@ -202,7 +256,7 @@ export class AssetUploadService {
         })),
       });
 
-      // Report progress for all versions during resizing/encrypting stages
+      // Report progress for all versions during resizing stage
       resizedVersions.forEach((v) => {
         this.updateProgress(globalIdentifier, v.quality, {
           stage: 'resizing',
@@ -211,7 +265,81 @@ export class AssetUploadService {
         });
       });
 
-      // Step 2: Encrypt all versions with shared symmetric key
+      // Step 2: Calculate embeddings from original image (REQUIRED)
+      resizedVersions.forEach((v) => {
+        this.updateProgress(globalIdentifier, v.quality, {
+          stage: 'fingerprinting',
+          progress: 15,
+          message: 'Generating asset fingerprint...',
+        });
+      });
+
+      let embeddings: string;
+      try {
+        // Wait for embedding model to be ready (with 60s timeout)
+        if (EmbeddingsSingleton.state !== 'loaded') {
+          console.debug(
+            `AssetUploadService.encryptAllFiles waiting for embedding model`,
+            {
+              globalIdentifier,
+              currentState: EmbeddingsSingleton.state,
+            }
+          );
+
+          // Update progress to show we're waiting
+          resizedVersions.forEach((v) => {
+            this.updateProgress(globalIdentifier, v.quality, {
+              stage: 'fingerprinting',
+              progress: 15,
+              message: 'Waiting for fingerprint model to load...',
+            });
+          });
+
+          await waitForEmbeddingModel(60000);
+
+          // Update progress after model is ready
+          resizedVersions.forEach((v) => {
+            this.updateProgress(globalIdentifier, v.quality, {
+              stage: 'fingerprinting',
+              progress: 15,
+              message: 'Generating asset fingerprint...',
+            });
+          });
+        }
+
+        // Create ImageData from the original file for embedding calculation
+        const imageData = await this.createImageDataFromFile(file);
+        const embedding = await generateEmbeddingFromImageData(imageData);
+        embeddings = serializeEmbeddingToBase64(embedding);
+
+        console.debug(
+          'AssetUploadService.encryptAllFiles embeddings calculated',
+          {
+            globalIdentifier,
+            embeddingsLength: embeddings.length,
+          }
+        );
+      } catch (error) {
+        const errorObject =
+          error instanceof Error
+            ? error
+            : new Error('Failed to generate fingerprint');
+        console.error(`Fingerprinting failed for ${globalIdentifier}:`, error);
+
+        // Report error and stop processing this file
+        resizedVersions.forEach((v) => {
+          this.updateProgress(globalIdentifier, v.quality, {
+            stage: 'error',
+            progress: 0,
+            error: errorObject,
+          });
+        });
+
+        // Throw error to stop the upload for this file
+        throw errorObject;
+      }
+
+      // Step 3: Encrypt all versions with shared symmetric key
       resizedVersions.forEach((v) => {
         this.updateProgress(globalIdentifier, v.quality, {
           stage: 'encrypting',
@@ -238,6 +366,7 @@ export class AssetUploadService {
         file,
         globalIdentifier,
         encryptedVersions,
+        embeddings,
       });
     }
 
@@ -251,6 +380,7 @@ export class AssetUploadService {
     encryptedAssets: {
       globalIdentifier: string;
       encryptedVersions: EncryptedAssetVersion[];
+      embeddings: string;
     }[],
     collection: CollectionOutputDTO,
     authedSession: AuthedSession
@@ -275,94 +405,153 @@ export class AssetUploadService {
     const assets: AssetInputDTO[] = encryptedAssets.map((asset) => ({
       globalIdentifier: asset.globalIdentifier,
       localIdentifier: undefined,
-      fingerprint: undefined,
       perceptualHash: undefined,
-      embeddings: undefined,
+      embeddings: asset.embeddings,
       creationDate: new Date().toISOString(),
       groupId: undefined,
       versions: asset.encryptedVersions.map((v) => v.selfEncryption),
       force: false,
     }));
 
-    // For system collections (Dropbox), create assets individually
-    // Assets are automatically added to Dropbox on creation
-    if (collection.isSystemCollection) {
-      console.debug(
-        'AssetUploadService.createAssetsOnServer using individual asset creation for system collection'
-      );
+    // Step 1: Always create assets first (this adds them to Dropbox automatically)
+    console.debug(
+      'AssetUploadService.createAssetsOnServer creating assets via /assets/create'
+    );
 
+    const createdOrExistingAssets: AssetOutputDTO[] = [];
+    const failedAssets: { globalIdentifier: string; error: Error }[] = [];
+
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
       try {
-        const createdAssets: AssetOutputDTO[] = [];
-
-        for (const asset of assets) {
-          const result = await assetsApi.createAsset(asset, authedSession);
-          createdAssets.push(result);
-        }
-
-        console.debug(
-          'AssetUploadService.createAssetsOnServer system collection creation successful',
-          {
-            createdCount: createdAssets.length,
-          }
-        );
-
-        return {
-          success: true,
-          message: 'Assets created and added to Dropbox',
-          addedCount: createdAssets.length,
-          skippedCount: 0,
-          assets: createdAssets,
-        };
+        const result = await assetsApi.createAsset(asset, authedSession);
+        createdOrExistingAssets.push(result);
       } catch (error) {
+        const errorObject =
+          error instanceof Error ? error : new Error('Unknown error');
         console.error(
-          'AssetUploadService.createAssetsOnServer system collection creation failed',
+          `Failed to create asset ${asset.globalIdentifier}:`,
           error
         );
-        throw error;
+        failedAssets.push({
+          globalIdentifier: asset.globalIdentifier,
+          error: errorObject,
+        });
+
+        // Update progress to show error for this asset's versions
+        const encryptedAsset = encryptedAssets[i];
+        if (encryptedAsset) {
+          encryptedAsset.encryptedVersions.forEach((version) => {
+            this.updateProgress(asset.globalIdentifier, version.versionName, {
+              stage: 'error',
+              progress: 0,
+              error: errorObject,
+            });
+          });
+        }
       }
     }
 
-    // For non-system collections, use batch add-to-collection endpoint
-    // which handles both creation and addition in one call
     console.debug(
-      'AssetUploadService.createAssetsOnServer using batch add-to-collection for non-system collection'
+      'AssetUploadService.createAssetsOnServer asset creation completed',
+      {
+        totalAttempted: assets.length,
+        successCount: createdOrExistingAssets.length,
+        failedCount: failedAssets.length,
+      }
     );
 
-    const serverDecryptionDetails = encryptedAssets.map((asset) => ({
-      assetGlobalIdentifier: asset.globalIdentifier,
-      versionDecryptionDetails: asset.encryptedVersions.map(
-        (v) => v.serverEncryption
-      ),
-    }));
+    // If all assets failed, throw the first error to preserve error type
+    if (createdOrExistingAssets.length === 0) {
+      console.error(
+        `Failed to create any assets. ${failedAssets.length} error(s)`
+      );
+      // Throw the first error to preserve its type (AssetClaimedError, etc.)
+      throw failedAssets[0].error;
+    }
+
+    // If some assets failed, log warning but continue
+    if (failedAssets.length > 0) {
+      console.warn(
+        `${failedAssets.length} asset(s) could not be created:`,
+        failedAssets
+      );
+    }
+
+    if (collection.isSystemCollection) {
+      // For system collection (Dropbox), assets are already added automatically
+      return {
+        success: true,
+        message:
+          failedAssets.length > 0
+            ? `${createdOrExistingAssets.length} assets added to Dropbox (${failedAssets.length} failed)`
+            : 'Assets created and added to Dropbox',
+        addedCount: createdOrExistingAssets.length,
+        skippedCount: failedAssets.length,
+        assets: createdOrExistingAssets,
+      };
+    }
+
+    // Step 2: Add successfully created/existing assets to non-system collection
+    console.debug(
+      'AssetUploadService.createAssetsOnServer adding assets to non-system collection',
+      {
+        collectionId: collection.id,
+        collectionName: collection.name,
+        assetsToAdd: createdOrExistingAssets.length,
+      }
+    );
+
+    // Filter encrypted assets and server decryption details to match only successfully created/existing assets
+    const successfulIdentifiers = new Set(
+      createdOrExistingAssets.map((a) => a.globalIdentifier)
+    );
+    const assetsToAdd = assets.filter((a) =>
+      successfulIdentifiers.has(a.globalIdentifier)
+    );
+    const serverDecryptionDetails = encryptedAssets
+      .filter((asset) => successfulIdentifiers.has(asset.globalIdentifier))
+      .map((asset) => ({
+        assetGlobalIdentifier: asset.globalIdentifier,
+        versionDecryptionDetails: asset.encryptedVersions.map(
+          (v) => v.serverEncryption
+        ),
+      }));
 
     const request: CollectionAssetAddRequestDTO = {
-      assets,
+      assets: assetsToAdd,
       serverDecryptionDetails,
     };
 
-    console.debug('AssetUploadService.createAssetsOnServer calling API', {
-      assetsCount: assets.length,
-      serverDecryptionDetailsCount: serverDecryptionDetails.length,
-    });
-
     try {
-      const result = await collectionsApi.addAssetsToCollection(
+      const addResult = await collectionsApi.addAssetsToCollection(
         collection.id,
         request,
         authedSession
       );
+
       console.debug(
-        'AssetUploadService.createAssetsOnServer API call successful',
+        'AssetUploadService.createAssetsOnServer add-to-collection successful',
         {
-          success: result.success,
-          addedCount: result.addedCount,
-          skippedCount: result.skippedCount,
+          success: addResult.success,
+          addedCount: addResult.addedCount,
+          skippedCount: addResult.skippedCount,
         }
       );
-      return result;
+
+      return {
+        success: true,
+        message:
+          failedAssets.length > 0
+            ? `${addResult.addedCount} assets added to ${collection.name} (${failedAssets.length} failed)`
+            : `${addResult.addedCount} assets added to ${collection.name}`,
+        addedCount: addResult.addedCount,
+        skippedCount: addResult.skippedCount + failedAssets.length,
+        assets: createdOrExistingAssets,
+      };
     } catch (error) {
       console.error(
-        'AssetUploadService.createAssetsOnServer API call failed',
+        'AssetUploadService.createAssetsOnServer add-to-collection failed',
         error
       );
       throw error;
@@ -374,6 +563,7 @@ export class AssetUploadService {
       file: File;
       globalIdentifier: string;
       encryptedVersions: EncryptedAssetVersion[];
+      embeddings: string;
     }[],
     creationResult: CollectionAssetAddResultDTO,
     authedSession: AuthedSession,
@@ -535,16 +725,14 @@ export class AssetUploadService {
         globalIdentifier: asset.globalIdentifier,
       };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Upload failed';
       const errorObject =
-        error instanceof Error ? error : new Error(errorMessage);
+        error instanceof Error ? error : new Error('Upload failed');
 
       asset.encryptedVersions.forEach((version) => {
         this.updateProgress(asset.globalIdentifier, version.versionName, {
           stage: 'error',
           progress: 0,
-          error: errorMessage,
+          error: errorObject,
         });
       });
 
@@ -554,7 +742,7 @@ export class AssetUploadService {
       return {
         success: false,
         globalIdentifier: asset.globalIdentifier,
-        error: errorMessage,
+        error: errorObject.message,
       };
     }
   }
@@ -636,5 +824,35 @@ export class AssetUploadService {
         }`
       );
     }
+  }
+
+  /**
+   * Create ImageData from a File object for embedding calculation
+   */
+  private async createImageDataFromFile(file: File): Promise<ImageData> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        resolve(imageData);
+      };
+
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
   }
 }

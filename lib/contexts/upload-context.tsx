@@ -21,7 +21,7 @@ export interface UploadItem {
   fileName: string;
   progress: number; // Aggregated across all versions
   status: 'uploading' | 'completed' | 'error';
-  error?: string;
+  error?: Error;
   collectionName?: string;
   file: File;
   versionProgress: Record<string, number>; // Progress per version

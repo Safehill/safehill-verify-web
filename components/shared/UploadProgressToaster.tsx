@@ -9,9 +9,16 @@ import {
   AlertCircle,
   Minimize2,
   Maximize2,
+  Info,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useUpload } from '@/lib/contexts/upload-context';
+import {
+  AssetClaimedError,
+  EmbeddingModelError,
+} from '@/lib/errors/upload-errors';
+import AssetClaimedInfoModal from '@/components/shared/AssetClaimedInfoModal';
+import { reloadEmbeddingModel } from '@/lib/hooks/use-image-embedding';
 
 export default function UploadProgressToaster({
   className = '',
@@ -20,6 +27,13 @@ export default function UploadProgressToaster({
 }) {
   const { uploads, removeUpload, clearCompleted } = useUpload();
   const [isMinimized, setIsMinimized] = useState(false);
+  const [claimedError, setClaimedError] = useState<AssetClaimedError | null>(
+    null
+  );
+
+  const handleRetryModel = () => {
+    reloadEmbeddingModel();
+  };
 
   // Don't show if no uploads
   if (uploads.length === 0) {
@@ -98,61 +112,107 @@ export default function UploadProgressToaster({
 
           {/* Upload List */}
           <div className="max-h-64 overflow-y-auto">
-            {uploads.map((upload) => (
-              <div
-                key={upload.globalIdentifier}
-                className="flex items-center gap-3 p-3 border-b border-gray-100 last:border-b-0"
-              >
-                {/* Status Icon */}
-                <div className="flex-shrink-0">
-                  {upload.status === 'uploading' && (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent" />
-                  )}
-                  {upload.status === 'completed' && (
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  )}
-                  {upload.status === 'error' && (
-                    <AlertCircle className="h-4 w-4 text-red-600" />
-                  )}
-                </div>
-
-                {/* File Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">
-                    {upload.fileName}
-                  </div>
-                  {upload.collectionName && (
-                    <div className="text-xs text-gray-500 truncate">
-                      to {upload.collectionName}
-                    </div>
-                  )}
-
-                  {/* Progress Bar */}
-                  {upload.status === 'uploading' && (
-                    <div className="mt-1">
-                      <Progress value={upload.progress} className="h-1" />
-                    </div>
-                  )}
-
-                  {/* Error Message */}
-                  {upload.status === 'error' && upload.error && (
-                    <div className="text-xs text-red-600 mt-1 truncate">
-                      {upload.error}
-                    </div>
-                  )}
-                </div>
-
-                {/* Remove Button */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-6 w-6 flex-shrink-0"
-                  onClick={() => removeUpload(upload.globalIdentifier)}
+            {uploads.map((upload) => {
+              const isClaimedError = upload.error instanceof AssetClaimedError;
+              return (
+                <div
+                  key={upload.globalIdentifier}
+                  className={`flex items-center gap-3 p-3 border-b border-gray-100 last:border-b-0 ${
+                    isClaimedError
+                      ? 'cursor-pointer hover:bg-orange-50 transition-colors'
+                      : ''
+                  }`}
+                  onClick={() => {
+                    if (isClaimedError) {
+                      setClaimedError(upload.error as AssetClaimedError);
+                    }
+                  }}
                 >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
+                  {/* Status Icon */}
+                  <div className="flex-shrink-0">
+                    {upload.status === 'uploading' && (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-blue-600 border-r-transparent" />
+                    )}
+                    {upload.status === 'completed' && (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    )}
+                    {upload.status === 'error' && (
+                      <AlertCircle className="h-4 w-4 text-red-600" />
+                    )}
+                  </div>
+
+                  {/* File Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-900 truncate">
+                      {upload.fileName}
+                    </div>
+                    {upload.collectionName && (
+                      <div className="text-xs text-gray-500 truncate">
+                        to {upload.collectionName}
+                      </div>
+                    )}
+
+                    {/* Progress Bar */}
+                    {upload.status === 'uploading' && (
+                      <div className="mt-1">
+                        <Progress value={upload.progress} className="h-1" />
+                      </div>
+                    )}
+
+                    {/* Error Message */}
+                    {upload.status === 'error' && upload.error && (
+                      <>
+                        {upload.error instanceof AssetClaimedError ? (
+                          <div
+                            className="text-xs text-orange-600 mt-1 flex items-center gap-1 cursor-pointer hover:text-orange-700"
+                            onClick={() =>
+                              setClaimedError(upload.error as AssetClaimedError)
+                            }
+                          >
+                            <span className="truncate flex-1">
+                              {upload.error.message}
+                            </span>
+                            <Info className="h-3 w-3 flex-shrink-0" />
+                          </div>
+                        ) : upload.error instanceof EmbeddingModelError &&
+                          upload.error.canRetry ? (
+                          <div className="text-xs mt-1 flex items-center gap-2">
+                            <span className="text-red-600 truncate flex-1">
+                              {upload.error.message}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-5 px-2 text-[10px] flex-shrink-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRetryModel();
+                              }}
+                            >
+                              Retry
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-red-600 mt-1 truncate">
+                            {upload.error.message}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Remove Button */}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-6 w-6 flex-shrink-0"
+                    onClick={() => removeUpload(upload.globalIdentifier)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              );
+            })}
           </div>
 
           {/* Summary */}
@@ -183,7 +243,7 @@ export default function UploadProgressToaster({
               {activeUploads.length > 0 ? (
                 <>Uploading {activeUploads.length}...</>
               ) : (
-                <>All uploads complete</>
+                <>No pending uploads</>
               )}
             </div>
             {activeUploads.length > 0 && (
@@ -197,6 +257,12 @@ export default function UploadProgressToaster({
           )}
         </div>
       )}
+
+      {/* Asset Claimed Info Modal */}
+      <AssetClaimedInfoModal
+        error={claimedError}
+        onClose={() => setClaimedError(null)}
+      />
     </div>
   );
 }
