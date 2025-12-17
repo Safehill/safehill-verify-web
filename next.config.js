@@ -1,7 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  turbopack: false,
+
+  // Explicitly acknowledge Turbopack to avoid Next 16 build errors
+  turbopack: {},
+
+  // Keep webpack config for browser-side Node fallbacks
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
