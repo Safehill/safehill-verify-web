@@ -4,6 +4,7 @@ import AssetFingerprintPopover from '@/components/authed/AssetFingerprintPopover
 import { Button } from '@/components/shared/button';
 import FingerprintIcon from '@/components/shared/FingerprintIcon';
 import { useCollection } from '@/lib/hooks/use-collections';
+import type { CollectionOutputDTO } from '@/lib/api/models/dto/Collection';
 import { useAsset } from '@/lib/hooks/use-assets';
 import { getUserColor } from '@/lib/utils';
 import { selectVersion, selectPublicVersion } from '@/lib/utils/asset-versions';
@@ -41,12 +42,17 @@ export default function FullScreenAssetGallery({
   // Get collection data to find the owner
   const { data: collection } = useCollection(collectionId);
 
-  // Reset to initial index when modal opens
-  useEffect(() => {
-    if (isOpen) {
+  // Track previous open state to reset index when gallery opens
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  // Adjust state while rendering when gallery opens (recommended React pattern)
+  if (prevIsOpen !== isOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen && !prevIsOpen) {
+      // Gallery is opening - set to initial index
       setCurrentIndex(initialAssetIndex);
     }
-  }, [isOpen, initialAssetIndex]);
+  }
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -164,7 +170,7 @@ function AssetImageView({
   collection,
 }: {
   asset: Asset;
-  collection?: any;
+  collection?: CollectionOutputDTO;
 }) {
   const { data: imageData, isLoading, error } = useAsset(asset.id);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

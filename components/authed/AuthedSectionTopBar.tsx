@@ -7,6 +7,7 @@ import {
   usePayoutBalance,
 } from '@/lib/hooks/use-payouts';
 import { useCollections } from '@/lib/hooks/use-collections';
+import type { CollectionOutputDTO } from '@/lib/api/models/dto/Collection';
 import { getAvatarColorValue, getInitials } from '@/lib/utils';
 import { isPayoutRequirementsDisabled } from '@/lib/utils/feature-flags';
 import {
@@ -85,7 +86,7 @@ export default function AuthedSectionTopBar({
 
   // Check if user owns any collections
   const ownsCollections = collections.some(
-    (collection: any) => collection.createdBy === currentUserId
+    (collection: CollectionOutputDTO) => collection.createdBy === currentUserId
   );
 
   // Show warning if user owns collections but hasn't set up payouts

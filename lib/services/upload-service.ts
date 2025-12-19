@@ -645,7 +645,7 @@ export class AssetUploadService {
       globalIdentifier: string;
       encryptedVersions: EncryptedAssetVersion[];
     },
-    createdAsset: any,
+    createdAsset: AssetOutputDTO,
     authedSession: AuthedSession,
     onFinishedProcessingItem?: (
       globalIdentifier: string,

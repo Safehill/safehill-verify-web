@@ -76,10 +76,14 @@ export default function AddCollectionModal({
   const endIndex = startIndex + resultsPerPage;
   const paginatedResults = searchResults.slice(startIndex, endIndex);
 
-  // Reset page when search query changes
-  useEffect(() => {
+  // Track last search query to reset pagination when it changes
+  const [lastSearchQuery, setLastSearchQuery] = useState(searchQuery);
+
+  // Adjust state while rendering when search query changes (recommended React pattern)
+  if (lastSearchQuery !== searchQuery) {
+    setLastSearchQuery(searchQuery);
     setCurrentPage(1);
-  }, [searchQuery]);
+  }
 
   // Recalculate results per page on window resize
   useEffect(() => {

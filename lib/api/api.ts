@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 
 // Global mock flag for S3 uploads only
 export const USE_MOCK_UPLOAD = false;
@@ -67,8 +67,8 @@ export default api;
 export const createUnauthenticatedRequest = <T>(
   method: 'get' | 'post' | 'put' | 'delete' | 'patch',
   url: string,
-  data?: any,
-  config?: any
+  data?: unknown,
+  config?: AxiosRequestConfig
 ): Promise<T> => {
   switch (method) {
     case 'get':
@@ -91,8 +91,8 @@ export const createAuthenticatedRequest = <T>(
   method: 'get' | 'post' | 'put' | 'delete' | 'patch',
   url: string,
   authedSession: { authToken: string },
-  data?: any,
-  config?: any
+  data?: unknown,
+  config?: AxiosRequestConfig
 ): Promise<T> => {
   const headers = {
     Authorization: `Bearer ${authedSession.authToken}`,

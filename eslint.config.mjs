@@ -12,13 +12,7 @@ const eslintConfig = [
     },
     rules: {
       'react-hooks/exhaustive-deps': 'warn',
-      'react-hooks/set-state-in-effect': 'warn', // Changed from error to warn
-      'react-hooks/immutability': 'warn', // Changed from error to warn
       '@next/next/no-img-element': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn', // Changed from error to warn
-      '@typescript-eslint/no-this-alias': 'warn', // Changed from error to warn
-      '@typescript-eslint/no-unused-expressions': 'warn', // Changed from error to warn
-      '@typescript-eslint/no-require-imports': 'warn', // Changed from error to warn
       'prefer-const': 'error',
       'no-var': 'error',
       'eqeqeq': 'error',
@@ -55,6 +49,7 @@ const eslintConfig = [
       'next-env.d.ts',
       'public/opencv.js',
       'deps/**', // Ignore vendor opencv files
+      '*.config.js', // Ignore CommonJS config files
     ],
   },
 ]

@@ -12,7 +12,7 @@ import {
 import { usePayoutAccountStatus } from '@/lib/hooks/use-payouts';
 import { isPayoutRequirementsDisabled } from '@/lib/utils/feature-flags';
 import type { Dispatch, SetStateAction } from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { generateCollectionLink } from '@/lib/api/collections';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -68,15 +68,20 @@ export default function CollectionSettingsModal({
   // Check payout status for validation
   const { data: payoutStatus } = usePayoutAccountStatus();
 
-  // Reset form values when collection changes or modal opens
-  useEffect(() => {
-    if (showModal) {
+  // Track previous modal state to reset form when it opens
+  const [prevShowModal, setPrevShowModal] = useState(showModal);
+
+  // Adjust state while rendering when modal opens (recommended React pattern)
+  if (prevShowModal !== showModal) {
+    setPrevShowModal(showModal);
+    if (showModal && !prevShowModal) {
+      // Modal is opening - reset form to current collection values
       setName(collection.name);
       setDescription(collection.description);
       setVisibility(collection.visibility);
       setPricing(collection.pricing.toString());
     }
-  }, [showModal, collection]);
+  }
 
   // Safehill's platform fee rate (applied to gross amount before payment processor fees)
   const platformFeeRate = 0.18;
@@ -202,7 +207,7 @@ export default function CollectionSettingsModal({
         const visibilityChangeRequest =
           await VisibilityChangeService.prepareVisibilityChange(
             collection,
-            visibility as any,
+            visibility,
             authedSession.privateKey,
             authedSession.privateSignature,
             serverKeys.publicKey,

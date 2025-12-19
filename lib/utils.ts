@@ -23,7 +23,7 @@ export const timeAgo = (
   return `${ms(Date.now() - date.getTime())}${timeOnly ? '' : ' ago'}`;
 };
 
-export async function fetcher<JSON = any>(
+export async function fetcher<JSON = unknown>(
   input: RequestInfo,
   init?: RequestInit
 ): Promise<JSON> {

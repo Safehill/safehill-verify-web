@@ -4,7 +4,7 @@ import { Button } from '@/components/shared/button';
 import Modal from '@/components/shared/modal';
 import FileUploader from '@/components/shared/FileUploader';
 import FileTable from '@/components/shared/FileTable';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface AddAssetModalProps {
   showModal: boolean;
@@ -33,21 +33,37 @@ export default function AddAssetModal({
   const [stagedFiles, setStagedFiles] = useState<File[]>([]);
   const [justOpened, setJustOpened] = useState(false);
 
-  // Reset staged files when modal opens/closes
-  useEffect(() => {
-    if (!showModal) {
+  // Track previous modal state to manage resets and justOpened flag
+  const [prevShowModal, setPrevShowModal] = useState(showModal);
+
+  // Adjust state while rendering when modal state changes (recommended React pattern)
+  if (prevShowModal !== showModal) {
+    setPrevShowModal(showModal);
+    if (!showModal && prevShowModal) {
+      // Modal is closing - reset state
       setStagedFiles([]);
       setJustOpened(false);
-    } else {
-      // When modal opens, mark it as just opened
+    } else if (showModal && !prevShowModal) {
+      // Modal is opening - mark as just opened
       setJustOpened(true);
-      // After a short delay, allow normal close behavior
+    }
+  }
+
+  // Set timer to clear justOpened flag after modal opens
+  useEffect(() => {
+    if (showModal && justOpened) {
       const timer = setTimeout(() => {
         setJustOpened(false);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [showModal]);
+  }, [showModal, justOpened]);
+
+  const handleCancel = useCallback(() => {
+    if (!isLoading && !justOpened) {
+      setShowModal(false);
+    }
+  }, [isLoading, justOpened, setShowModal]);
 
   // Close modal on escape key
   useEffect(() => {
@@ -63,13 +79,7 @@ export default function AddAssetModal({
         document.removeEventListener('keydown', handleEscape);
       };
     }
-  }, [showModal]);
-
-  const handleCancel = () => {
-    if (!isLoading && !justOpened) {
-      setShowModal(false);
-    }
-  };
+  }, [showModal, handleCancel]);
 
   const handleFilesAdded = (newFiles: File[]) => {
     if (newFiles.length < 1) {

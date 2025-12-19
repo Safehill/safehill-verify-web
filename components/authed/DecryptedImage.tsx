@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { useAuth } from '@/lib/auth/auth-context';
+import { useAuth, type AuthedSession } from '@/lib/auth/auth-context';
 import { AssetEncryption } from '@/lib/crypto/asset-encryption';
 import { useServerEncryptionKeys } from '@/lib/hooks/useServerEncryptionKeys';
 import type { AssetVersionOutputDTO } from '@/lib/api/models/dto/Asset';
+import type { ServerEncryptionKeysDTO } from '@/lib/api/models/dto/ServerEncryptionKeys';
 import { USE_MOCK_UPLOAD } from '@/lib/api/api';
 
 /**
@@ -14,8 +15,8 @@ import { USE_MOCK_UPLOAD } from '@/lib/api/api';
  */
 async function decryptVersion(
   version: AssetVersionOutputDTO,
-  authedSession: any,
-  serverKeys: any
+  authedSession: AuthedSession,
+  serverKeys: ServerEncryptionKeysDTO
 ): Promise<string> {
   const imageId =
     version.presignedURL.split('/').pop()?.substring(0, 8) || 'unknown';

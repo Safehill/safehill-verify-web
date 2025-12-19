@@ -69,7 +69,7 @@ async function attemptModelLoad(isRetry: boolean = false): Promise<void> {
       });
       notifyAll();
     })
-    .catch((reason: any) => {
+    .catch((reason: unknown) => {
       console.error('[Embedding Model] Load failed:', reason);
 
       if (EmbeddingsSingleton.state === 'loading') {
