@@ -6,7 +6,10 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { payoutKeys } from '@/lib/hooks/use-payouts';
-import { loadConnectAndInitialize } from '@stripe/connect-js/pure';
+import {
+  loadConnectAndInitialize,
+  type StripeConnectInstance,
+} from '@stripe/connect-js/pure';
 
 interface PayoutOnboardingModalProps {
   showModal: boolean;
@@ -22,16 +25,22 @@ export default function PayoutOnboardingModal({
   const [stage, setStage] = useState<'loading' | 'onboarding' | 'complete'>(
     'loading'
   );
-  const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
+  const [stripeConnectInstance, setStripeConnectInstance] =
+    useState<StripeConnectInstance | null>(null);
   const queryClient = useQueryClient();
 
-  // Reset state when modal closes
-  useEffect(() => {
-    if (!showModal) {
+  // Track previous modal state to reset when it closes
+  const [prevShowModal, setPrevShowModal] = useState(showModal);
+
+  // Adjust state while rendering when modal closes (recommended React pattern)
+  if (prevShowModal !== showModal) {
+    setPrevShowModal(showModal);
+    if (!showModal && prevShowModal) {
+      // Modal is closing - reset state
       setStage('loading');
       setStripeConnectInstance(null);
     }
-  }, [showModal]);
+  }
 
   // Initialize Stripe Connect
   useEffect(() => {

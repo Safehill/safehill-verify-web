@@ -15,22 +15,28 @@ import {
   usePrefetchCollection,
   useSearchCollections,
 } from '@/lib/hooks/use-collections';
+import type {
+  CollectionOutputDTO,
+  Visibility,
+} from '@/lib/api/models/dto/Collection';
 import { ArrowUpDown, BoxIcon, Filter, Loader2, Search, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
+// Filter types for collection listing
+type VisibilityFilter = 'all' | Visibility;
+type OwnershipFilter = 'all' | 'owned' | 'shared';
+type PricingFilter = 'all' | 'paid' | 'free';
+type CollectionSortOption = 'name' | 'lastUpdated';
+
 export default function AuthedSectionLayout() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterVisibility, setFilterVisibility] = useState<
-    'all' | 'public' | 'confidential' | 'not-shared'
-  >('all');
-  const [filterOwnership, setFilterOwnership] = useState<
-    'all' | 'owned' | 'shared'
-  >('all');
-  const [filterPricing, setFilterPricing] = useState<'all' | 'paid' | 'free'>(
-    'all'
-  );
-  const [sortBy, setSortBy] = useState<'lastUpdated' | 'name'>('lastUpdated');
+  const [filterVisibility, setFilterVisibility] =
+    useState<VisibilityFilter>('all');
+  const [filterOwnership, setFilterOwnership] =
+    useState<OwnershipFilter>('all');
+  const [filterPricing, setFilterPricing] = useState<PricingFilter>('all');
+  const [sortBy, setSortBy] = useState<CollectionSortOption>('lastUpdated');
   const [openFilterPopover, setOpenFilterPopover] = useState(false);
   const [openSortPopover, setOpenSortPopover] = useState(false);
   const [showAddCollectionModal, setShowAddCollectionModal] = useState(false);
@@ -69,24 +75,31 @@ export default function AuthedSectionLayout() {
   const allCollections = searchQuery ? searchResults || [] : collections;
 
   // Filter collections based on search and filters
-  const filteredCollections = allCollections.filter((collection: any) => {
-    const matchesVisibilityFilter =
-      filterVisibility === 'all' || collection.visibility === filterVisibility;
+  const filteredCollections = allCollections.filter(
+    (collection: CollectionOutputDTO) => {
+      const matchesVisibilityFilter =
+        filterVisibility === 'all' ||
+        collection.visibility === filterVisibility;
 
-    const matchesOwnershipFilter =
-      filterOwnership === 'all' ||
-      (filterOwnership === 'owned' && collection.createdBy === currentUserId) ||
-      (filterOwnership === 'shared' && collection.createdBy !== currentUserId);
+      const matchesOwnershipFilter =
+        filterOwnership === 'all' ||
+        (filterOwnership === 'owned' &&
+          collection.createdBy === currentUserId) ||
+        (filterOwnership === 'shared' &&
+          collection.createdBy !== currentUserId);
 
-    const matchesPricingFilter =
-      filterPricing === 'all' ||
-      (filterPricing === 'paid' && collection.pricing > 0) ||
-      (filterPricing === 'free' && collection.pricing === 0);
+      const matchesPricingFilter =
+        filterPricing === 'all' ||
+        (filterPricing === 'paid' && collection.pricing > 0) ||
+        (filterPricing === 'free' && collection.pricing === 0);
 
-    return (
-      matchesVisibilityFilter && matchesOwnershipFilter && matchesPricingFilter
-    );
-  });
+      return (
+        matchesVisibilityFilter &&
+        matchesOwnershipFilter &&
+        matchesPricingFilter
+      );
+    }
+  );
 
   // Sort collections
   const sortedCollections = [...filteredCollections].sort((a, b) => {
@@ -166,7 +179,9 @@ export default function AuthedSectionLayout() {
                           value="all"
                           checked={filterVisibility === 'all'}
                           onChange={(e) =>
-                            setFilterVisibility(e.target.value as any)
+                            setFilterVisibility(
+                              e.target.value as VisibilityFilter
+                            )
                           }
                           className="text-blue-300"
                         />
@@ -179,7 +194,9 @@ export default function AuthedSectionLayout() {
                           value="public"
                           checked={filterVisibility === 'public'}
                           onChange={(e) =>
-                            setFilterVisibility(e.target.value as any)
+                            setFilterVisibility(
+                              e.target.value as VisibilityFilter
+                            )
                           }
                           className="text-green-500"
                         />
@@ -192,7 +209,9 @@ export default function AuthedSectionLayout() {
                           value="confidential"
                           checked={filterVisibility === 'confidential'}
                           onChange={(e) =>
-                            setFilterVisibility(e.target.value as any)
+                            setFilterVisibility(
+                              e.target.value as VisibilityFilter
+                            )
                           }
                           className="text-yellow-500"
                         />
@@ -207,7 +226,9 @@ export default function AuthedSectionLayout() {
                           value="not-shared"
                           checked={filterVisibility === 'not-shared'}
                           onChange={(e) =>
-                            setFilterVisibility(e.target.value as any)
+                            setFilterVisibility(
+                              e.target.value as VisibilityFilter
+                            )
                           }
                           className="text-gray-500"
                         />
@@ -230,7 +251,9 @@ export default function AuthedSectionLayout() {
                           value="all"
                           checked={filterOwnership === 'all'}
                           onChange={(e) =>
-                            setFilterOwnership(e.target.value as any)
+                            setFilterOwnership(
+                              e.target.value as OwnershipFilter
+                            )
                           }
                           className="text-blue-500"
                         />
@@ -243,7 +266,9 @@ export default function AuthedSectionLayout() {
                           value="owned"
                           checked={filterOwnership === 'owned'}
                           onChange={(e) =>
-                            setFilterOwnership(e.target.value as any)
+                            setFilterOwnership(
+                              e.target.value as OwnershipFilter
+                            )
                           }
                           className="text-blue-500"
                         />
@@ -258,7 +283,9 @@ export default function AuthedSectionLayout() {
                           value="shared"
                           checked={filterOwnership === 'shared'}
                           onChange={(e) =>
-                            setFilterOwnership(e.target.value as any)
+                            setFilterOwnership(
+                              e.target.value as OwnershipFilter
+                            )
                           }
                           className="text-blue-500"
                         />
@@ -281,7 +308,7 @@ export default function AuthedSectionLayout() {
                           value="all"
                           checked={filterPricing === 'all'}
                           onChange={(e) =>
-                            setFilterPricing(e.target.value as any)
+                            setFilterPricing(e.target.value as PricingFilter)
                           }
                           className="text-purple-500"
                         />
@@ -294,7 +321,7 @@ export default function AuthedSectionLayout() {
                           value="paid"
                           checked={filterPricing === 'paid'}
                           onChange={(e) =>
-                            setFilterPricing(e.target.value as any)
+                            setFilterPricing(e.target.value as PricingFilter)
                           }
                           className="text-purple-500"
                         />
@@ -307,7 +334,7 @@ export default function AuthedSectionLayout() {
                           value="free"
                           checked={filterPricing === 'free'}
                           onChange={(e) =>
-                            setFilterPricing(e.target.value as any)
+                            setFilterPricing(e.target.value as PricingFilter)
                           }
                           className="text-purple-500"
                         />
@@ -348,7 +375,9 @@ export default function AuthedSectionLayout() {
                       name="sort"
                       value="name"
                       checked={sortBy === 'name'}
-                      onChange={(e) => setSortBy(e.target.value as any)}
+                      onChange={(e) =>
+                        setSortBy(e.target.value as CollectionSortOption)
+                      }
                       className="text-blue-500"
                     />
                     <span className="text-gray-900 text-sm">Name</span>
@@ -359,7 +388,9 @@ export default function AuthedSectionLayout() {
                       name="sort"
                       value="lastUpdated"
                       checked={sortBy === 'lastUpdated'}
-                      onChange={(e) => setSortBy(e.target.value as any)}
+                      onChange={(e) =>
+                        setSortBy(e.target.value as CollectionSortOption)
+                      }
                       className="text-blue-500"
                     />
                     <span className="text-gray-900 text-sm">Last Updated</span>

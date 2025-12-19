@@ -11,7 +11,7 @@ import {
   importPrivateKeySigning,
   initializePrivateKeyAgreement,
 } from '@/lib/crypto/keys';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 
 export type SessionWebSocketState = {
   session: AuthSessionInitializationMessage | null;
@@ -48,22 +48,27 @@ export function useSessionWebSocket(): SessionWebSocketState {
   const [localAuthedSession, setLocalLocalAuthedSession] =
     useState<AuthedSession | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const initializingRef = useRef(false);
 
   const { setAuthedSession } = useAuth();
 
-  // Perform init once
-  if (
-    typeof window !== 'undefined' &&
-    !SessionEncryption.symmetricKey &&
-    !SessionEncryption.isInitializing
-  ) {
-    // console.log('Creating encryption key');
-    SessionEncryption.isInitializing = true;
+  // Perform init once in an effect
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      !SessionEncryption.symmetricKey &&
+      !initializingRef.current
+    ) {
+      // console.log('Creating encryption key');
+      initializingRef.current = true;
+      SessionEncryption.isInitializing = true;
 
-    generateSymmetricKey().then((key) => {
-      SessionEncryption.symmetricKey = key;
-    });
-  }
+      generateSymmetricKey().then((key) => {
+        SessionEncryption.symmetricKey = key;
+        SessionEncryption.isInitializing = false;
+      });
+    }
+  }, []);
 
   async function decryptData(
     base64Ciphertext: string,
@@ -85,9 +90,6 @@ export function useSessionWebSocket(): SessionWebSocketState {
       WebsocketSessionStatus.wsRef.close();
     }
     WebsocketSessionStatus.isConnecting = true;
-    setError(null);
-    setLocalLocalAuthedSession(null);
-    setWebsocketSession(null);
 
     const ws = new WebSocket(`${WS_BASE_URL}/web/sessions`);
     WebsocketSessionStatus.wsRef = ws;
@@ -185,8 +187,13 @@ export function useSessionWebSocket(): SessionWebSocketState {
   useEffect(() => {
     // Only connect if not already connecting (prevents double connection in strict mode)
     if (!WebsocketSessionStatus.isConnecting) {
-      setLocalLocalAuthedSession(null);
-      connect();
+      // Reset state and connect asynchronously to avoid synchronous setState in effect
+      setTimeout(() => {
+        setError(null);
+        setLocalLocalAuthedSession(null);
+        setWebsocketSession(null);
+        connect();
+      }, 0);
     }
 
     // Cleanup on unmount (handles React strict mode gracefully)
@@ -197,7 +204,7 @@ export function useSessionWebSocket(): SessionWebSocketState {
       }
       WebsocketSessionStatus.isConnecting = false;
     };
-  }, []); // Empty deps: only run on mount/unmount
+  }, [connect]); // Include connect in deps since it's stable from useCallback
 
   return {
     session: websocketSession,

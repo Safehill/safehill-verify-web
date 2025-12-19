@@ -5,7 +5,7 @@ import { Input } from '@/components/shared/input';
 import Modal from '@/components/shared/modal';
 import { useCreateCollection } from '@/lib/hooks/use-collections';
 import { Loader2, Check } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -30,18 +30,29 @@ export default function CreateCollectionModal({
   const router = useRouter();
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset form when modal opens/closes
-  useEffect(() => {
-    if (showModal) {
+  // Track previous modal state to reset form when it opens
+  const [prevShowModal, setPrevShowModal] = useState(showModal);
+
+  // Adjust state while rendering when modal opens (recommended React pattern)
+  if (prevShowModal !== showModal) {
+    setPrevShowModal(showModal);
+    if (showModal && !prevShowModal) {
+      // Modal is opening - reset form
       setName('');
       setDescription('');
       setIsSubmitting(false);
       setShowSuccess(false);
       setCreatedCollectionName('');
     }
-  }, [showModal]);
+  }
 
   // Close modal on escape key and focus name input when modal opens
+  const handleCancel = useCallback(() => {
+    if (!isSubmitting) {
+      setShowModal(false);
+    }
+  }, [isSubmitting, setShowModal]);
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -64,13 +75,7 @@ export default function CreateCollectionModal({
         clearTimeout(focusTimer);
       };
     }
-  }, [showModal]);
-
-  const handleCancel = () => {
-    if (!isSubmitting) {
-      setShowModal(false);
-    }
-  };
+  }, [showModal, handleCancel]);
 
   const handleCreate = async () => {
     if (!name.trim() || !description.trim()) {

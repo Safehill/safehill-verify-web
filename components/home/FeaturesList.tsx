@@ -126,12 +126,25 @@ const FeaturesList = () => {
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, [emblaApi]);
 
+  // Track whether we've initialized from emblaApi
+  const [initializedApi, setInitializedApi] = useState<typeof emblaApi | null>(
+    null
+  );
+
+  // Adjust state while rendering when emblaApi becomes available (recommended React pattern)
+  if (emblaApi !== initializedApi) {
+    setInitializedApi(emblaApi);
+    if (emblaApi) {
+      // Sync initial state from emblaApi
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    }
+  }
+
   useEffect(() => {
     if (!emblaApi) {
       return;
     }
     emblaApi.on('select', onSelect);
-    onSelect();
     return () => {
       emblaApi.off('select', onSelect);
     };

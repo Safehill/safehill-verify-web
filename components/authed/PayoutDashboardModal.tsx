@@ -4,7 +4,10 @@ import Modal from '@/components/shared/modal';
 import { useEffect, useState, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { Loader2 } from 'lucide-react';
-import { loadConnectAndInitialize } from '@stripe/connect-js/pure';
+import {
+  loadConnectAndInitialize,
+  type StripeConnectInstance,
+} from '@stripe/connect-js/pure';
 
 interface PayoutDashboardModalProps {
   showModal: boolean;
@@ -19,22 +22,34 @@ export default function PayoutDashboardModal({
 }: PayoutDashboardModalProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
+  const [stripeConnectInstance, setStripeConnectInstance] =
+    useState<StripeConnectInstance | null>(null);
 
   // Use ref to prevent double initialization in React Strict Mode
   const initializingRef = useRef(false);
   const initializedRef = useRef(false);
 
-  // Reset state when modal closes
-  useEffect(() => {
-    if (!showModal) {
+  // Track previous modal state to reset when it closes
+  const [prevShowModal, setPrevShowModal] = useState(showModal);
+
+  // Adjust state while rendering when modal closes (recommended React pattern)
+  if (prevShowModal !== showModal) {
+    setPrevShowModal(showModal);
+    if (!showModal && prevShowModal) {
+      // Modal is closing - reset state
       setLoading(true);
       setError(null);
       setStripeConnectInstance(null);
+    }
+  }
+
+  // Update refs when modal closes (must be in useEffect, not during render)
+  useEffect(() => {
+    if (!showModal && prevShowModal) {
       initializedRef.current = false;
       initializingRef.current = false;
     }
-  }, [showModal]);
+  }, [showModal, prevShowModal]);
 
   // Initialize Stripe Connect
   useEffect(() => {

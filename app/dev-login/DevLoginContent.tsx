@@ -64,7 +64,6 @@ export default function DevLogin() {
       const redirectTo = getValidRedirectUrl(searchParams);
       router.push(redirectTo);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Dev login error:', error);
       alert('Failed to login in development mode');
     } finally {

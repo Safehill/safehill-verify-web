@@ -47,9 +47,10 @@ const TypewriterHeadline = ({
           setCharIdx(charIdx - 1);
         }, 30);
       } else {
-        // Move to next string
+        // Move to next string and reset charIdx
         timeoutRef.current = setTimeout(() => {
           setDeleting(false);
+          setCharIdx(0);
           setStringIdx((stringIdx + 1) % strings.length);
         }, 200);
       }
@@ -60,11 +61,6 @@ const TypewriterHeadline = ({
       }
     };
   }, [charIdx, deleting, stringIdx, strings]);
-
-  useEffect(() => {
-    // Reset charIdx when stringIdx changes
-    setCharIdx(0);
-  }, [stringIdx]);
 
   // Render with line breaks
   const lines = displayed.split('\n');

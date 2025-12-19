@@ -192,8 +192,8 @@ export default function CollectionDetail() {
     }
 
     return [...allAssets].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: string | number;
+      let bValue: string | number;
 
       switch (sortField) {
         case 'name':
@@ -797,7 +797,9 @@ export default function CollectionDetail() {
       {/* Full Screen Asset Gallery */}
       <FullScreenAssetGallery
         assets={
-          sortedAssets.filter((asset) => !isUploadingAsset(asset)) as any[]
+          sortedAssets.filter(
+            (asset) => !isUploadingAsset(asset)
+          ) as UploadedAsset[]
         }
         initialAssetIndex={selectedAssetIndex}
         isOpen={showFullScreenGallery}
